@@ -16,8 +16,16 @@ using namespace std;
 using namespace libcamera::properties;
 
 using libcamera::Camera;
+using libcamera::CameraConfiguration;
 using libcamera::CameraManager;
+using libcamera::ControlId;
+using libcamera::ControlInfo;
+using libcamera::ControlInfoMap;
 using libcamera::ControlList;
+using libcamera::Size;
+using libcamera::StreamConfiguration;
+using libcamera::StreamFormats;
+using libcamera::StreamRole;
 
 using kms::Card;
 using kms::Connector;
@@ -245,10 +253,64 @@ int main(int argc, char** argv) {
                props.get(PixelArrayActiveAreas)[0].toString().c_str());
       }
 
-      printf("\n");
+      for (const pair<const ControlId* const, ControlInfo>& ctrl :
+           cam->controls()) {
+        const ControlId* id = ctrl.first;
+        const ControlInfo& info = ctrl.second;
 
-      cam.get()->acquire();
+        printf("%s: %s\n", id->name().c_str(), info.toString().c_str());
+      }
+
+      std::unique_ptr<CameraConfiguration> config =
+          cam->generateConfiguration({StreamRole::Viewfinder});
+      if (!config) {
+        eprintf("0 = generateConfiguration()\n");
+      }
+
+      switch (config->validate()) {
+        case CameraConfiguration::Valid:
+          break;
+
+        case CameraConfiguration::Adjusted:
+          printf("Camera configuration adjusted\n");
+          break;
+
+        case CameraConfiguration::Invalid:
+          eprintf("Camera configuration invalid\n");
+          break;
+      }
+
+      for (const StreamConfiguration& cfg : *config.get()) {
+        printf("StreamConfiguration: %s\n\n", cfg.toString().c_str());
+
+        const StreamFormats& formats = cfg.formats();
+        printf("\tPixelFormats:\n");
+        for (libcamera::PixelFormat pf : formats.pixelformats()) {
+          printf("\ttoString: %s %s\n\tSizes: ", pf.toString().c_str(),
+                 formats.range(pf).toString().c_str());
+
+          for (size_t i = 0; i < formats.sizes(pf).size(); ++i) {
+            printf("%s%s", i ? ", " : "",
+                   formats.sizes(pf)[i].toString().c_str());
+          }
+
+          printf("\n\n");
+        }
+      }
+
 #if 0
+      // printf("\n");
+
+      ret = cam.get()->acquire();
+      if (ret) {
+        eprintf("%d = acquire()\n", ret);
+      }
+
+      ret = cam.get()->release();
+      if (ret) {
+        eprintf("%d = release()\n", ret);
+      }
+
       for (ControlList::const_iterator it = cam.get()->properties().begin();
            it != cam.get()->properties().end(); it++) {
         if (it->first == LOCATION) {
