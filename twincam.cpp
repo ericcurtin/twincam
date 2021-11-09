@@ -210,7 +210,7 @@ int main(int argc, char** argv) {
     }
 
     if (!cm.cameras().empty()) {
-      printf("Cameras:\n\n");
+      printf("Cameras:\n");
     }
 
     const std::vector<std::shared_ptr<Camera>>& cameras = cm.cameras();
