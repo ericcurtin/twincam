@@ -30,3 +30,19 @@
 *.exe
 *.out
 *.app
+
+# QT Creator stuff
+*.cflags
+*.config
+*.creator
+*.creator.user
+*.cxxflags
+*.files
+*.includes
+
+# build directory
+build
+
+# twincam binary
+twincam
+
