@@ -151,104 +151,104 @@ int main(int argc, char** argv) {
     }
   }
 
-  setenv("LIBCAMERA_LOG_LEVELS", "2", 1);
-  CameraManager cm;
-  int ret = cm.start();
-  if (ret) {
-    eprint("{:d} = start()\n", ret);
-  }
-
-  // if (list_cameras) {
-  if (list_cameras && !cm.cameras().empty()) {
-    print("Cameras:\n\n");
-  }
-
-  const std::vector<std::shared_ptr<Camera>>& cameras = cm.cameras();
-  for (size_t cam_num = 0; cam_num < cameras.size(); ++cam_num) {
-    const std::shared_ptr<Camera>& cam = cameras[cam_num];
-    const ControlList& props = cam->properties();
-    print(
-        "cam_num: {:d}\n"
-        "id: {:s}\n",
-        cam_num, cam.get()->id().c_str());
-
-    if (props.contains(Location)) {
-      print("Location: ");
-      switch (props.get(Location)) {
-        case CameraLocationFront:
-          print("front");
-          break;
-        case CameraLocationBack:
-          print("back");
-          break;
-        case CameraLocationExternal:
-          print("external");
-          break;
-      }
-
-      print("\n");
+  if (list_cameras) {
+    setenv("LIBCAMERA_LOG_LEVELS", "2", 1);
+    CameraManager cm;
+    int ret = cm.start();
+    if (ret) {
+      eprint("{:d} = start()\n", ret);
     }
 
-    if (props.contains(Model)) {
-      print("Model: {:s}\n", props.get(Model).c_str());
+    if (!cm.cameras().empty()) {
+      print("Cameras:\n\n");
     }
 
-    if (props.contains(PixelArraySize)) {
-      print("PixelArraySize: {:s}\n",
-            props.get(PixelArraySize).toString().c_str());
-    }
+    const std::vector<std::shared_ptr<Camera>>& cameras = cm.cameras();
+    for (size_t cam_num = 0; cam_num < cameras.size(); ++cam_num) {
+      const std::shared_ptr<Camera>& cam = cameras[cam_num];
+      const ControlList& props = cam->properties();
+      print(
+          "cam_num: {:d}\n"
+          "id: {:s}\n",
+          cam_num, cam.get()->id().c_str());
 
-    if (props.contains(PixelArrayActiveAreas)) {
-      print("PixelArrayActiveAreas: {:s}\n",
-            props.get(PixelArrayActiveAreas)[0].toString().c_str());
-    }
-
-    for (const pair<const ControlId* const, ControlInfo>& ctrl :
-         cam->controls()) {
-      const ControlId* id = ctrl.first;
-      const ControlInfo& info = ctrl.second;
-
-      print("{:s}: {:s}\n", id->name().c_str(), info.toString().c_str());
-    }
-
-    std::unique_ptr<CameraConfiguration> config =
-        cam->generateConfiguration({StreamRole::Viewfinder});
-    if (!config) {
-      eprint("0 = generateConfiguration()\n");
-    }
-
-    switch (config->validate()) {
-      case CameraConfiguration::Valid:
-        break;
-
-      case CameraConfiguration::Adjusted:
-        print("Camera configuration adjusted\n");
-        break;
-
-      case CameraConfiguration::Invalid:
-        eprint("Camera configuration invalid\n");
-        break;
-    }
-
-    for (const StreamConfiguration& cfg : *config.get()) {
-      print("StreamConfiguration: {:s}\n\n", cfg.toString().c_str());
-
-      const StreamFormats& formats = cfg.formats();
-      print("\tPixelFormats:\n");
-      for (libcamera::PixelFormat pf : formats.pixelformats()) {
-        print("\ttoString: {:s} {:s}\n\tSizes: ", pf.toString().c_str(),
-              formats.range(pf).toString().c_str());
-
-        for (size_t i = 0; i < formats.sizes(pf).size(); ++i) {
-          print("{:s}{:s}", i ? ", " : "",
-                formats.sizes(pf)[i].toString().c_str());
+      if (props.contains(Location)) {
+        print("Location: ");
+        switch (props.get(Location)) {
+          case CameraLocationFront:
+            print("front");
+            break;
+          case CameraLocationBack:
+            print("back");
+            break;
+          case CameraLocationExternal:
+            print("external");
+            break;
         }
 
-        print("\n\n");
+        print("\n");
+      }
+
+      if (props.contains(Model)) {
+        print("Model: {:s}\n", props.get(Model).c_str());
+      }
+
+      if (props.contains(PixelArraySize)) {
+        print("PixelArraySize: {:s}\n",
+              props.get(PixelArraySize).toString().c_str());
+      }
+
+      if (props.contains(PixelArrayActiveAreas)) {
+        print("PixelArrayActiveAreas: {:s}\n",
+              props.get(PixelArrayActiveAreas)[0].toString().c_str());
+      }
+
+      for (const pair<const ControlId* const, ControlInfo>& ctrl :
+           cam->controls()) {
+        const ControlId* id = ctrl.first;
+        const ControlInfo& info = ctrl.second;
+
+        print("{:s}: {:s}\n", id->name().c_str(), info.toString().c_str());
+      }
+
+      std::unique_ptr<CameraConfiguration> config =
+          cam->generateConfiguration({StreamRole::Viewfinder});
+      if (!config) {
+        eprint("0 = generateConfiguration()\n");
+      }
+
+      switch (config->validate()) {
+        case CameraConfiguration::Valid:
+          break;
+
+        case CameraConfiguration::Adjusted:
+          print("Camera configuration adjusted\n");
+          break;
+
+        case CameraConfiguration::Invalid:
+          eprint("Camera configuration invalid\n");
+          break;
+      }
+
+      for (const StreamConfiguration& cfg : *config.get()) {
+        print("StreamConfiguration: {:s}\n\n", cfg.toString().c_str());
+
+        const StreamFormats& formats = cfg.formats();
+        print("\tPixelFormats:\n");
+        for (libcamera::PixelFormat pf : formats.pixelformats()) {
+          print("\ttoString: {:s} {:s}\n\tSizes: ", pf.toString().c_str(),
+                formats.range(pf).toString().c_str());
+
+          for (size_t i = 0; i < formats.sizes(pf).size(); ++i) {
+            print("{:s}{:s}", i ? ", " : "",
+                  formats.sizes(pf)[i].toString().c_str());
+          }
+
+          print("\n\n");
+        }
       }
     }
   }
-  //}
 
 #if 0
   for (Connector* c : card.get_connectors()) {
