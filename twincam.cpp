@@ -333,5 +333,10 @@ int main(int argc, char** argv) {
     eprint("{:d} = req.commit_sync();\n", ret);
   }
 
-  cm.start();
+  ret = cm.start();
+  if (ret) {
+    eprint("{:d} = cm.start();\n", ret);
+  }
+
+  cm.stop();
 }
