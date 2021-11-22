@@ -47,7 +47,7 @@ static const char* usage_str =
     "  -c, --list-cameras          List cameras\n"
     "  -h, --help                  Print this help\n";
 
-static std::string PixelFormatToCC(const kms::PixelFormat& f) {
+static string PixelFormatToCC(const kms::PixelFormat& f) {
   char buf[5] = {(char)(((uint32_t)f >> 0) & 0xff),
                  (char)(((uint32_t)f >> 8) & 0xff),
                  (char)(((uint32_t)f >> 16) & 0xff),
@@ -59,7 +59,7 @@ static std::string PixelFormatToCC(const kms::PixelFormat& f) {
     }
   }
 
-  return std::string(buf);
+  return string(buf);
 }
 
 template <typename T>
@@ -332,65 +332,6 @@ int main(int argc, char** argv) {
   if (ret) {
     eprint("{:d} = req.commit_sync();\n", ret);
   }
-#if 0
-  for (Connector* c : card.get_connectors()) {
-    print(
-        "\tfullname: {:s}\n"
-        "\tconnected: {:d}\n"
-        "\tconnector_type: {:d}\n"
-        "\tconnector_type_id: {:d}\n"
-        "\tmmWidth: {:d}\n"
-        "\tmmHeight: {:d}\n"
-        "\tsubpixel: {:d}\n"
-        "\tsubpixel_str: {:s}\n\n"
-        "{:s}",
-        c->fullname().c_str(), c->connected(), c->connector_type(),
-        c->connector_type_id(), c->mmWidth(), c->mmHeight(), c->subpixel(),
-        c->subpixel_str().c_str(),
-        c->get_modes().empty() ? "" : "\t\tVideomodes:\n");
-    for (Videomode& v : c->get_modes()) {
-#endif
 
-#if 0
-  cm.cameras();
-  static const unsigned CAMERA_BUF_QUEUE_SIZE = 3;
-  kms::PixelFormat pf = kms::PixelFormat::YUYV;
-  for (unsigned i = 0; i < CAMERA_BUF_QUEUE_SIZE; i++) {
-    Framebuffer* fb = new DumbFramebuffer(card, m_in_width, m_in_height, pf);
-
-    v4lbuf.index = i;
-    if (m_buffer_provider == BufferProvider::DRM)
-      v4lbuf.m.fd = fb->prime_fd(0);
-    r = ioctl(m_fd, VIDIOC_QBUF, &v4lbuf);
-    ASSERT(r == 0);
-
-    m_fb.push_back(fb);
-  }
-
-  AtomicReq req(card);
-
-  Framebuffer* fb = m_fb[0];
-
-  req.add(plane, "CRTC_ID", m_crtc->id());
-  req.add(plane, "FB_ID", fb->id());
-
-  req.add(plane, "CRTC_X", m_out_x);
-  req.add(plane, "CRTC_Y", m_out_y);
-  req.add(plane, "CRTC_W", m_out_width);
-  req.add(plane, "CRTC_H", m_out_height);
-
-  req.add(plane, "SRC_X", 0);
-  req.add(plane, "SRC_Y", 0);
-  req.add(plane, "SRC_W", m_in_width << 16);
-  req.add(plane, "SRC_H", m_in_height << 16);
-
-  for (int i = 0; i < 2000; ++i) {
-    r = req.commit_sync();
-    if (!r) {
-      break;
-    }
-
-    usleep(1000);
-  }
-#endif
+  cm.start();
 }
