@@ -342,4 +342,6 @@ int main(int argc, char** argv) {
   if (ret) {
     eprint("{:d} = camera->release();\n", ret);
   }
+
+  cm.stop();
 }
