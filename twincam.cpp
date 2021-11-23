@@ -333,10 +333,13 @@ int main(int argc, char** argv) {
     eprint("{:d} = req.commit_sync();\n", ret);
   }
 
-  ret = cm.start();
+  ret = camera->acquire();
   if (ret) {
-    eprint("{:d} = cm.start();\n", ret);
+    eprint("{:d} = camera->acquire();\n", ret);
   }
 
-  cm.stop();
+  ret = camera->release();
+  if (ret) {
+    eprint("{:d} = camera->release();\n", ret);
+  }
 }
