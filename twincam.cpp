@@ -343,5 +343,6 @@ int main(int argc, char** argv) {
     eprint("{:d} = camera->release();\n", ret);
   }
 
-  cm.stop();
+  camera->stop();
+  // causes memory leak cm.stop();
 }
