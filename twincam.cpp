@@ -25,10 +25,15 @@ using libcamera::ControlId;
 using libcamera::ControlInfo;
 using libcamera::ControlInfoMap;
 using libcamera::ControlList;
+using libcamera::FrameBuffer;
+using libcamera::FrameBufferAllocator;
+using libcamera::Request;
 using libcamera::Size;
+using libcamera::Stream;
 using libcamera::StreamConfiguration;
 using libcamera::StreamFormats;
 using libcamera::StreamRole;
+using libcamera::StreamRoles;
 
 using kms::AtomicReq;
 using kms::Card;
@@ -154,7 +159,7 @@ int main(int argc, char** argv) {
 
       //       : "", c->get_current_crtc()->buffer_id(), c->get_current_crtc() ?
       //       '\n' : '',
-      //    join((std::vector<void*>)c->get_possible_crtcs(), ", "),
+      //    join((vector<void*>)c->get_possible_crtcs(), ", "),
       //  c->get_modes().empty() ? "" : "\t\tVideomodes:\n");
       for (Videomode& v : c->get_modes()) {
         print(
@@ -196,7 +201,6 @@ int main(int argc, char** argv) {
     }
   }
 
-  Camera* camera = 0;
   setenv("LIBCAMERA_LOG_LEVELS", "2", 1);
   CameraManager cm;
   int ret = cm.start();
@@ -204,16 +208,16 @@ int main(int argc, char** argv) {
     eprint("{:d} = start()\n", ret);
   }
 
-  if (!cm.cameras().empty() && list_cameras) {
+  if (cm.cameras().empty()) {
+    print("No cameras present\n");
+  } else if (list_cameras) {
     print("Cameras:\n");
   }
 
-  const std::vector<std::shared_ptr<Camera>>& cameras = cm.cameras();
+  const vector<shared_ptr<Camera>>& cameras = cm.cameras();
+  const shared_ptr<Camera>& camera = cameras[0];
   for (size_t cam_num = 0; cam_num < cameras.size(); ++cam_num) {
-    const std::shared_ptr<Camera>& cam = cameras[cam_num];
-    if (!camera) {
-      camera = cam.get();
-    }
+    const shared_ptr<Camera>& cam = cameras[cam_num];
 
     if (list_cameras) {
       const ControlList& props = cam->properties();
@@ -261,7 +265,7 @@ int main(int argc, char** argv) {
         print("{:s}: {:s}\n", id->name().c_str(), info.toString().c_str());
       }
 
-      std::unique_ptr<CameraConfiguration> config =
+      unique_ptr<CameraConfiguration> config =
           cam->generateConfiguration({StreamRole::Viewfinder});
       if (!config) {
         eprint("0 = generateConfiguration()\n");
@@ -333,12 +337,30 @@ int main(int argc, char** argv) {
     eprint("{:d} = req.commit_sync();\n", ret);
   }
 
-  ret = camera->acquire();
+  ret = camera->acquire();  // to be put in C++ class
   if (ret) {
     eprint("{:d} = camera->acquire();\n", ret);
   }
 
-  ret = camera->release();
+  StreamRoles roles = {StreamRole::Viewfinder};
+  std::unique_ptr<libcamera::CameraConfiguration> cfg =
+      camera->generateConfiguration(roles);
+  camera->configure(cfg.get());
+  FrameBufferAllocator fba(camera);
+  for (StreamConfiguration& config : *cfg) {
+    Stream* stream = config.stream();
+    fba.allocate(stream);
+
+    for (const unique_ptr<FrameBuffer>& buffer : fba.buffers(stream)) {
+      std::unique_ptr<Request> request = camera->createRequest();
+      request->addBuffer(stream, buffer.get());
+      // freeBuffers_[stream].enqueue(buffer.get());
+    }
+  }
+
+  camera->start();
+
+  ret = camera->release();  // to be put in C++ class
   if (ret) {
     eprint("{:d} = camera->release();\n", ret);
   }
