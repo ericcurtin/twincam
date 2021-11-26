@@ -345,20 +345,60 @@ int main(int argc, char** argv) {
   StreamRoles roles = {StreamRole::Viewfinder};
   std::unique_ptr<libcamera::CameraConfiguration> cfg =
       camera->generateConfiguration(roles);
-  camera->configure(cfg.get());
+  if (!cfg) {
+    eprint("{:d} = camera->generateConfiguration(roles);\n", ptr(cfg));
+  }
+
+  ret = camera->configure(cfg.get());
+  if (ret) {
+    eprint("{:d} = camera->configure(cfg.get());\n", ret);
+  }
+
   FrameBufferAllocator fba(camera);
+  std::vector<std::unique_ptr<libcamera::Request>> requests;
+  Stream* stream = 0;
   for (StreamConfiguration& config : *cfg) {
-    Stream* stream = config.stream();
-    fba.allocate(stream);
+    stream = config.stream();
+    ret = fba.allocate(stream);
+    if (ret < 0) {
+      eprint("{:d} = fba.allocate(stream);\n", ret);
+    }
 
     for (const unique_ptr<FrameBuffer>& buffer : fba.buffers(stream)) {
       std::unique_ptr<Request> request = camera->createRequest();
-      request->addBuffer(stream, buffer.get());
+      if (!request) {
+        eprint("{:d} = camera->createRequest();\n", ptr(request));
+      }
+
+      ret = request->addBuffer(stream, buffer.get());
+      if (ret < 0) {
+        eprint("{:d} = request->addBuffer(stream, buffer.get());\n", ret);
+      }
+
+      requests.push_back(std::move(request));
       // freeBuffers_[stream].enqueue(buffer.get());
     }
   }
 
-  camera->start();
+  ret = camera->start();
+  if (ret) {
+    eprint("{:d} = camera->start();\n", ret);
+  }
+
+  // Queue requests
+  for (std::unique_ptr<Request>& request : requests) {
+    ret = camera->queueRequest(request.get());
+    if (ret < 0) {
+      eprint("{:d} = camera->queueRequest(request.get())\n", ret);
+    }
+  }
+
+#if 0
+  for (const unique_ptr<FrameBuffer>& buffer : fba.buffers(stream)) {
+    AtomicReq req1(card);
+    req1.add(plane, "FB_ID", buffer->);
+  }
+#endif
 
   ret = camera->release();  // to be put in C++ class
   if (ret) {
