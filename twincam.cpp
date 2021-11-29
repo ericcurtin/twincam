@@ -67,6 +67,27 @@ static string PixelFormatToCC(const kms::PixelFormat& f) {
   return string(buf);
 }
 
+static void Plane_print(Plane* p) {
+  print(
+      "\tcrtc_id: {:d}\n"
+      "\tfb_id: {:d}\n"
+      "\tcrtc_x: {:d}\n"
+      "\tcrtc_y: {:d}\n"
+      "\tx: {:d}\n"
+      "\ty: {:d}\n"
+      "\tgamma_size: {:d}\n"
+      "\tplane_type: {:d}\n"
+      "\tPixelFormatToCC:",
+      p->crtc_id(), p->fb_id(), p->crtc_x(), p->crtc_y(), p->x(), p->y(),
+      p->gamma_size(), p->plane_type());
+  for (size_t i = 0; i < p->get_formats().size(); ++i) {
+    print("{:s}{:s}", i ? ", " : " ",
+          PixelFormatToCC(p->get_formats()[i]).c_str());
+  }
+
+  print("\n\n");
+}
+
 template <typename T>
 struct TD;
 int main(int argc, char** argv) {
@@ -88,117 +109,6 @@ int main(int argc, char** argv) {
   if (optionset.params().size() > 0) {
     puts(usage_str);
     return -1;
-  }
-
-  Card card;
-  if (list_displays) {
-    print(
-        "Card:\n"
-        "is_master: {:d}\n"
-        "has_atomic: {:d}\n"
-        "has_universal_planes: {:d}\n"
-        "has_dumb_buffers: {:d}\n"
-        "has_kms: {:d}\n"
-        "version_name: {:s}\n\n"
-        "\tConnectors:\n",
-        card.is_master(), card.has_atomic(), card.has_universal_planes(),
-        card.has_dumb_buffers(), card.has_kms(), card.version_name().c_str());
-  }
-
-  Plane* plane;
-  Crtc* ctrc = card.get_connectors().front()->get_current_crtc();
-  for (Connector* c : card.get_connectors()) {
-    if (list_displays) {
-      print(
-          "\tfullname: {:s}\n"
-          "\tconnected: {:d}\n"
-          "\tconnector_type: {:d}\n"
-          "\tconnector_type_id: {:d}\n"
-          "\tmmWidth: {:d}\n"
-          "\tmmHeight: {:d}\n"
-          "\tsubpixel: {:d}\n"
-          "\tsubpixel_str: {:s}\n\n",
-          c->fullname().c_str(), c->connected(), c->connector_type(),
-          c->connector_type_id(), c->mmWidth(), c->mmHeight(), c->subpixel(),
-          c->subpixel_str().c_str());
-    }
-
-    Crtc* this_ctrc = c->get_current_crtc();
-    if (this_ctrc) {
-      if (list_displays) {
-        print(
-            "\t\tget_current_crtc:\n"
-            "\t\tbuffer_id: {:d}\n"
-            "\t\tx: {:d}\n"
-            "\t\ty: {:d}\n"
-            "\t\twidth {:d}\n"
-            "\t\theight: {:d}\n"
-            "\t\tmode_valid: {:d}\n"
-            "\t\tlegacy_gamma_size: {:d}\n",
-            this_ctrc->buffer_id(), this_ctrc->x(), this_ctrc->y(),
-            this_ctrc->width(), this_ctrc->height(), this_ctrc->mode_valid(),
-            this_ctrc->legacy_gamma_size());
-      }
-
-      for (Plane* p : ctrc->get_possible_planes()) {
-        if (p->crtc_id()) {
-          if (list_displays) {
-            print("\t\tcrtc_id: {:d}\n\n", p->crtc_id());
-          }
-
-          plane = p;
-          break;
-        }
-      }
-    }
-
-    if (list_displays) {
-      if (!c->get_modes().empty()) {
-        print("\t\tVideomodes:\n");
-      }
-
-      //       : "", c->get_current_crtc()->buffer_id(), c->get_current_crtc() ?
-      //       '\n' : '',
-      //    join((vector<void*>)c->get_possible_crtcs(), ", "),
-      //  c->get_modes().empty() ? "" : "\t\tVideomodes:\n");
-      for (Videomode& v : c->get_modes()) {
-        print(
-            "\t\tto_string_long: {:s}\n"
-            "\t\thsync_start: {:d}\n"
-            "\t\thsync_end: {:d}\n"
-            "\t\thtotal: {:d}\n"
-            "\t\thskew: {:d}\n"
-            "\t\tvsync_start: {:d}\n"
-            "\t\tvsync_end: {:d}\n"
-            "\t\tvtotal: {:d}\n"
-            "\t\tvscan: {:d}\n"
-            "\t\tvalid: {:d}\n\n",
-            v.to_string_long().c_str(), v.hsync_start, v.hsync_end, v.htotal,
-            v.hskew, v.vsync_start, v.vsync_end, v.vtotal, v.vscan, v.valid());
-      }
-
-      print("\tPlanes:\n");
-      for (Plane* p : card.get_planes()) {
-        print(
-            "\tcrtc_id: {:d}\n"
-            "\tfb_id: {:d}\n"
-            "\tcrtc_x: {:d}\n"
-            "\tcrtc_y: {:d}\n"
-            "\tx: {:d}\n"
-            "\ty: {:d}\n"
-            "\tgamma_size: {:d}\n"
-            "\tplane_type: {:d}\n"
-            "\tPixelFormatToCC:",
-            p->crtc_id(), p->fb_id(), p->crtc_x(), p->crtc_y(), p->x(), p->y(),
-            p->gamma_size(), p->plane_type());
-        for (size_t i = 0; i < p->get_formats().size(); ++i) {
-          print("{:s}{:s}", i ? ", " : " ",
-                PixelFormatToCC(p->get_formats()[i]).c_str());
-        }
-
-        print("\n\n");
-      }
-    }
   }
 
   setenv("LIBCAMERA_LOG_LEVELS", "2", 1);
@@ -304,94 +214,205 @@ int main(int argc, char** argv) {
     }
   }
 
-  if (!ctrc) {
-    eprint("no ctrc set\n");
-    return 0;
-  }
-
-  AtomicReq req(card);
-  req.add(plane, "CRTC_ID", plane->crtc_id());
-  req.add(plane, "FB_ID", plane->fb_id());
-
-  uint32_t x = 0;
-  uint32_t y = 0;
-  uint32_t iw = ctrc->width();
-  uint32_t ih = ctrc->height();
-  uint32_t cam_width = camera->properties().get(PixelArraySize).width;
-  uint32_t cam_height = camera->properties().get(PixelArraySize).height;
-  uint32_t out_x = x + iw / 2 - cam_width / 2;
-  uint32_t out_y = y + ih / 2 - cam_height / 2;
-
-  req.add(plane, "CRTC_X", out_x);
-  req.add(plane, "CRTC_Y", out_y);
-  req.add(plane, "CRTC_W", cam_width);
-  req.add(plane, "CRTC_H", cam_height);
-
-  req.add(plane, "SRC_X", 0);
-  req.add(plane, "SRC_Y", 0);
-  req.add(plane, "SRC_W", cam_width << 16);
-  req.add(plane, "SRC_H", cam_height << 16);
-
-  ret = req.commit_sync();
-  if (ret) {
-    eprint("{:d} = req.commit_sync();\n", ret);
-  }
-
-  ret = camera->acquire();  // to be put in C++ class
-  if (ret) {
-    eprint("{:d} = camera->acquire();\n", ret);
-  }
-
-  StreamRoles roles = {StreamRole::Viewfinder};
-  std::unique_ptr<libcamera::CameraConfiguration> cfg =
-      camera->generateConfiguration(roles);
-  if (!cfg) {
-    eprint("{:d} = camera->generateConfiguration(roles);\n", ptr(cfg));
-  }
-
-  ret = camera->configure(cfg.get());
-  if (ret) {
-    eprint("{:d} = camera->configure(cfg.get());\n", ret);
-  }
-
-  FrameBufferAllocator fba(camera);
-  std::vector<std::unique_ptr<libcamera::Request>> requests;
-  Stream* stream = 0;
-  for (StreamConfiguration& config : *cfg) {
-    stream = config.stream();
-    ret = fba.allocate(stream);
-    if (ret < 0) {
-      eprint("{:d} = fba.allocate(stream);\n", ret);
+  if (!access("/dev/dri/card0", R_OK)) {
+    Card card;
+    if (list_displays) {
+      print(
+          "Card:\n"
+          "is_master: {:d}\n"
+          "has_atomic: {:d}\n"
+          "has_universal_planes: {:d}\n"
+          "has_dumb_buffers: {:d}\n"
+          "has_kms: {:d}\n"
+          "version_name: {:s}\n\n"
+          "\tConnectors:\n",
+          card.is_master(), card.has_atomic(), card.has_universal_planes(),
+          card.has_dumb_buffers(), card.has_kms(), card.version_name().c_str());
     }
 
-    for (const unique_ptr<FrameBuffer>& buffer : fba.buffers(stream)) {
-      std::unique_ptr<Request> request = camera->createRequest();
-      if (!request) {
-        eprint("{:d} = camera->createRequest();\n", ptr(request));
+    Plane* plane;
+    Crtc* ctrc = card.get_connectors().front()->get_current_crtc();
+    for (Connector* c : card.get_connectors()) {
+      if (list_displays) {
+        print(
+            "\tfullname: {:s}\n"
+            "\tconnected: {:d}\n"
+            "\tconnector_type: {:d}\n"
+            "\tconnector_type_id: {:d}\n"
+            "\tmmWidth: {:d}\n"
+            "\tmmHeight: {:d}\n"
+            "\tsubpixel: {:d}\n"
+            "\tsubpixel_str: {:s}\n\n",
+            c->fullname().c_str(), c->connected(), c->connector_type(),
+            c->connector_type_id(), c->mmWidth(), c->mmHeight(), c->subpixel(),
+            c->subpixel_str().c_str());
       }
 
-      ret = request->addBuffer(stream, buffer.get());
+      Crtc* this_ctrc = c->get_current_crtc();
+      if (this_ctrc) {
+        if (list_displays) {
+          print(
+              "\t\tget_current_crtc:\n"
+              "\t\tbuffer_id: {:d}\n"
+              "\t\tx: {:d}\n"
+              "\t\ty: {:d}\n"
+              "\t\twidth {:d}\n"
+              "\t\theight: {:d}\n"
+              "\t\tmode_valid: {:d}\n"
+              "\t\tlegacy_gamma_size: {:d}\n",
+              this_ctrc->buffer_id(), this_ctrc->x(), this_ctrc->y(),
+              this_ctrc->width(), this_ctrc->height(), this_ctrc->mode_valid(),
+              this_ctrc->legacy_gamma_size());
+        }
+
+        for (Plane* p : ctrc->get_possible_planes()) {
+          if (p->crtc_id()) {
+            if (list_displays) {
+              print("\t\tcrtc_id: {:d}\n\n", p->crtc_id());
+            }
+
+            plane = p;
+            break;
+          }
+        }
+      }
+
+      if (list_displays) {
+        if (!c->get_modes().empty()) {
+          print("\t\tVideomodes:\n");
+        }
+
+        //       : "", c->get_current_crtc()->buffer_id(), c->get_current_crtc()
+        //       ?
+        //       '\n' : '',
+        //    join((vector<void*>)c->get_possible_crtcs(), ", "),
+        //  c->get_modes().empty() ? "" : "\t\tVideomodes:\n");
+        for (Videomode& v : c->get_modes()) {
+          print(
+              "\t\tto_string_long: {:s}\n"
+              "\t\thsync_start: {:d}\n"
+              "\t\thsync_end: {:d}\n"
+              "\t\thtotal: {:d}\n"
+              "\t\thskew: {:d}\n"
+              "\t\tvsync_start: {:d}\n"
+              "\t\tvsync_end: {:d}\n"
+              "\t\tvtotal: {:d}\n"
+              "\t\tvscan: {:d}\n"
+              "\t\tvalid: {:d}\n\n",
+              v.to_string_long().c_str(), v.hsync_start, v.hsync_end, v.htotal,
+              v.hskew, v.vsync_start, v.vsync_end, v.vtotal, v.vscan,
+              v.valid());
+        }
+
+        print("\tPlanes:\n");
+        for (Plane* p : card.get_planes()) {
+          Plane_print(p);
+        }
+      }
+    }
+
+    if (!ctrc) {
+      eprint("no ctrc set\n");
+      return 0;
+    }
+
+    uint32_t cam_width = camera->properties().get(PixelArraySize).width;
+    uint32_t cam_height = camera->properties().get(PixelArraySize).height;
+    DumbFramebuffer fb(card, cam_width, cam_height, kms::PixelFormat::YUYV);
+    AtomicReq req(card);
+    req.add(plane, "CRTC_ID", plane->crtc_id());
+    req.add(plane, "FB_ID", fb.id());
+
+    uint32_t x = 0;
+    uint32_t y = 0;
+    uint32_t iw = ctrc->width();
+    uint32_t ih = ctrc->height();
+    uint32_t out_x = x + iw / 2 - cam_width / 2;
+    uint32_t out_y = y + ih / 2 - cam_height / 2;
+
+    req.add(plane, "CRTC_X", out_x);
+    req.add(plane, "CRTC_Y", out_y);
+    req.add(plane, "CRTC_W", cam_width);
+    req.add(plane, "CRTC_H", cam_height);
+
+    req.add(plane, "SRC_X", 0);
+    req.add(plane, "SRC_Y", 0);
+    req.add(plane, "SRC_W", cam_width << 16);
+    req.add(plane, "SRC_H", cam_height << 16);
+
+    ret = req.commit_sync();
+    if (ret) {
+      eprint(
+          "CRTC_ID: {:d}\n"
+          "FB_ID: {:d}\n"
+          "CRTC_X: {:d}\n"
+          "CRTC_Y: {:d}\n"
+          "CRTC_W: {:d}\n"
+          "CRTC_H: {:d}\n"
+          "SRC_X: {:d}\n"
+          "SRC_Y: {:d}\n"
+          "SRC_W: {:d}\n"
+          "SRC_H: {:d}\n"
+          "{:d} = req.commit_sync();\n\n",
+          plane->crtc_id(), fb.id(), out_x, out_y, cam_width, cam_height,
+          0, 0, cam_width << 16, cam_height << 16, ret);
+    }
+
+    ret = camera->acquire();  // to be put in C++ class
+    if (ret) {
+      eprint("{:d} = camera->acquire();\n", ret);
+    }
+
+    StreamRoles roles = {StreamRole::Viewfinder};
+    std::unique_ptr<libcamera::CameraConfiguration> cfg =
+        camera->generateConfiguration(roles);
+    if (!cfg) {
+      eprint("{:d} = camera->generateConfiguration(roles);\n", ptr(cfg));
+    }
+
+    ret = camera->configure(cfg.get());
+    if (ret) {
+      eprint("{:d} = camera->configure(cfg.get());\n", ret);
+    }
+
+    FrameBufferAllocator fba(camera);
+    std::vector<std::unique_ptr<libcamera::Request>> requests;
+    Stream* stream = 0;
+    for (StreamConfiguration& config : *cfg) {
+      stream = config.stream();
+      ret = fba.allocate(stream);
       if (ret < 0) {
-        eprint("{:d} = request->addBuffer(stream, buffer.get());\n", ret);
+        eprint("{:d} = fba.allocate(stream);\n", ret);
       }
 
-      requests.push_back(std::move(request));
-      // freeBuffers_[stream].enqueue(buffer.get());
-    }
-  }
+      for (const unique_ptr<FrameBuffer>& buffer : fba.buffers(stream)) {
+        std::unique_ptr<Request> request = camera->createRequest();
+        if (!request) {
+          eprint("{:d} = camera->createRequest();\n", ptr(request));
+        }
 
-  ret = camera->start();
-  if (ret) {
-    eprint("{:d} = camera->start();\n", ret);
-  }
+        ret = request->addBuffer(stream, buffer.get());
+        if (ret < 0) {
+          eprint("{:d} = request->addBuffer(stream, buffer.get());\n", ret);
+        }
 
-  // Queue requests
-  for (std::unique_ptr<Request>& request : requests) {
-    ret = camera->queueRequest(request.get());
-    if (ret < 0) {
-      eprint("{:d} = camera->queueRequest(request.get())\n", ret);
+        requests.push_back(std::move(request));
+        // freeBuffers_[stream].enqueue(buffer.get());
+      }
     }
-  }
+
+    ret = camera->start();
+    if (ret) {
+      eprint("{:d} = camera->start();\n", ret);
+    }
+
+    // Queue requests
+    for (std::unique_ptr<Request>& request : requests) {
+      ret = camera->queueRequest(request.get());
+      if (ret < 0) {
+        eprint("{:d} = camera->queueRequest(request.get())\n", ret);
+      }
+    }
 
 #if 0
   for (const unique_ptr<FrameBuffer>& buffer : fba.buffers(stream)) {
@@ -400,11 +421,16 @@ int main(int argc, char** argv) {
   }
 #endif
 
-  ret = camera->release();  // to be put in C++ class
-  if (ret) {
-    eprint("{:d} = camera->release();\n", ret);
+    ret = camera->release();  // to be put in C++ class
+    if (ret) {
+      eprint("{:d} = camera->release();\n", ret);
+    }
+
+    camera->stop();
+    // causes memory leak cm.stop();
+  } else if (list_displays) {
+    eprint("No access to /dev/dri/card0\n");
   }
 
-  camera->stop();
-  // causes memory leak cm.stop();
+  return 0;
 }
