@@ -12,7 +12,10 @@
 
 #include <libcamera/libcamera.h>
 
-#define eprint(...) fprintf(stderr, format(__VA_ARGS__).c_str())
+#include <event2/event.h>
+#include <event2/thread.h>
+
+#define eprint(...) fprintf(stderr, "%s", format(__VA_ARGS__).c_str())
 
 using namespace fmt;
 using namespace std;
@@ -88,8 +91,31 @@ static void Plane_print(Plane* p) {
   print("\n\n");
 }
 
-template <typename T>
-struct TD;
+struct Event {
+  Event(const std::function<void()>& callback)
+      : callback_(callback), event_(nullptr) {}
+
+  ~Event() {
+    event_del(event_);
+    event_free(event_);
+  }
+
+  // static void dispatch(int fd, short events, void* arg);
+
+  std::function<void()> callback_;
+  struct event* event_;
+};
+
+#define ASYNC
+#ifdef ASYNC
+static void dispatch([[maybe_unused]] int fd,
+                     [[maybe_unused]] short events,
+                     void* arg) {
+  Event* event = static_cast<Event*>(arg);
+  event->callback_();
+}
+#endif
+
 int main(int argc, char** argv) {
   bool list_displays = false;
   bool list_cameras = false;
@@ -354,8 +380,8 @@ int main(int argc, char** argv) {
           "SRC_W: {:d}\n"
           "SRC_H: {:d}\n"
           "{:d} = req.commit_sync();\n\n",
-          plane->crtc_id(), fb.id(), out_x, out_y, cam_width, cam_height,
-          0, 0, cam_width << 16, cam_height << 16, ret);
+          plane->crtc_id(), fb.id(), out_x, out_y, cam_width, cam_height, 0, 0,
+          cam_width << 16, cam_height << 16, ret);
     }
 
     ret = camera->acquire();  // to be put in C++ class
@@ -370,35 +396,51 @@ int main(int argc, char** argv) {
       eprint("{:d} = camera->generateConfiguration(roles);\n", ptr(cfg));
     }
 
+#if 0
+    ret = cfg->validate();
+    if (ret) {
+      eprint("{:d} = cfg->validate();\n", ret);
+    }
+#endif
+
     ret = camera->configure(cfg.get());
     if (ret) {
       eprint("{:d} = camera->configure(cfg.get());\n", ret);
     }
 
+    libcamera::Signal<libcamera::Request*> requestProcessed;
+
+    // allocator
     FrameBufferAllocator fba(camera);
     std::vector<std::unique_ptr<libcamera::Request>> requests;
     Stream* stream = 0;
-    for (StreamConfiguration& config : *cfg) {
-      stream = config.stream();
-      ret = fba.allocate(stream);
-      if (ret < 0) {
-        eprint("{:d} = fba.allocate(stream);\n", ret);
+    StreamConfiguration& config = cfg->at(0);
+    stream = config.stream();
+
+    // Start capture
+    ret = fba.allocate(stream);
+    if (ret < 0) {
+      eprint("{:d} = fba.allocate(stream);\n", ret);
+    }
+
+    for (const unique_ptr<FrameBuffer>& buffer : fba.buffers(stream)) {
+      std::unique_ptr<Request> request = camera->createRequest();
+      if (!request) {
+        eprint("{:d} = camera->createRequest();\n", ptr(request));
       }
 
-      for (const unique_ptr<FrameBuffer>& buffer : fba.buffers(stream)) {
-        std::unique_ptr<Request> request = camera->createRequest();
-        if (!request) {
-          eprint("{:d} = camera->createRequest();\n", ptr(request));
-        }
-
-        ret = request->addBuffer(stream, buffer.get());
-        if (ret < 0) {
-          eprint("{:d} = request->addBuffer(stream, buffer.get());\n", ret);
-        }
-
-        requests.push_back(std::move(request));
-        // freeBuffers_[stream].enqueue(buffer.get());
+      ret = request->addBuffer(stream, buffer.get());
+      if (ret) {
+        eprint("{:d} = request->addBuffer(stream, buffer.get());\n", ret);
       }
+
+      ret = camera->queueRequest(request.get());
+      if (ret) {
+        eprint("{:d} = camera->queueRequest(request.get())\n", ret);
+      }
+
+      requests.push_back(std::move(request));
+      // freeBuffers_[stream].enqueue(buffer.get());
     }
 
     ret = camera->start();
@@ -406,6 +448,7 @@ int main(int argc, char** argv) {
       eprint("{:d} = camera->start();\n", ret);
     }
 
+#if 0
     // Queue requests
     for (std::unique_ptr<Request>& request : requests) {
       ret = camera->queueRequest(request.get());
@@ -413,6 +456,48 @@ int main(int argc, char** argv) {
         eprint("{:d} = camera->queueRequest(request.get())\n", ret);
       }
     }
+#endif
+
+#ifdef ASYNC
+    // ()
+    evthread_use_pthreads();
+    struct event_base* eb = event_base_new();
+
+    // kmssink constructor
+    Event event(std::bind(&Device::drmEvent, this);
+    event_new(eb, card.fd(), EV_READ | EV_PERSIST, dispatch, &event);
+
+    // exec
+    event_base_loop(eb, EVLOOP_NO_EXIT_ON_EMPTY);
+
+    // ~()
+    std::list<std::unique_ptr<Event>> events;
+    events.clear();
+    event_base_free(eb);
+    libevent_global_shutdown();
+#else
+    poolfd pfd = camera->while (true) {
+      int r = poll(fds.data(), nr_cameras + 1, -1);
+      ASSERT(r > 0);
+
+      if (fds[nr_cameras].revents != 0)
+        break;
+
+      AtomicReq req(card);
+
+      for (unsigned i = 0; i < nr_cameras; i++) {
+        if (!fds[i].revents)
+          continue;
+        cameras[i]->show_next_frame(req);
+        fds[i].revents = 0;
+      }
+
+      r = req.test();
+      FAIL_IF(r, "Atomic commit failed: %d", r);
+
+      req.commit_sync();
+    }
+#endif
 
 #if 0
   for (const unique_ptr<FrameBuffer>& buffer : fba.buffers(stream)) {
@@ -434,3 +519,33 @@ int main(int argc, char** argv) {
 
   return 0;
 }
+
+#if 0
+void MainWindow::processCapture()
+{
+    /*
+     * Retrieve the next buffer from the done queue. The queue may be empty
+     * if stopCapture() has been called while a CaptureEvent was posted but
+     * not processed yet. Return immediately in that case.
+     */
+    Request *request;
+    {
+        QMutexLocker locker(&mutex_);
+        if (doneQueue_.isEmpty())
+            return;
+
+        request = doneQueue_.dequeue();
+    }
+
+    /* Process buffers. */
+    if (request->buffers().count(vfStream_))
+        processViewfinder(request->buffers().at(vfStream_));
+
+    if (request->buffers().count(rawStream_))
+        processRaw(request->buffers().at(rawStream_), request->metadata());
+
+    request->reuse();
+    QMutexLocker locker(&mutex_);
+    freeQueue_.enqueue(request);
+}
+#endif
