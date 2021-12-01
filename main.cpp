@@ -132,20 +132,9 @@ int CamApp::parseOptions(int argc, char *argv[])
 			 "Capture until interrupted by user or until <count> frames captured",
 			 "capture", ArgumentOptional, "count", false,
 			 OptCamera);
-#ifdef HAVE_KMS
 	parser.addOption(OptDisplay, OptionString,
 			 "Display viewfinder through DRM/KMS on specified connector",
 			 "display", ArgumentOptional, "connector", false,
-			 OptCamera);
-#endif
-	parser.addOption(OptFile, OptionString,
-			 "Write captured frames to disk\n"
-			 "If the file name ends with a '/', it sets the directory in which\n"
-			 "to write files, using the default file name. Otherwise it sets the\n"
-			 "full file path and name. The first '#' character in the file name\n"
-			 "is expanded to the camera index, stream name and frame sequence number.\n"
-			 "The default file name is 'frame-#.bin'.",
-			 "file", ArgumentOptional, "filename", false,
 			 OptCamera);
 	parser.addOption(OptStream, &streamKeyValue,
 			 "Set configuration of a camera stream", "stream", true,

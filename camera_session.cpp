@@ -15,10 +15,7 @@
 
 #include "camera_session.h"
 #include "event_loop.h"
-#include "file_sink.h"
-#ifdef HAVE_KMS
 #include "kms_sink.h"
-#endif
 #include "main.h"
 #include "stream_options.h"
 
@@ -69,14 +66,7 @@ CameraSession::CameraSession(CameraManager *cm,
 
 	bool strictFormats = options_.isSet(OptStrictFormats);
 
-#ifdef HAVE_KMS
 	if (options_.isSet(OptDisplay)) {
-		if (options_.isSet(OptFile)) {
-			std::cerr << "--display and --file options are mutually exclusive"
-				  << std::endl;
-			return;
-		}
-
 		if (roles.size() != 1) {
 			std::cerr << "Display doesn't support multiple streams"
 				  << std::endl;
@@ -89,7 +79,6 @@ CameraSession::CameraSession(CameraManager *cm,
 			return;
 		}
 	}
-#endif
 
 	switch (config->validate()) {
 	case CameraConfiguration::Valid:
@@ -186,18 +175,8 @@ int CameraSession::start()
 
 	camera_->requestCompleted.connect(this, &CameraSession::requestComplete);
 
-#ifdef HAVE_KMS
 	if (options_.isSet(OptDisplay))
 		sink_ = std::make_unique<KMSSink>(options_[OptDisplay].toString());
-#endif
-
-	if (options_.isSet(OptFile)) {
-		if (!options_[OptFile].toString().empty())
-			sink_ = std::make_unique<FileSink>(streamNames_,
-							   options_[OptFile]);
-		else
-			sink_ = std::make_unique<FileSink>(streamNames_);
-	}
 
 	if (sink_) {
 		ret = sink_->configure(*config_);

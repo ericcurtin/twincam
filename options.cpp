@@ -880,7 +880,7 @@ OptionsParser::Options OptionsParser::parse(int argc, char **argv)
 	 * options.
 	 */
 	char *shortOptions = (char *) malloc(optionsMap_.size() * 3 + 2);
-	struct option *longOptions = (struct option *) malloc(optionsMap_.size() + 1);
+	struct option *longOptions = (struct option *) malloc((optionsMap_.size() + 1) * sizeof(struct option));
 	unsigned int ids = 0;
 	unsigned int idl = 0;
 
