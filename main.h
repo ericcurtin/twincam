@@ -8,16 +8,16 @@
 #pragma once
 
 enum {
-	OptCamera = 'c',
-	OptCapture = 'C',
-	OptDisplay = 'D',
-	OptHelp = 'h',
-	OptInfo = 'I',
-	OptList = 'l',
-	OptListProperties = 'p',
-	OptMonitor = 'm',
-	OptStream = 's',
-	OptListControls = 256,
-	OptStrictFormats = 257,
-	OptMetadata = 258,
+  OptCamera = 'c',
+  OptCapture = 'C',
+  OptDisplay = 'D',
+  OptHelp = 'h',
+  OptInfo = 'I',
+  OptList = 'l',
+  OptListProperties = 'p',
+  OptMonitor = 'm',
+  OptStream = 's',
+  OptListControls = 256,
+  OptStrictFormats = 257,
+  OptMetadata = 258,
 };

@@ -7,9 +7,9 @@
 
 #include <assert.h>
 #include <getopt.h>
+#include <string.h>
 #include <iomanip>
 #include <iostream>
-#include <string.h>
 
 #include "options.h"
 
@@ -94,44 +94,43 @@
  * \return True if the option has a long option specifier, false otherwise
  */
 struct Option {
-	int opt;
-	OptionType type;
-	const char *name;
-	OptionArgument argument;
-	const char *argumentName;
-	const char *help;
-	KeyValueParser *keyValueParser;
-	bool isArray;
-	Option *parent;
-	std::list<Option> children;
+  int opt;
+  OptionType type;
+  const char* name;
+  OptionArgument argument;
+  const char* argumentName;
+  const char* help;
+  KeyValueParser* keyValueParser;
+  bool isArray;
+  Option* parent;
+  std::list<Option> children;
 
-	bool hasShortOption() const { return isalnum(opt); }
-	bool hasLongOption() const { return name != nullptr; }
-	const char *typeName() const;
-	std::string optionName() const;
+  bool hasShortOption() const { return isalnum(opt); }
+  bool hasLongOption() const { return name != nullptr; }
+  const char* typeName() const;
+  std::string optionName() const;
 };
 
 /**
  * \brief Retrieve a string describing the option type
  * \return A string describing the option type
  */
-const char *Option::typeName() const
-{
-	switch (type) {
-	case OptionNone:
-		return "none";
+const char* Option::typeName() const {
+  switch (type) {
+    case OptionNone:
+      return "none";
 
-	case OptionInteger:
-		return "integer";
+    case OptionInteger:
+      return "integer";
 
-	case OptionString:
-		return "string";
+    case OptionString:
+      return "string";
 
-	case OptionKeyValue:
-		return "key=value";
-	}
+    case OptionKeyValue:
+      return "key=value";
+  }
 
-	return "unknown";
+  return "unknown";
 }
 
 /**
@@ -140,12 +139,11 @@ const char *Option::typeName() const
  * (double dash) if the option has a name, or a short option identifier (single
  * dash) otherwise
  */
-std::string Option::optionName() const
-{
-	if (name)
-		return "--" + std::string(name);
-	else
-		return "-" + std::string(1, opt);
+std::string Option::optionName() const {
+  if (name)
+    return "--" + std::string(name);
+  else
+    return "-" + std::string(1, opt);
 }
 
 /* -----------------------------------------------------------------------------
@@ -177,10 +175,9 @@ std::string Option::optionName() const
  * \brief Tell if the stored options list is empty
  * \return True if the container is empty, false otherwise
  */
-template<typename T>
-bool OptionsBase<T>::empty() const
-{
-	return values_.empty();
+template <typename T>
+bool OptionsBase<T>::empty() const {
+  return values_.empty();
 }
 
 /**
@@ -188,10 +185,9 @@ bool OptionsBase<T>::empty() const
  * \return True if the container is returned after successfully parsing
  * options, false if it is returned after an error was detected during parsing
  */
-template<typename T>
-bool OptionsBase<T>::valid() const
-{
-	return valid_;
+template <typename T>
+bool OptionsBase<T>::valid() const {
+  return valid_;
 }
 
 /**
@@ -199,10 +195,9 @@ bool OptionsBase<T>::valid() const
  * \param[in] opt The option to search for
  * \return True if the \a opt option is set, false otherwise
  */
-template<typename T>
-bool OptionsBase<T>::isSet(const T &opt) const
-{
-	return values_.find(opt) != values_.end();
+template <typename T>
+bool OptionsBase<T>::isSet(const T& opt) const {
+  return values_.find(opt) != values_.end();
 }
 
 /**
@@ -210,15 +205,14 @@ bool OptionsBase<T>::isSet(const T &opt) const
  * \param[in] opt The option to retrieve
  * \return The value of option \a opt if found, an empty OptionValue otherwise
  */
-template<typename T>
-const OptionValue &OptionsBase<T>::operator[](const T &opt) const
-{
-	static const OptionValue empty;
+template <typename T>
+const OptionValue& OptionsBase<T>::operator[](const T& opt) const {
+  static const OptionValue empty;
 
-	auto it = values_.find(opt);
-	if (it != values_.end())
-		return it->second;
-	return empty;
+  auto it = values_.find(opt);
+  if (it != values_.end())
+    return it->second;
+  return empty;
 }
 
 /**
@@ -228,57 +222,56 @@ const OptionValue &OptionsBase<T>::operator[](const T &opt) const
  * KeyValueParser::parse() function to mark the returned options as invalid if
  * a validation error occurs.
  */
-template<typename T>
-void OptionsBase<T>::invalidate()
-{
-	valid_ = false;
+template <typename T>
+void OptionsBase<T>::invalidate() {
+  valid_ = false;
 }
 
-template<typename T>
-bool OptionsBase<T>::parseValue(const T &opt, const Option &option,
-				const char *arg)
-{
-	OptionValue value;
+template <typename T>
+bool OptionsBase<T>::parseValue(const T& opt,
+                                const Option& option,
+                                const char* arg) {
+  OptionValue value;
 
-	switch (option.type) {
-	case OptionNone:
-		break;
+  switch (option.type) {
+    case OptionNone:
+      break;
 
-	case OptionInteger:
-		unsigned int integer;
+    case OptionInteger:
+      unsigned int integer;
 
-		if (arg) {
-			char *endptr;
-			integer = strtoul(arg, &endptr, 0);
-			if (*endptr != '\0')
-				return false;
-		} else {
-			integer = 0;
-		}
+      if (arg) {
+        char* endptr;
+        integer = strtoul(arg, &endptr, 0);
+        if (*endptr != '\0')
+          return false;
+      } else {
+        integer = 0;
+      }
 
-		value = OptionValue(integer);
-		break;
+      value = OptionValue(integer);
+      break;
 
-	case OptionString:
-		value = OptionValue(arg ? arg : "");
-		break;
+    case OptionString:
+      value = OptionValue(arg ? arg : "");
+      break;
 
-	case OptionKeyValue:
-		KeyValueParser *kvParser = option.keyValueParser;
-		KeyValueParser::Options keyValues = kvParser->parse(arg);
-		if (!keyValues.valid())
-			return false;
+    case OptionKeyValue:
+      KeyValueParser* kvParser = option.keyValueParser;
+      KeyValueParser::Options keyValues = kvParser->parse(arg);
+      if (!keyValues.valid())
+        return false;
 
-		value = OptionValue(keyValues);
-		break;
-	}
+      value = OptionValue(keyValues);
+      break;
+  }
 
-	if (option.isArray)
-		values_[opt].addValue(value);
-	else
-		values_[opt] = value;
+  if (option.isArray)
+    values_[opt].addValue(value);
+  else
+    values_[opt] = value;
 
-	return true;
+  return true;
 }
 
 template class OptionsBase<int>;
@@ -328,23 +321,24 @@ KeyValueParser::~KeyValueParser() = default;
  * \return True if the option was added successfully, false if an error
  * occurred.
  */
-bool KeyValueParser::addOption(const char *name, OptionType type,
-			       const char *help, OptionArgument argument)
-{
-	if (!name)
-		return false;
-	if (!help || help[0] == '\0')
-		return false;
-	if (argument != ArgumentNone && type == OptionNone)
-		return false;
+bool KeyValueParser::addOption(const char* name,
+                               OptionType type,
+                               const char* help,
+                               OptionArgument argument) {
+  if (!name)
+    return false;
+  if (!help || help[0] == '\0')
+    return false;
+  if (argument != ArgumentNone && type == OptionNone)
+    return false;
 
-	/* Reject duplicate options. */
-	if (optionsMap_.find(name) != optionsMap_.end())
-		return false;
+  /* Reject duplicate options. */
+  if (optionsMap_.find(name) != optionsMap_.end())
+    return false;
 
-	optionsMap_[name] = Option({ 0, type, name, argument, nullptr,
-				     help, nullptr, false, nullptr, {} });
-	return true;
+  optionsMap_[name] = Option(
+      {0, type, name, argument, nullptr, help, nullptr, false, nullptr, {}});
+  return true;
 }
 
 /**
@@ -358,114 +352,108 @@ bool KeyValueParser::addOption(const char *name, OptionType type,
  * \return A valid container with the list of parsed options on success, or an
  * invalid container otherwise
  */
-KeyValueParser::Options KeyValueParser::parse(const char *arguments)
-{
-	Options options;
+KeyValueParser::Options KeyValueParser::parse(const char* arguments) {
+  Options options;
 
-	for (const char *pair = arguments; *arguments != '\0'; pair = arguments) {
-		const char *comma = strchrnul(arguments, ',');
-		size_t len = comma - pair;
+  for (const char* pair = arguments; *arguments != '\0'; pair = arguments) {
+    const char* comma = strchrnul(arguments, ',');
+    size_t len = comma - pair;
 
-		/* Skip over the comma. */
-		arguments = *comma == ',' ? comma + 1 : comma;
+    /* Skip over the comma. */
+    arguments = *comma == ',' ? comma + 1 : comma;
 
-		/* Skip to the next pair if the pair is empty. */
-		if (!len)
-			continue;
+    /* Skip to the next pair if the pair is empty. */
+    if (!len)
+      continue;
 
-		std::string key;
-		std::string value;
+    std::string key;
+    std::string value;
 
-		const char *separator = static_cast<const char *>(memchr(pair, '=', len));
-		if (!separator) {
-			key = std::string(pair, len);
-			value = "";
-		} else {
-			key = std::string(pair, separator - pair);
-			value = std::string(separator + 1, comma - separator - 1);
-		}
+    const char* separator = static_cast<const char*>(memchr(pair, '=', len));
+    if (!separator) {
+      key = std::string(pair, len);
+      value = "";
+    } else {
+      key = std::string(pair, separator - pair);
+      value = std::string(separator + 1, comma - separator - 1);
+    }
 
-		/* The key is mandatory, the value might be optional. */
-		if (key.empty())
-			continue;
+    /* The key is mandatory, the value might be optional. */
+    if (key.empty())
+      continue;
 
-		if (optionsMap_.find(key) == optionsMap_.end()) {
-			std::cerr << "Invalid option " << key << std::endl;
-			return options;
-		}
+    if (optionsMap_.find(key) == optionsMap_.end()) {
+      std::cerr << "Invalid option " << key << std::endl;
+      return options;
+    }
 
-		OptionArgument arg = optionsMap_[key].argument;
-		if (value.empty() && arg == ArgumentRequired) {
-			std::cerr << "Option " << key << " requires an argument"
-				  << std::endl;
-			return options;
-		} else if (!value.empty() && arg == ArgumentNone) {
-			std::cerr << "Option " << key << " takes no argument"
-				  << std::endl;
-			return options;
-		}
+    OptionArgument arg = optionsMap_[key].argument;
+    if (value.empty() && arg == ArgumentRequired) {
+      std::cerr << "Option " << key << " requires an argument" << std::endl;
+      return options;
+    } else if (!value.empty() && arg == ArgumentNone) {
+      std::cerr << "Option " << key << " takes no argument" << std::endl;
+      return options;
+    }
 
-		const Option &option = optionsMap_[key];
-		if (!options.parseValue(key, option, value.c_str())) {
-			std::cerr << "Failed to parse '" << value << "' as "
-				  << option.typeName() << " for option " << key
-				  << std::endl;
-			return options;
-		}
-	}
+    const Option& option = optionsMap_[key];
+    if (!options.parseValue(key, option, value.c_str())) {
+      std::cerr << "Failed to parse '" << value << "' as " << option.typeName()
+                << " for option " << key << std::endl;
+      return options;
+    }
+  }
 
-	options.valid_ = true;
-	return options;
+  options.valid_ = true;
+  return options;
 }
 
-unsigned int KeyValueParser::maxOptionLength() const
-{
-	unsigned int maxLength = 0;
+unsigned int KeyValueParser::maxOptionLength() const {
+  unsigned int maxLength = 0;
 
-	for (auto const &iter : optionsMap_) {
-		const Option &option = iter.second;
-		unsigned int length = 10 + strlen(option.name);
-		if (option.argument != ArgumentNone)
-			length += 1 + strlen(option.typeName());
-		if (option.argument == ArgumentOptional)
-			length += 2;
+  for (auto const& iter : optionsMap_) {
+    const Option& option = iter.second;
+    unsigned int length = 10 + strlen(option.name);
+    if (option.argument != ArgumentNone)
+      length += 1 + strlen(option.typeName());
+    if (option.argument == ArgumentOptional)
+      length += 2;
 
-		if (length > maxLength)
-			maxLength = length;
-	}
+    if (length > maxLength)
+      maxLength = length;
+  }
 
-	return maxLength;
+  return maxLength;
 }
 
-void KeyValueParser::usage(int indent)
-{
-	for (auto const &iter : optionsMap_) {
-		const Option &option = iter.second;
-		std::string argument = std::string("          ") + option.name;
+void KeyValueParser::usage(int indent) {
+  for (auto const& iter : optionsMap_) {
+    const Option& option = iter.second;
+    std::string argument = std::string("          ") + option.name;
 
-		if (option.argument != ArgumentNone) {
-			if (option.argument == ArgumentOptional)
-				argument += "[=";
-			else
-				argument += "=";
-			argument += option.typeName();
-			if (option.argument == ArgumentOptional)
-				argument += "]";
-		}
+    if (option.argument != ArgumentNone) {
+      if (option.argument == ArgumentOptional)
+        argument += "[=";
+      else
+        argument += "=";
+      argument += option.typeName();
+      if (option.argument == ArgumentOptional)
+        argument += "]";
+    }
 
-		std::cerr << std::setw(indent) << argument;
+    std::cerr << std::setw(indent) << argument;
 
-		for (const char *help = option.help, *end = help; end;) {
-			end = strchr(help, '\n');
-			if (end) {
-				std::cerr << std::string(help, end - help + 1);
-				std::cerr << std::setw(indent) << " ";
-				help = end + 1;
-			} else {
-				std::cerr << help << std::endl;
-			}
-		}
-	}
+    for (const char *help = option.help, *end = help; end;) {
+      end = strchr(help, '\n');
+      if (end) {
+        std::cerr << std::string(help, end - help + 1);
+        std::cerr << std::setw(indent) << " ";
+        help = end + 1;
+      } else {
+        std::cerr << help << std::endl;
+      }
+    }
+  }
 }
 
 /* -----------------------------------------------------------------------------
@@ -512,10 +500,7 @@ void KeyValueParser::usage(int indent)
  *
  * The value type is set to ValueType::ValueNone.
  */
-OptionValue::OptionValue()
-	: type_(ValueNone), integer_(0)
-{
-}
+OptionValue::OptionValue() : type_(ValueNone), integer_(0) {}
 
 /**
  * \brief Construct an integer OptionValue instance
@@ -523,10 +508,7 @@ OptionValue::OptionValue()
  *
  * The value type is set to ValueType::ValueInteger.
  */
-OptionValue::OptionValue(int value)
-	: type_(ValueInteger), integer_(value)
-{
-}
+OptionValue::OptionValue(int value) : type_(ValueInteger), integer_(value) {}
 
 /**
  * \brief Construct a string OptionValue instance
@@ -534,10 +516,8 @@ OptionValue::OptionValue(int value)
  *
  * The value type is set to ValueType::ValueString.
  */
-OptionValue::OptionValue(const char *value)
-	: type_(ValueString), integer_(0), string_(value)
-{
-}
+OptionValue::OptionValue(const char* value)
+    : type_(ValueString), integer_(0), string_(value) {}
 
 /**
  * \brief Construct a string OptionValue instance
@@ -545,10 +525,8 @@ OptionValue::OptionValue(const char *value)
  *
  * The value type is set to ValueType::ValueString.
  */
-OptionValue::OptionValue(const std::string &value)
-	: type_(ValueString), integer_(0), string_(value)
-{
-}
+OptionValue::OptionValue(const std::string& value)
+    : type_(ValueString), integer_(0), string_(value) {}
 
 /**
  * \brief Construct a key-value OptionValue instance
@@ -556,10 +534,8 @@ OptionValue::OptionValue(const std::string &value)
  *
  * The value type is set to ValueType::ValueKeyValue.
  */
-OptionValue::OptionValue(const KeyValueParser::Options &value)
-	: type_(ValueKeyValue), integer_(0), keyValues_(value)
-{
-}
+OptionValue::OptionValue(const KeyValueParser::Options& value)
+    : type_(ValueKeyValue), integer_(0), keyValues_(value) {}
 
 /**
  * \brief Add an entry to an array value
@@ -569,12 +545,11 @@ OptionValue::OptionValue(const KeyValueParser::Options &value)
  * ValueType::ValueNone or ValueType::ValueArray. Upon return, the type will be
  * set to ValueType::ValueArray.
  */
-void OptionValue::addValue(const OptionValue &value)
-{
-	assert(type_ == ValueNone || type_ == ValueArray);
+void OptionValue::addValue(const OptionValue& value) {
+  assert(type_ == ValueNone || type_ == ValueArray);
 
-	type_ = ValueArray;
-	array_.push_back(value);
+  type_ = ValueArray;
+  array_.push_back(value);
 }
 
 /**
@@ -595,9 +570,8 @@ void OptionValue::addValue(const OptionValue &value)
  * \return The option value as an int, or 0 if the value type isn't
  * ValueType::ValueInteger
  */
-OptionValue::operator int() const
-{
-	return toInteger();
+OptionValue::operator int() const {
+  return toInteger();
 }
 
 /**
@@ -605,9 +579,8 @@ OptionValue::operator int() const
  * \return The option value as an std::string, or an empty string if the value
  * type isn't ValueType::ValueString
  */
-OptionValue::operator std::string() const
-{
-	return toString();
+OptionValue::operator std::string() const {
+  return toString();
 }
 
 /**
@@ -615,12 +588,11 @@ OptionValue::operator std::string() const
  * \return The option value as an int, or 0 if the value type isn't
  * ValueType::ValueInteger
  */
-int OptionValue::toInteger() const
-{
-	if (type_ != ValueInteger)
-		return 0;
+int OptionValue::toInteger() const {
+  if (type_ != ValueInteger)
+    return 0;
 
-	return integer_;
+  return integer_;
 }
 
 /**
@@ -628,12 +600,11 @@ int OptionValue::toInteger() const
  * \return The option value as a std::string, or an empty string if the value
  * type isn't ValueType::ValueString
  */
-std::string OptionValue::toString() const
-{
-	if (type_ != ValueString)
-		return std::string();
+std::string OptionValue::toString() const {
+  if (type_ != ValueString)
+    return std::string();
 
-	return string_;
+  return string_;
 }
 
 /**
@@ -643,10 +614,9 @@ std::string OptionValue::toString() const
  *
  * \return The option value as a KeyValueParser::Options
  */
-const KeyValueParser::Options &OptionValue::toKeyValues() const
-{
-	assert(type_ == ValueKeyValue);
-	return keyValues_;
+const KeyValueParser::Options& OptionValue::toKeyValues() const {
+  assert(type_ == ValueKeyValue);
+  return keyValues_;
 }
 
 /**
@@ -656,19 +626,17 @@ const KeyValueParser::Options &OptionValue::toKeyValues() const
  *
  * \return The option value as a std::vector of OptionValue
  */
-const std::vector<OptionValue> &OptionValue::toArray() const
-{
-	assert(type_ == ValueArray);
-	return array_;
+const std::vector<OptionValue>& OptionValue::toArray() const {
+  assert(type_ == ValueArray);
+  return array_;
 }
 
 /**
  * \brief Retrieve the list of child values
  * \return The list of child values
  */
-const OptionsParser::Options &OptionValue::children() const
-{
-	return children_;
+const OptionsParser::Options& OptionValue::children() const {
+  return children_;
 }
 
 /* -----------------------------------------------------------------------------
@@ -787,51 +755,69 @@ OptionsParser::~OptionsParser() = default;
  * \return True if the option was added successfully, false if an error
  * occurred.
  */
-bool OptionsParser::addOption(int opt, OptionType type, const char *help,
-			      const char *name, OptionArgument argument,
-			      const char *argumentName, bool array, int parent)
-{
-	/*
-	 * Options must have at least a short or long name, and a text message.
-	 * If an argument is accepted, it must be described by argumentName.
-	 */
-	if (!isalnum(opt) && !name)
-		return false;
-	if (!help || help[0] == '\0')
-		return false;
-	if (argument != ArgumentNone && !argumentName)
-		return false;
+bool OptionsParser::addOption(int opt,
+                              OptionType type,
+                              const char* help,
+                              const char* name,
+                              OptionArgument argument,
+                              const char* argumentName,
+                              bool array,
+                              int parent) {
+  /*
+   * Options must have at least a short or long name, and a text message.
+   * If an argument is accepted, it must be described by argumentName.
+   */
+  if (!isalnum(opt) && !name)
+    return false;
+  if (!help || help[0] == '\0')
+    return false;
+  if (argument != ArgumentNone && !argumentName)
+    return false;
 
-	/* Reject duplicate options. */
-	if (optionsMap_.find(opt) != optionsMap_.end())
-		return false;
+  /* Reject duplicate options. */
+  if (optionsMap_.find(opt) != optionsMap_.end())
+    return false;
 
-	/*
-	 * If a parent is specified, create the option as a child of its parent.
-	 * Otherwise, create it in the parser's options list.
-	 */
-	Option *option;
+  /*
+   * If a parent is specified, create the option as a child of its parent.
+   * Otherwise, create it in the parser's options list.
+   */
+  Option* option;
 
-	if (parent) {
-		auto iter = optionsMap_.find(parent);
-		if (iter == optionsMap_.end())
-			return false;
+  if (parent) {
+    auto iter = optionsMap_.find(parent);
+    if (iter == optionsMap_.end())
+      return false;
 
-		Option *parentOpt = iter->second;
-		parentOpt->children.push_back({
-			opt, type, name, argument, argumentName, help, nullptr,
-			array, parentOpt, {}
-		});
-		option = &parentOpt->children.back();
-	} else {
-		options_.push_back({ opt, type, name, argument, argumentName,
-				     help, nullptr, array, nullptr, {} });
-		option = &options_.back();
-	}
+    Option* parentOpt = iter->second;
+    parentOpt->children.push_back({opt,
+                                   type,
+                                   name,
+                                   argument,
+                                   argumentName,
+                                   help,
+                                   nullptr,
+                                   array,
+                                   parentOpt,
+                                   {}});
+    option = &parentOpt->children.back();
+  } else {
+    options_.push_back({opt,
+                        type,
+                        name,
+                        argument,
+                        argumentName,
+                        help,
+                        nullptr,
+                        array,
+                        nullptr,
+                        {}});
+    option = &options_.back();
+  }
 
-	optionsMap_[opt] = option;
+  optionsMap_[opt] = option;
 
-	return true;
+  return true;
 }
 
 /**
@@ -847,15 +833,18 @@ bool OptionsParser::addOption(int opt, OptionType type, const char *help,
  * \return True if the option was added successfully, false if an error
  * occurred.
  */
-bool OptionsParser::addOption(int opt, KeyValueParser *parser, const char *help,
-			      const char *name, bool array, int parent)
-{
-	if (!addOption(opt, OptionKeyValue, help, name, ArgumentRequired,
-		       "key=value[,key=value,...]", array, parent))
-		return false;
+bool OptionsParser::addOption(int opt,
+                              KeyValueParser* parser,
+                              const char* help,
+                              const char* name,
+                              bool array,
+                              int parent) {
+  if (!addOption(opt, OptionKeyValue, help, name, ArgumentRequired,
+                 "key=value[,key=value,...]", array, parent))
+    return false;
 
-	optionsMap_[opt]->keyValueParser = parser;
-	return true;
+  optionsMap_[opt]->keyValueParser = parser;
+  return true;
 }
 
 /**
@@ -871,94 +860,94 @@ bool OptionsParser::addOption(int opt, KeyValueParser *parser, const char *help,
  * \return A valid container with the list of parsed options on success, or an
  * invalid container otherwise
  */
-OptionsParser::Options OptionsParser::parse(int argc, char **argv)
-{
-	OptionsParser::Options options;
+OptionsParser::Options OptionsParser::parse(int argc, char** argv) {
+  OptionsParser::Options options;
 
-	/*
-	 * Allocate short and long options arrays large enough to contain all
-	 * options.
-	 */
-	char *shortOptions = (char *) malloc(optionsMap_.size() * 3 + 2);
-	struct option *longOptions = (struct option *) malloc((optionsMap_.size() + 1) * sizeof(struct option));
-	unsigned int ids = 0;
-	unsigned int idl = 0;
+  /*
+   * Allocate short and long options arrays large enough to contain all
+   * options.
+   */
+  char* shortOptions = (char*)malloc(optionsMap_.size() * 3 + 2);
+  struct option* longOptions =
+      (struct option*)malloc((optionsMap_.size() + 1) * sizeof(struct option));
+  unsigned int ids = 0;
+  unsigned int idl = 0;
 
-	shortOptions[ids++] = ':';
+  shortOptions[ids++] = ':';
 
-	for (const auto [opt, option] : optionsMap_) {
-		if (option->hasShortOption()) {
-			shortOptions[ids++] = opt;
-			if (option->argument != ArgumentNone)
-				shortOptions[ids++] = ':';
-			if (option->argument == ArgumentOptional)
-				shortOptions[ids++] = ':';
-		}
+  for (const auto [opt, option] : optionsMap_) {
+    if (option->hasShortOption()) {
+      shortOptions[ids++] = opt;
+      if (option->argument != ArgumentNone)
+        shortOptions[ids++] = ':';
+      if (option->argument == ArgumentOptional)
+        shortOptions[ids++] = ':';
+    }
 
-		if (option->hasLongOption()) {
-			longOptions[idl].name = option->name;
+    if (option->hasLongOption()) {
+      longOptions[idl].name = option->name;
 
-			switch (option->argument) {
-			case ArgumentNone:
-				longOptions[idl].has_arg = no_argument;
-				break;
-			case ArgumentRequired:
-				longOptions[idl].has_arg = required_argument;
-				break;
-			case ArgumentOptional:
-				longOptions[idl].has_arg = optional_argument;
-				break;
-			}
+      switch (option->argument) {
+        case ArgumentNone:
+          longOptions[idl].has_arg = no_argument;
+          break;
+        case ArgumentRequired:
+          longOptions[idl].has_arg = required_argument;
+          break;
+        case ArgumentOptional:
+          longOptions[idl].has_arg = optional_argument;
+          break;
+      }
 
-			longOptions[idl].flag = 0;
-			longOptions[idl].val = option->opt;
-			idl++;
-		}
-	}
+      longOptions[idl].flag = 0;
+      longOptions[idl].val = option->opt;
+      idl++;
+    }
+  }
 
-	shortOptions[ids] = '\0';
-	memset(&longOptions[idl], 0, sizeof(longOptions[idl]));
+  shortOptions[ids] = '\0';
+  memset(&longOptions[idl], 0, sizeof(longOptions[idl]));
 
-	opterr = 0;
+  opterr = 0;
 
-	while (true) {
-		int c = getopt_long(argc, argv, shortOptions, longOptions, nullptr);
+  while (true) {
+    int c = getopt_long(argc, argv, shortOptions, longOptions, nullptr);
 
-		if (c == -1)
-			break;
+    if (c == -1)
+      break;
 
-		if (c == '?' || c == ':') {
-			if (c == '?')
-				std::cerr << "Invalid option ";
-			else
-				std::cerr << "Missing argument for option ";
-			std::cerr << argv[optind - 1] << std::endl;
+    if (c == '?' || c == ':') {
+      if (c == '?')
+        std::cerr << "Invalid option ";
+      else
+        std::cerr << "Missing argument for option ";
+      std::cerr << argv[optind - 1] << std::endl;
 
-			usage();
-              
-			goto ret;
-		}
+      usage();
 
-		const Option &option = *optionsMap_[c];
-		if (!parseValue(option, optarg, &options)) {
-			usage();
-			goto ret;
-		}
-	}
+      goto ret;
+    }
 
-	if (optind < argc) {
-		std::cerr << "Invalid non-option argument '" << argv[optind]
-			  << "'" << std::endl;
-		usage();
-		goto ret;
-	}
+    const Option& option = *optionsMap_[c];
+    if (!parseValue(option, optarg, &options)) {
+      usage();
+      goto ret;
+    }
+  }
 
-	options.valid_ = true;
+  if (optind < argc) {
+    std::cerr << "Invalid non-option argument '" << argv[optind] << "'"
+              << std::endl;
+    usage();
+    goto ret;
+  }
+
+  options.valid_ = true;
 
 ret:
-free(shortOptions);
-free(longOptions);
-	return options;
+  free(shortOptions);
+  free(longOptions);
+  return options;
 }
 
 /**
@@ -969,178 +958,175 @@ free(longOptions);
  * function may print additional usage information for the application before
  * the list of options.
  */
-void OptionsParser::usage()
-{
-	unsigned int indent = 0;
+void OptionsParser::usage() {
+  unsigned int indent = 0;
 
-	for (const auto &opt : optionsMap_) {
-		const Option *option = opt.second;
-		unsigned int length = 14;
-		if (option->hasLongOption())
-			length += 2 + strlen(option->name);
-		if (option->argument != ArgumentNone)
-			length += 1 + strlen(option->argumentName);
-		if (option->argument == ArgumentOptional)
-			length += 2;
-		if (option->isArray)
-			length += 4;
+  for (const auto& opt : optionsMap_) {
+    const Option* option = opt.second;
+    unsigned int length = 14;
+    if (option->hasLongOption())
+      length += 2 + strlen(option->name);
+    if (option->argument != ArgumentNone)
+      length += 1 + strlen(option->argumentName);
+    if (option->argument == ArgumentOptional)
+      length += 2;
+    if (option->isArray)
+      length += 4;
 
-		if (length > indent)
-			indent = length;
+    if (length > indent)
+      indent = length;
 
-		if (option->keyValueParser) {
-			length = option->keyValueParser->maxOptionLength();
-			if (length > indent)
-				indent = length;
-		}
-	}
+    if (option->keyValueParser) {
+      length = option->keyValueParser->maxOptionLength();
+      if (length > indent)
+        indent = length;
+    }
+  }
 
-	indent = (indent + 7) / 8 * 8;
+  indent = (indent + 7) / 8 * 8;
 
-	std::cerr << "Options:" << std::endl;
+  std::cerr << "Options:" << std::endl;
 
-	std::ios_base::fmtflags f(std::cerr.flags());
-	std::cerr << std::left;
+  std::ios_base::fmtflags f(std::cerr.flags());
+  std::cerr << std::left;
 
-	usageOptions(options_, indent);
+  usageOptions(options_, indent);
 
-	std::cerr.flags(f);
+  std::cerr.flags(f);
 }
 
-void OptionsParser::usageOptions(const std::list<Option> &options,
-				 unsigned int indent)
-{
-	std::vector<const Option *> parentOptions;
+void OptionsParser::usageOptions(const std::list<Option>& options,
+                                 unsigned int indent) {
+  std::vector<const Option*> parentOptions;
 
-	for (const Option &option : options) {
-		std::string argument;
-		if (option.hasShortOption())
-			argument = std::string("  -")
-				 + static_cast<char>(option.opt);
-		else
-			argument = "    ";
+  for (const Option& option : options) {
+    std::string argument;
+    if (option.hasShortOption())
+      argument = std::string("  -") + static_cast<char>(option.opt);
+    else
+      argument = "    ";
 
-		if (option.hasLongOption()) {
-			if (option.hasShortOption())
-				argument += ", ";
-			else
-				argument += "  ";
-			argument += std::string("--") + option.name;
-		}
+    if (option.hasLongOption()) {
+      if (option.hasShortOption())
+        argument += ", ";
+      else
+        argument += "  ";
+      argument += std::string("--") + option.name;
+    }
 
-		if (option.argument != ArgumentNone) {
-			if (option.argument == ArgumentOptional)
-				argument += "[=";
-			else
-				argument += " ";
-			argument += option.argumentName;
-			if (option.argument == ArgumentOptional)
-				argument += "]";
-		}
+    if (option.argument != ArgumentNone) {
+      if (option.argument == ArgumentOptional)
+        argument += "[=";
+      else
+        argument += " ";
+      argument += option.argumentName;
+      if (option.argument == ArgumentOptional)
+        argument += "]";
+    }
 
-		if (option.isArray)
-			argument += " ...";
+    if (option.isArray)
+      argument += " ...";
 
-		std::cerr << std::setw(indent) << argument;
+    std::cerr << std::setw(indent) << argument;
 
-		for (const char *help = option.help, *end = help; end; ) {
-			end = strchr(help, '\n');
-			if (end) {
-				std::cerr << std::string(help, end - help + 1);
-				std::cerr << std::setw(indent) << " ";
-				help = end + 1;
-			} else {
-				std::cerr << help << std::endl;
-			}
-		}
+    for (const char *help = option.help, *end = help; end;) {
+      end = strchr(help, '\n');
+      if (end) {
+        std::cerr << std::string(help, end - help + 1);
+        std::cerr << std::setw(indent) << " ";
+        help = end + 1;
+      } else {
+        std::cerr << help << std::endl;
+      }
+    }
 
-		if (option.keyValueParser)
-			option.keyValueParser->usage(indent);
+    if (option.keyValueParser)
+      option.keyValueParser->usage(indent);
 
-		if (!option.children.empty())
-			parentOptions.push_back(&option);
-	}
+    if (!option.children.empty())
+      parentOptions.push_back(&option);
+  }
 
-	if (parentOptions.empty())
-		return;
+  if (parentOptions.empty())
+    return;
 
-	for (const Option *option : parentOptions) {
-		std::cerr << std::endl << "Options valid in the context of "
-			  << option->optionName() << ":" << std::endl;
-		usageOptions(option->children, indent);
-	}
+  for (const Option* option : parentOptions) {
+    std::cerr << std::endl
+              << "Options valid in the context of " << option->optionName()
+              << ":" << std::endl;
+    usageOptions(option->children, indent);
+  }
 }
 
-std::tuple<OptionsParser::Options *, const Option *>
-OptionsParser::childOption(const Option *parent, Options *options)
-{
-	/*
-	 * The parent argument points to the parent of the leaf node Option,
-	 * and the options argument to the root node of the Options tree. Use
-	 * recursive calls to traverse the Option tree up to the root node while
-	 * traversing the Options tree down to the leaf node:
-	 */
+std::tuple<OptionsParser::Options*, const Option*> OptionsParser::childOption(
+    const Option* parent,
+    Options* options) {
+  /*
+   * The parent argument points to the parent of the leaf node Option,
+   * and the options argument to the root node of the Options tree. Use
+   * recursive calls to traverse the Option tree up to the root node while
+   * traversing the Options tree down to the leaf node:
+   */
 
-	/*
-	 * - If we have no parent, we've reached the root node of the Option
-	 *   tree, the options argument is what we need.
-	 */
-	if (!parent)
-		return { options, nullptr };
+  /*
+   * - If we have no parent, we've reached the root node of the Option
+   *   tree, the options argument is what we need.
+   */
+  if (!parent)
+    return {options, nullptr};
 
-	/*
-	 * - If the parent has a parent, use recursion to move one level up the
-	 *   Option tree. This returns the Options corresponding to parent, or
-	 *   nullptr if a suitable Options child isn't found.
-	 */
-	if (parent->parent) {
-		const Option *error;
-		std::tie(options, error) = childOption(parent->parent, options);
+  /*
+   * - If the parent has a parent, use recursion to move one level up the
+   *   Option tree. This returns the Options corresponding to parent, or
+   *   nullptr if a suitable Options child isn't found.
+   */
+  if (parent->parent) {
+    const Option* error;
+    std::tie(options, error) = childOption(parent->parent, options);
 
-		/* Propagate the error all the way back up the call stack. */
-		if (!error)
-			return { options, error };
-	}
+    /* Propagate the error all the way back up the call stack. */
+    if (!error)
+      return {options, error};
+  }
 
-	/*
-	 * - The parent has no parent, we're now one level down the root.
-	 *   Return the Options child corresponding to the parent. The child may
-	 *   not exist if options are specified in an incorrect order.
-	 */
-	if (!options->isSet(parent->opt))
-		return { nullptr, parent };
+  /*
+   * - The parent has no parent, we're now one level down the root.
+   *   Return the Options child corresponding to the parent. The child may
+   *   not exist if options are specified in an incorrect order.
+   */
+  if (!options->isSet(parent->opt))
+    return {nullptr, parent};
 
-	/*
-	 * If the child value is of array type, children are not stored in the
-	 * value .children() list, but in the .children() of the value's array
-	 * elements. Use the last array element in that case, as a child option
-	 * relates to the last instance of its parent option.
-	 */
-	const OptionValue *value = &(*options)[parent->opt];
-	if (value->type() == OptionValue::ValueArray)
-		value = &value->toArray().back();
+  /*
+   * If the child value is of array type, children are not stored in the
+   * value .children() list, but in the .children() of the value's array
+   * elements. Use the last array element in that case, as a child option
+   * relates to the last instance of its parent option.
+   */
+  const OptionValue* value = &(*options)[parent->opt];
+  if (value->type() == OptionValue::ValueArray)
+    value = &value->toArray().back();
 
-	return { const_cast<Options *>(&value->children()), nullptr };
+  return {const_cast<Options*>(&value->children()), nullptr};
 }
 
-bool OptionsParser::parseValue(const Option &option, const char *arg,
-			       Options *options)
-{
-	const Option *error;
+bool OptionsParser::parseValue(const Option& option,
+                               const char* arg,
+                               Options* options) {
+  const Option* error;
 
-	std::tie(options, error) = childOption(option.parent, options);
-	if (error) {
-		std::cerr << "Option " << option.optionName() << " requires a "
-			  << error->optionName() << " context" << std::endl;
-		return false;
-	}
+  std::tie(options, error) = childOption(option.parent, options);
+  if (error) {
+    std::cerr << "Option " << option.optionName() << " requires a "
+              << error->optionName() << " context" << std::endl;
+    return false;
+  }
 
-	if (!options->parseValue(option.opt, option, arg)) {
-		std::cerr << "Can't parse " << option.typeName()
-			  << " argument for option " << option.optionName()
-			  << std::endl;
-		return false;
-	}
+  if (!options->parseValue(option.opt, option, arg)) {
+    std::cerr << "Can't parse " << option.typeName() << " argument for option "
+              << option.optionName() << std::endl;
+    return false;
+  }
 
-	return true;
+  return true;
 }

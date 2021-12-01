@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <memory>
 #include <stdint.h>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -25,52 +25,52 @@
 
 class KMSSink;
 
-class CameraSession
-{
-public:
-	CameraSession(libcamera::CameraManager *cm,
-		      const std::string &cameraId, unsigned int cameraIndex,
-		      const OptionsParser::Options &options);
-	~CameraSession();
+class CameraSession {
+ public:
+  CameraSession(libcamera::CameraManager* cm,
+                const std::string& cameraId,
+                unsigned int cameraIndex,
+                const OptionsParser::Options& options);
+  ~CameraSession();
 
-	bool isValid() const { return config_ != nullptr; }
-	const OptionsParser::Options &options() { return options_; }
+  bool isValid() const { return config_ != nullptr; }
+  const OptionsParser::Options& options() { return options_; }
 
-	libcamera::Camera *camera() { return camera_.get(); }
-	libcamera::CameraConfiguration *config() { return config_.get(); }
+  libcamera::Camera* camera() { return camera_.get(); }
+  libcamera::CameraConfiguration* config() { return config_.get(); }
 
-	void listControls() const;
-	void listProperties() const;
-	void infoConfiguration() const;
+  void listControls() const;
+  void listProperties() const;
+  void infoConfiguration() const;
 
-	int start();
-	void stop();
+  int start();
+  void stop();
 
-	libcamera::Signal<> captureDone;
+  libcamera::Signal<> captureDone;
 
-private:
-	int startCapture();
+ private:
+  int startCapture();
 
-	int queueRequest(libcamera::Request *request);
-	void requestComplete(libcamera::Request *request);
-	void processRequest(libcamera::Request *request);
-	void sinkRelease(libcamera::Request *request);
+  int queueRequest(libcamera::Request* request);
+  void requestComplete(libcamera::Request* request);
+  void processRequest(libcamera::Request* request);
+  void sinkRelease(libcamera::Request* request);
 
-	const OptionsParser::Options &options_;
-	std::shared_ptr<libcamera::Camera> camera_;
-	std::unique_ptr<libcamera::CameraConfiguration> config_;
+  const OptionsParser::Options& options_;
+  std::shared_ptr<libcamera::Camera> camera_;
+  std::unique_ptr<libcamera::CameraConfiguration> config_;
 
-	std::map<const libcamera::Stream *, std::string> streamNames_;
-	std::unique_ptr<KMSSink> sink_;
-	unsigned int cameraIndex_;
+  std::map<const libcamera::Stream*, std::string> streamNames_;
+  std::unique_ptr<KMSSink> sink_;
+  unsigned int cameraIndex_;
 
-	uint64_t last_;
+  uint64_t last_;
 
-	unsigned int queueCount_;
-	unsigned int captureCount_;
-	unsigned int captureLimit_;
-	bool printMetadata_;
+  unsigned int queueCount_;
+  unsigned int captureCount_;
+  unsigned int captureLimit_;
+  bool printMetadata_;
 
-	std::unique_ptr<libcamera::FrameBufferAllocator> allocator_;
-	std::vector<std::unique_ptr<libcamera::Request>> requests_;
+  std::unique_ptr<libcamera::FrameBufferAllocator> allocator_;
+  std::vector<std::unique_ptr<libcamera::Request>> requests_;
 };

@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <memory>
 #include <stdint.h>
+#include <memory>
 #include <vector>
 
 #include <libcamera/base/class.h>
@@ -17,32 +17,32 @@
 
 #include <libcamera/framebuffer.h>
 
-class Image
-{
-public:
-	enum class MapMode {
-		ReadOnly = 1 << 0,
-		WriteOnly = 1 << 1,
-		ReadWrite = ReadOnly | WriteOnly,
-	};
+class Image {
+ public:
+  enum class MapMode {
+    ReadOnly = 1 << 0,
+    WriteOnly = 1 << 1,
+    ReadWrite = ReadOnly | WriteOnly,
+  };
 
-	static std::unique_ptr<Image> fromFrameBuffer(const libcamera::FrameBuffer *buffer,
-						      MapMode mode);
+  static std::unique_ptr<Image> fromFrameBuffer(
+      const libcamera::FrameBuffer* buffer,
+      MapMode mode);
 
-	~Image();
+  ~Image();
 
-	unsigned int numPlanes() const;
+  unsigned int numPlanes() const;
 
-	libcamera::Span<uint8_t> data(unsigned int plane);
-	libcamera::Span<const uint8_t> data(unsigned int plane) const;
+  libcamera::Span<uint8_t> data(unsigned int plane);
+  libcamera::Span<const uint8_t> data(unsigned int plane) const;
 
-private:
-	LIBCAMERA_DISABLE_COPY(Image)
+ private:
+  LIBCAMERA_DISABLE_COPY(Image)
 
-	Image();
+  Image();
 
-	std::vector<libcamera::Span<uint8_t>> maps_;
-	std::vector<libcamera::Span<uint8_t>> planes_;
+  std::vector<libcamera::Span<uint8_t>> maps_;
+  std::vector<libcamera::Span<uint8_t>> planes_;
 };
 
 namespace libcamera {
