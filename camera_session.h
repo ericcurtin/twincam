@@ -23,7 +23,7 @@
 
 #include "options.h"
 
-class FrameSink;
+class KMSSink;
 
 class CameraSession
 {
@@ -61,7 +61,7 @@ private:
 	std::unique_ptr<libcamera::CameraConfiguration> config_;
 
 	std::map<const libcamera::Stream *, std::string> streamNames_;
-	std::unique_ptr<FrameSink> sink_;
+	std::unique_ptr<KMSSink> sink_;
 	unsigned int cameraIndex_;
 
 	uint64_t last_;

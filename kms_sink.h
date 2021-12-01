@@ -16,24 +16,25 @@
 #include <libcamera/base/signal.h>
 
 #include <libcamera/geometry.h>
+#include <libcamera/camera.h>
 #include <libcamera/pixel_format.h>
 
 #include "drm.h"
-#include "frame_sink.h"
 
-class KMSSink : public FrameSink
+class KMSSink
 {
 public:
 	KMSSink(const std::string &connectorName);
 
-	void mapBuffer(libcamera::FrameBuffer *buffer) override;
+	void mapBuffer(libcamera::FrameBuffer *buffer);
 
-	int configure(const libcamera::CameraConfiguration &config) override;
-	int start() override;
-	int stop() override;
+	int configure(const libcamera::CameraConfiguration &config);
+	int start();
+	int stop();
 
-	bool processRequest(libcamera::Request *request) override;
+	bool processRequest(libcamera::Request *request);
 
+        libcamera::Signal<libcamera::Request *> requestProcessed;
 private:
 	class Request
 	{
