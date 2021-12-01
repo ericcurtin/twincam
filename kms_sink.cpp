@@ -166,10 +166,6 @@ int KMSSink::configurePipeline(const libcamera::PixelFormat &format)
 	 */
 	for (const DRM::Encoder *encoder : connector_->encoders()) {
 		for (const DRM::Crtc *crtc : encoder->possibleCrtcs()) {
-			if (!crtc->clock()) {
-				continue;
-			}
-
 			for (const DRM::Plane *plane : crtc->planes()) {
 				if (plane->type() != DRM::Plane::TypePrimary)
 					continue;
@@ -178,18 +174,21 @@ int KMSSink::configurePipeline(const libcamera::PixelFormat &format)
 					crtc_ = crtc;
 					plane_ = plane;
 					format_ = format;
-					break;
+					goto break_all;
 				}
 
 				if (plane->supportsFormat(xFormat)) {
 					crtc_ = crtc;
 					plane_ = plane;
 					format_ = xFormat;
-					break;
+					goto break_all;
 				}
 			}
 		}
 	}
+
+// hack to fix
+break_all:
 
 	if (!crtc_) {
 		std::cerr
