@@ -18,8 +18,6 @@ twincam_sources = files([
     'event_loop.cpp',
     'image.cpp',
     'main.cpp',
-    'options.cpp',
-    'stream_options.cpp',
     'drm.cpp',
     'kms_sink.cpp'
 ])

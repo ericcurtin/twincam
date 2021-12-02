@@ -21,16 +21,13 @@
 #include <libcamera/request.h>
 #include <libcamera/stream.h>
 
-#include "options.h"
-
 class KMSSink;
 
 class CameraSession {
  public:
   CameraSession(libcamera::CameraManager* cm,
                 const std::string& cameraId,
-                unsigned int cameraIndex,
-                const OptionsParser::Options& options);
+                unsigned int cameraIndex);
   ~CameraSession();
 
   bool isValid() const { return config_ != nullptr; }
@@ -68,7 +65,6 @@ class CameraSession {
 
   unsigned int queueCount_;
   unsigned int captureCount_;
-  unsigned int captureLimit_;
   bool printMetadata_;
 
   std::unique_ptr<libcamera::FrameBufferAllocator> allocator_;

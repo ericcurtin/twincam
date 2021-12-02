@@ -17,20 +17,16 @@
 #include "event_loop.h"
 #include "kms_sink.h"
 #include "main.h"
-#include "stream_options.h"
 
 using namespace libcamera;
 
 CameraSession::CameraSession(CameraManager* cm,
                              const std::string& cameraId,
-                             unsigned int cameraIndex,
-                             const OptionsParser::Options& options)
-    : options_(options),
-      cameraIndex_(cameraIndex),
+                             unsigned int cameraIndex)
+    : cameraIndex_(cameraIndex),
       last_(0),
       queueCount_(0),
       captureCount_(0),
-      captureLimit_(0),
       printMetadata_(false) {
   char* endptr;
   unsigned long index = strtoul(cameraId.c_str(), &endptr, 10);
@@ -149,7 +145,6 @@ int CameraSession::start() {
 
   queueCount_ = 0;
   captureCount_ = 0;
-  captureLimit_ = options_[OptCapture].toInteger();
   printMetadata_ = options_.isSet(OptMetadata);
 
   ret = camera_->configure(config_.get());
@@ -277,10 +272,6 @@ int CameraSession::startCapture() {
     }
   }
 
-  if (captureLimit_)
-    std::cout << "cam" << cameraIndex_ << ": Capture " << captureLimit_
-              << " frames" << std::endl;
-  else
     std::cout << "cam" << cameraIndex_
               << ": Capture until user interrupts by SIGINT" << std::endl;
 
@@ -288,9 +279,6 @@ int CameraSession::startCapture() {
 }
 
 int CameraSession::queueRequest(Request* request) {
-  if (captureLimit_ && queueCount_ >= captureLimit_)
-    return 0;
-
   queueCount_++;
 
   return camera_->queueRequest(request);
@@ -308,16 +296,6 @@ void CameraSession::requestComplete(Request* request) {
 }
 
 void CameraSession::processRequest(Request* request) {
-  /*
-   * If we've reached the capture limit, we're done. This doesn't
-   * duplicate the check below that emits the captureDone signal, as this
-   * function will be called for each request still in flight after the
-   * capture limit is reached and we don't want to emit the signal every
-   * single time.
-   */
-  if (captureLimit_ && captureCount_ >= captureLimit_)
-    return;
-
   const Request::BufferMap& buffers = request->buffers();
 
   /*
@@ -374,10 +352,6 @@ void CameraSession::processRequest(Request* request) {
    * reached.
    */
   captureCount_++;
-  if (captureLimit_ && captureCount_ >= captureLimit_) {
-    captureDone.emit();
-    return;
-  }
 
   /*
    * If the frame sink holds on the request, we'll requeue it later in the
