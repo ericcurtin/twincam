@@ -12,7 +12,6 @@
 #include <string.h>
 #include <algorithm>
 #include <array>
-#include <iostream>
 #include <memory>
 
 #include <libcamera/camera.h>
@@ -21,6 +20,7 @@
 #include <libcamera/stream.h>
 
 #include "drm.h"
+#include "main.h"
 
 KMSSink::KMSSink(const std::string& connectorName)
     : connector_(nullptr), crtc_(nullptr), plane_(nullptr), mode_(nullptr) {
@@ -53,9 +53,9 @@ KMSSink::KMSSink(const std::string& connectorName)
 
   if (!connector_) {
     if (!connectorName.empty())
-      std::cerr << "Connector " << connectorName << " not found" << std::endl;
+      eprintf("Connector %s not found\n", connectorName.c_str());
     else
-      std::cerr << "No connected connector found" << std::endl;
+      eprintf("No connected connector found\n");
     return;
   }
 
@@ -113,7 +113,7 @@ int KMSSink::configure(const libcamera::CameraConfiguration& config) {
                mode.vdisplay == cfg.size.height;
       });
   if (iter == modes.end()) {
-    std::cerr << "No mode matching " << cfg.size.toString() << std::endl;
+    eprintf("No mode matching %s\n", cfg.size.toString().c_str());
     return -EINVAL;
   }
 
@@ -182,15 +182,14 @@ int KMSSink::configurePipeline(const libcamera::PixelFormat& format) {
 break_all:
 
   if (!crtc_) {
-    std::cerr << "Unable to find display pipeline for format "
-              << format.toString() << std::endl;
+    eprintf("Unable to find display pipeline for format %s\n",
+            format.toString().c_str());
 
     return -EPIPE;
   }
 
-  std::cout << "Using KMS plane " << plane_->id() << ", CRTC " << crtc_->id()
-            << ", connector " << connector_->name() << " (" << connector_->id()
-            << ")" << std::endl;
+  printf("Using KMS plane %d, CRTC %d, connector %s (%d)\n", plane_->id(),
+         crtc_->id(), connector_->name().c_str(), connector_->id());
 
   return 0;
 }
@@ -211,8 +210,7 @@ int KMSSink::start() {
 
   int ret = request->commit(DRM::AtomicRequest::FlagAllowModeset);
   if (ret < 0) {
-    std::cerr << "Failed to disable CRTCs and planes: " << strerror(-ret)
-              << std::endl;
+    eprintf("Failed to disable CRTCs and planes: %s\n", strerror(-ret));
     return ret;
   }
 
@@ -231,8 +229,7 @@ int KMSSink::stop() {
 
   int ret = request.commit(DRM::AtomicRequest::FlagAllowModeset);
   if (ret < 0) {
-    std::cerr << "Failed to stop display pipeline: " << strerror(-ret)
-              << std::endl;
+    eprintf("Failed to stop display pipeline: %s\n", strerror(-ret));
     return ret;
   }
 
@@ -291,9 +288,7 @@ bool KMSSink::processRequest(libcamera::Request* camRequest) {
   if (!queued_) {
     int ret = drmRequest->commit(flags);
     if (ret < 0) {
-      std::cerr << "Failed to commit atomic request: " << strerror(-ret)
-                << std::endl;
-      /* \todo Implement error handling */
+      eprintf("Failed to commit atomic request: %s\n", strerror(-ret));
     }
 
     queued_ = std::move(pending_);

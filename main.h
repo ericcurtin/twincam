@@ -22,4 +22,7 @@ enum {
   OptMetadata = 258,
 };
 
-#define eprintf(...) do fprintf(stderr, __VA_ARGS__); while (0)
+#define eprintf(...)              \
+  do                              \
+    fprintf(stderr, __VA_ARGS__); \
+  while (0)

@@ -7,7 +7,6 @@
 
 #include <limits.h>
 #include <iomanip>
-#include <iostream>
 #include <sstream>
 
 #include <libcamera/control_ids.h>
@@ -23,10 +22,7 @@ using namespace libcamera;
 CameraSession::CameraSession(CameraManager* cm,
                              const std::string& cameraId,
                              unsigned int cameraIndex)
-    : cameraIndex_(cameraIndex),
-      last_(0),
-      queueCount_(0),
-      captureCount_(0) {
+    : cameraIndex_(cameraIndex), last_(0), queueCount_(0), captureCount_(0) {
   char* endptr;
   unsigned long index = strtoul(cameraId.c_str(), &endptr, 10);
   if (*endptr == '\0' && index > 0 && index <= cm->cameras().size())
@@ -35,19 +31,19 @@ CameraSession::CameraSession(CameraManager* cm,
     camera_ = cm->get(cameraId);
 
   if (!camera_) {
-      eprintf("Camera %s not found\n", cameraId.c_str());
+    eprintf("Camera %s not found\n", cameraId.c_str());
     return;
   }
 
   if (camera_->acquire()) {
-      eprintf("Failed to acquire camera %s\n", cameraId.c_str());
+    eprintf("Failed to acquire camera %s\n", cameraId.c_str());
     return;
   }
 
   std::unique_ptr<CameraConfiguration> config =
       camera_->generateConfiguration();
   if (!config || config->size() != 1) {
-    std::cerr << "Failed to get default stream configuration" << std::endl;
+    eprintf("Failed to get default stream configuration\n");
     return;
   }
 
@@ -64,8 +60,7 @@ void CameraSession::listControls() const {
     const ControlId* id = ctrl.first;
     const ControlInfo& info = ctrl.second;
 
-    std::cout << "Control: " << id->name() << ": " << info.toString()
-              << std::endl;
+    printf("Control: %s: %s\n", id->name().c_str(), info.toString().c_str());
   }
 }
 
@@ -74,23 +69,22 @@ void CameraSession::listProperties() const {
     const ControlId* id = properties::properties.at(prop.first);
     const ControlValue& value = prop.second;
 
-    std::cout << "Property: " << id->name() << " = " << value.toString()
-              << std::endl;
+    printf("Property: %s = %s\n", id->name().c_str(), value.toString().c_str());
   }
 }
 
 void CameraSession::infoConfiguration() const {
   unsigned int index = 0;
   for (const StreamConfiguration& cfg : *config_) {
-    std::cout << index << ": " << cfg.toString() << std::endl;
+    printf("%d: %s\n", index, cfg.toString().c_str());
 
     const StreamFormats& formats = cfg.formats();
     for (PixelFormat pixelformat : formats.pixelformats()) {
-      std::cout << " * Pixelformat: " << pixelformat.toString() << " "
-                << formats.range(pixelformat).toString() << std::endl;
+      printf(" * Pixelformat: %s %s\n", pixelformat.toString().c_str(),
+             formats.range(pixelformat).toString().c_str());
 
       for (const Size& size : formats.sizes(pixelformat))
-        std::cout << "  - " << size.toString() << std::endl;
+        printf("  - %s\n", size.toString().c_str());
     }
 
     index++;
@@ -105,7 +99,7 @@ int CameraSession::start() {
 
   ret = camera_->configure(config_.get());
   if (ret < 0) {
-    std::cout << "Failed to configure camera" << std::endl;
+    printf("Failed to configure camera\n");
     return ret;
   }
 
@@ -117,12 +111,12 @@ int CameraSession::start() {
   }
 
   camera_->requestCompleted.connect(this, &CameraSession::requestComplete);
-    sink_ = std::make_unique<KMSSink>("");
+  sink_ = std::make_unique<KMSSink>("");
 
   if (sink_) {
     ret = sink_->configure(*config_);
     if (ret < 0) {
-      std::cout << "Failed to configure frame sink" << std::endl;
+      printf("Failed to configure frame sink\n");
       return ret;
     }
 
@@ -137,12 +131,12 @@ int CameraSession::start() {
 void CameraSession::stop() {
   int ret = camera_->stop();
   if (ret)
-    std::cout << "Failed to stop capture" << std::endl;
+    printf("Failed to stop capture\n");
 
   if (sink_) {
     ret = sink_->stop();
     if (ret)
-      std::cout << "Failed to stop frame sink" << std::endl;
+      printf("Failed to stop frame sink\n");
   }
 
   sink_.reset();
@@ -160,7 +154,7 @@ int CameraSession::startCapture() {
   for (StreamConfiguration& cfg : *config_) {
     ret = allocator_->allocate(cfg.stream());
     if (ret < 0) {
-      std::cerr << "Can't allocate buffers" << std::endl;
+      eprintf("Can't allocate buffers\n");
       return -ENOMEM;
     }
 
@@ -176,7 +170,7 @@ int CameraSession::startCapture() {
   for (unsigned int i = 0; i < nbuffers; i++) {
     std::unique_ptr<Request> request = camera_->createRequest();
     if (!request) {
-      std::cerr << "Can't create request" << std::endl;
+      eprintf("Can't create request\n");
       return -ENOMEM;
     }
 
@@ -188,7 +182,7 @@ int CameraSession::startCapture() {
 
       ret = request->addBuffer(stream, buffer.get());
       if (ret < 0) {
-        std::cerr << "Can't set buffer for request" << std::endl;
+        eprintf("Can't set buffer for request\n");
         return ret;
       }
 
@@ -202,14 +196,14 @@ int CameraSession::startCapture() {
   if (sink_) {
     ret = sink_->start();
     if (ret) {
-      std::cout << "Failed to start frame sink" << std::endl;
+      printf("Failed to start frame sink\n");
       return ret;
     }
   }
 
   ret = camera_->start();
   if (ret) {
-    std::cout << "Failed to start capture" << std::endl;
+    printf("Failed to start capture\n");
     if (sink_)
       sink_->stop();
     return ret;
@@ -218,7 +212,7 @@ int CameraSession::startCapture() {
   for (std::unique_ptr<Request>& request : requests_) {
     ret = queueRequest(request.get());
     if (ret < 0) {
-      std::cerr << "Can't queue request" << std::endl;
+      eprintf("Can't queue request\n");
       camera_->stop();
       if (sink_)
         sink_->stop();
@@ -226,8 +220,7 @@ int CameraSession::startCapture() {
     }
   }
 
-    std::cout << "cam" << cameraIndex_
-              << ": Capture until user interrupts by SIGINT" << std::endl;
+  printf("cam%d: Capture until user interrupts by SIGINT\n", cameraIndex_);
 
   return 0;
 }
@@ -290,7 +283,7 @@ void CameraSession::processRequest(Request* request) {
       requeue = false;
   }
 
-  std::cout << info.str() << std::endl;
+  puts(info.str().c_str());
 
 #if 0
   if (printMetadata_) {

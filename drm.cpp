@@ -14,7 +14,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <algorithm>
-#include <iostream>
 #include <set>
 
 #include <libcamera/framebuffer.h>
@@ -24,6 +23,7 @@
 #include <libdrm/drm_mode.h>
 
 #include "event_loop.h"
+#include "main.h"
 
 namespace DRM {
 
@@ -167,8 +167,7 @@ Connector::Connector(Device* dev, const drmModeConnector* connector)
       type_(connector->connector_type) {
   auto typeName = connectorTypeNames.find(connector->connector_type);
   if (typeName == connectorTypeNames.end()) {
-    std::cerr << "Invalid connector type " << connector->connector_type
-              << std::endl;
+    eprintf("Invalid connector type %d\n", connector->connector_type);
     typeName = connectorTypeNames.find(DRM_MODE_CONNECTOR_Unknown);
   }
 
@@ -200,7 +199,7 @@ Connector::Connector(Device* dev, const drmModeConnector* connector)
         std::find_if(encoders.begin(), encoders.end(),
                      [=](const Encoder& e) { return e.id() == encoderId; });
     if (encoder == encoders.end()) {
-      std::cerr << "Encoder " << encoderId << " not found" << std::endl;
+      eprintf("Encoder %d not found\n", encoderId);
       continue;
     }
 
@@ -274,8 +273,7 @@ FrameBuffer::~FrameBuffer() {
 
     if (ret == -1) {
       ret = -errno;
-      std::cerr << "Failed to close GEM object: " << strerror(-ret)
-                << std::endl;
+      eprintf("Failed to close GEM object: %s\n", strerror(-ret));
     }
   }
 
@@ -377,8 +375,7 @@ int Device::init() {
   fd_ = open(name, O_RDWR | O_CLOEXEC);
   if (fd_ < 0) {
     ret = -errno;
-    std::cerr << "Failed to open DRM/KMS device " << name << ": "
-              << strerror(-ret) << std::endl;
+    eprintf("Failed to open DRM/KMS device %s: %s\n", name, strerror(-ret));
     return ret;
   }
 
@@ -389,8 +386,7 @@ int Device::init() {
   ret = drmSetClientCap(fd_, DRM_CLIENT_CAP_ATOMIC, 1);
   if (ret < 0) {
     ret = -errno;
-    std::cerr << "Failed to enable atomic capability: " << strerror(-ret)
-              << std::endl;
+    eprintf("Failed to enable atomic capability: %s\n", strerror(-ret));
     return ret;
   }
 
@@ -412,8 +408,7 @@ int Device::getResources() {
       drmModeGetResources(fd_), &drmModeFreeResources};
   if (!resources) {
     ret = -errno;
-    std::cerr << "Failed to get DRM/KMS resources: " << strerror(-ret)
-              << std::endl;
+    eprintf("Failed to get DRM/KMS resources: %s\n", strerror(-ret));
     return ret;
   }
 
@@ -421,7 +416,7 @@ int Device::getResources() {
     drmModeCrtc* crtc = drmModeGetCrtc(fd_, resources->crtcs[i]);
     if (!crtc) {
       ret = -errno;
-      std::cerr << "Failed to get CRTC: " << strerror(-ret) << std::endl;
+      eprintf("Failed to get CRTC: %s\n", strerror(-ret));
       return ret;
     }
 
@@ -436,7 +431,7 @@ int Device::getResources() {
     drmModeEncoder* encoder = drmModeGetEncoder(fd_, resources->encoders[i]);
     if (!encoder) {
       ret = -errno;
-      std::cerr << "Failed to get encoder: " << strerror(-ret) << std::endl;
+      eprintf("Failed to get encoder: %s\n", strerror(-ret));
       return ret;
     }
 
@@ -452,7 +447,7 @@ int Device::getResources() {
         drmModeGetConnector(fd_, resources->connectors[i]);
     if (!connector) {
       ret = -errno;
-      std::cerr << "Failed to get connector: " << strerror(-ret) << std::endl;
+      eprintf("Failed to get connector: %s\n", strerror(-ret));
       return ret;
     }
 
@@ -467,8 +462,7 @@ int Device::getResources() {
       drmModeGetPlaneResources(fd_), &drmModeFreePlaneResources};
   if (!planes) {
     ret = -errno;
-    std::cerr << "Failed to get DRM/KMS planes: " << strerror(-ret)
-              << std::endl;
+    eprintf("Failed to get DRM/KMS planes: %s\n", strerror(-ret));
     return ret;
   }
 
@@ -476,7 +470,7 @@ int Device::getResources() {
     drmModePlane* plane = drmModeGetPlane(fd_, planes->planes[i]);
     if (!plane) {
       ret = -errno;
-      std::cerr << "Failed to get plane: " << strerror(-ret) << std::endl;
+      eprintf("Failed to get plane: %s\n", strerror(-ret));
       return ret;
     }
 
@@ -506,7 +500,7 @@ int Device::getResources() {
     drmModePropertyRes* property = drmModeGetProperty(fd_, id);
     if (!property) {
       ret = -errno;
-      std::cerr << "Failed to get property: " << strerror(-ret) << std::endl;
+      eprintf("Failed to get property: %s\n", strerror(-ret));
       continue;
     }
 
@@ -521,8 +515,8 @@ int Device::getResources() {
   for (auto& object : objects_) {
     ret = object.second->setup();
     if (ret < 0) {
-      std::cerr << "Failed to setup object " << object.second->id() << ": "
-                << strerror(-ret) << std::endl;
+      eprintf("Failed to setup object %d: %s\n", object.second->id(),
+              strerror(-ret));
       return ret;
     }
   }
@@ -561,8 +555,7 @@ std::unique_ptr<FrameBuffer> Device::createFrameBuffer(
       ret = drmPrimeFDToHandle(fd_, plane.fd.fd(), &handle);
       if (ret < 0) {
         ret = -errno;
-        std::cerr << "Unable to import framebuffer dmabuf: " << strerror(-ret)
-                  << std::endl;
+        eprintf("Unable to import framebuffer dmabuf: %s\n", strerror(-ret));
         return nullptr;
       }
 
@@ -580,7 +573,7 @@ std::unique_ptr<FrameBuffer> Device::createFrameBuffer(
                       strides.data(), offsets, &fb->id_, 0);
   if (ret < 0) {
     ret = -errno;
-    std::cerr << "Failed to add framebuffer: " << strerror(-ret) << std::endl;
+    eprintf("Failed to add framebuffer: %s\n", strerror(-ret));
     return nullptr;
   }
 

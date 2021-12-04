@@ -6,11 +6,11 @@
  */
 
 #include "event_loop.h"
+#include "main.h"
 
 #include <assert.h>
 #include <event2/event.h>
 #include <event2/thread.h>
-#include <iostream>
 
 EventLoop* EventLoop::instance_ = nullptr;
 
@@ -64,13 +64,13 @@ void EventLoop::addEvent(int fd,
   event->event_ =
       event_new(base_, fd, events, &EventLoop::Event::dispatch, event.get());
   if (!event->event_) {
-    std::cerr << "Failed to create event for fd " << fd << std::endl;
+    eprintf("Failed to create event for fd %d\n", fd);
     return;
   }
 
   int ret = event_add(event->event_, nullptr);
   if (ret < 0) {
-    std::cerr << "Failed to add event for fd " << fd << std::endl;
+    eprintf("Failed to add event for fd %d\n", fd);
     return;
   }
 

@@ -9,7 +9,6 @@
 #include <string.h>
 #include <atomic>
 #include <iomanip>
-#include <iostream>
 
 #include <libcamera/libcamera.h>
 #include <libcamera/property_ids.h>
@@ -63,8 +62,7 @@ int CamApp::init() {
 
   int ret = cm_->start();
   if (ret) {
-    std::cout << "Failed to start camera manager: " << strerror(-ret)
-              << std::endl;
+    printf("Failed to start camera manager: %s\n", strerror(-ret));
     return ret;
   }
 
@@ -89,11 +87,11 @@ void CamApp::quit() {
 }
 
 void CamApp::cameraAdded(std::shared_ptr<Camera> cam) {
-  std::cout << "Camera Added: " << cam->id() << std::endl;
+  printf("Camera Added: %s\n", cam->id().c_str());
 }
 
 void CamApp::cameraRemoved(std::shared_ptr<Camera> cam) {
-  std::cout << "Camera Removed: " << cam->id() << std::endl;
+  printf("Camera Removed: %s\n", cam->id().c_str());
 }
 
 void CamApp::captureDone() {
@@ -102,24 +100,27 @@ void CamApp::captureDone() {
 }
 
 int CamApp::run(int argc, char** argv) {
-    for (int opt; (opt = getopt(argc, argv, "lch")) != -1; ) {
-     switch (opt) {
-     case 'l': break;
-     case 'c':     printf("Available cameras:\n");
-         for (size_t i = 0; i < cm_->cameras().size(); ++i) {
-           printf("%ld: %s\n", i, cameraName(cm_->cameras()[i].get()).c_str());
-         }
+  for (int opt; (opt = getopt(argc, argv, "lch")) != -1;) {
+    switch (opt) {
+      case 'l':
+        break;
+      case 'c':
+        printf("Available cameras:\n");
+        for (size_t i = 0; i < cm_->cameras().size(); ++i) {
+          printf("%ld: %s\n", i, cameraName(cm_->cameras()[i].get()).c_str());
+        }
 
-         break;
-     case 'h':
-     default:
-         printf(    "Usage: twincam [OPTIONS]\n\n"
-                  "Options:\n"
-                  "  -l, --list-displays         List displays\n"
-                  "  -c, --list-cameras          List cameras\n"
-                  "  -h, --help                  Print this help\n");
-     }
-}
+        break;
+      case 'h':
+      default:
+        printf(
+            "Usage: twincam [OPTIONS]\n\n"
+            "Options:\n"
+            "  -l, --list-displays         List displays\n"
+            "  -c, --list-cameras          List cameras\n"
+            "  -h, --help                  Print this help\n");
+    }
+  }
 #if 0
   /* 2. Create the camera sessions. */
   std::vector<std::unique_ptr<CameraSession>> sessions;
@@ -237,7 +238,7 @@ std::string CamApp::cameraName(const Camera* camera) {
 }
 
 void signalHandler([[maybe_unused]] int signal) {
-  std::cout << "Exiting" << std::endl;
+  printf("Exiting\n");
   CamApp::instance()->quit();
 }
 
