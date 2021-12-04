@@ -26,23 +26,21 @@ class CamApp {
 
   static CamApp* instance();
 
-  int init(int argc, char** argv);
+  int init();
   void cleanup();
 
-  int exec();
+  int exec(int argc, char** argv);
   void quit();
 
  private:
   void cameraAdded(std::shared_ptr<Camera> cam);
   void cameraRemoved(std::shared_ptr<Camera> cam);
   void captureDone();
-  int parseOptions(int argc, char* argv[]);
-  int run();
+  int run(int argc, char** argv);
 
   static std::string cameraName(const Camera* camera);
 
   static CamApp* app_;
-  OptionsParser::Options options_;
 
   std::unique_ptr<CameraManager> cm_;
 
@@ -60,16 +58,10 @@ CamApp* CamApp::instance() {
   return CamApp::app_;
 }
 
-int CamApp::init(int argc, char** argv) {
-  int ret;
-
-  ret = parseOptions(argc, argv);
-  if (ret < 0)
-    return ret;
-
+int CamApp::init() {
   cm_ = std::make_unique<CameraManager>();
 
-  ret = cm_->start();
+  int ret = cm_->start();
   if (ret) {
     std::cout << "Failed to start camera manager: " << strerror(-ret)
               << std::endl;
@@ -83,10 +75,10 @@ void CamApp::cleanup() {
   cm_->stop();
 }
 
-int CamApp::exec() {
+int CamApp::exec(int argc, char** argv) {
   int ret;
 
-  ret = run();
+  ret = run(argc, argv);
   cleanup();
 
   return ret;
@@ -94,54 +86,6 @@ int CamApp::exec() {
 
 void CamApp::quit() {
   loop_.exit();
-}
-
-int CamApp::parseOptions(int argc, char* argv[]) {
-  StreamKeyValueParser streamKeyValue;
-
-  OptionsParser parser;
-  parser.addOption(OptCamera, OptionString,
-                   "Specify which camera to operate on, by id or by index",
-                   "camera", ArgumentRequired, "camera", true);
-  parser.addOption(OptHelp, OptionNone, "Display this help message", "help");
-  parser.addOption(OptInfo, OptionNone, "Display information about stream(s)",
-                   "info");
-  parser.addOption(OptList, OptionNone, "List all cameras", "list");
-  parser.addOption(OptListControls, OptionNone, "List cameras controls",
-                   "list-controls");
-  parser.addOption(OptListProperties, OptionNone, "List cameras properties",
-                   "list-properties");
-  parser.addOption(OptMonitor, OptionNone,
-                   "Monitor for hotplug and unplug camera events", "monitor");
-
-  /* Sub-options of OptCamera: */
-  parser.addOption(
-      OptCapture, OptionInteger,
-      "Capture until interrupted by user or until <count> frames captured",
-      "capture", ArgumentOptional, "count", false, OptCamera);
-  parser.addOption(OptDisplay, OptionString,
-                   "Display viewfinder through DRM/KMS on specified connector",
-                   "display", ArgumentOptional, "connector", false, OptCamera);
-  parser.addOption(OptStream, &streamKeyValue,
-                   "Set configuration of a camera stream", "stream", true,
-                   OptCamera);
-  parser.addOption(OptStrictFormats, OptionNone,
-                   "Do not allow requested stream format(s) to be adjusted",
-                   "strict-formats", ArgumentNone, nullptr, false, OptCamera);
-  parser.addOption(OptMetadata, OptionNone,
-                   "Print the metadata for completed requests", "metadata",
-                   ArgumentNone, nullptr, false, OptCamera);
-
-  options_ = parser.parse(argc, argv);
-  if (!options_.valid())
-    return -EINVAL;
-
-  if (options_.empty() || options_.isSet(OptHelp)) {
-    parser.usage();
-    return options_.empty() ? -EINVAL : -EINTR;
-  }
-
-  return 0;
 }
 
 void CamApp::cameraAdded(std::shared_ptr<Camera> cam) {
@@ -157,20 +101,26 @@ void CamApp::captureDone() {
     EventLoop::instance()->exit(0);
 }
 
-int CamApp::run() {
-  int ret;
+int CamApp::run(int argc, char** argv) {
+    for (int opt; (opt = getopt(argc, argv, "lch")) != -1; ) {
+     switch (opt) {
+     case 'l': break;
+     case 'c':     printf("Available cameras:\n");
+         for (size_t i = 0; i < cm_->cameras().size(); ++i) {
+           printf("%ld: %s\n", i, cameraName(cm_->cameras()[i].get()).c_str());
+         }
 
-  /* 1. List all cameras. */
-  if (options_.isSet(OptList)) {
-    std::cout << "Available cameras:" << std::endl;
-
-    unsigned int index = 1;
-    for (const std::shared_ptr<Camera>& cam : cm_->cameras()) {
-      std::cout << index << ": " << cameraName(cam.get()) << std::endl;
-      index++;
-    }
-  }
-
+         break;
+     case 'h':
+     default:
+         printf(    "Usage: twincam [OPTIONS]\n\n"
+                  "Options:\n"
+                  "  -l, --list-displays         List displays\n"
+                  "  -c, --list-cameras          List cameras\n"
+                  "  -h, --help                  Print this help\n");
+     }
+}
+#if 0
   /* 2. Create the camera sessions. */
   std::vector<std::unique_ptr<CameraSession>> sessions;
 
@@ -243,6 +193,7 @@ int CamApp::run() {
 
     session->stop();
   }
+#endif
 
   return 0;
 }
@@ -292,9 +243,7 @@ void signalHandler([[maybe_unused]] int signal) {
 
 int main(int argc, char** argv) {
   CamApp app;
-  int ret;
-
-  ret = app.init(argc, argv);
+  int ret = app.init();
   if (ret)
     return ret == -EINTR ? 0 : EXIT_FAILURE;
 
@@ -302,7 +251,7 @@ int main(int argc, char** argv) {
   sa.sa_handler = &signalHandler;
   sigaction(SIGINT, &sa, nullptr);
 
-  if (app.exec())
+  if (app.exec(argc, argv))
     return EXIT_FAILURE;
 
   return 0;

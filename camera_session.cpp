@@ -26,8 +26,7 @@ CameraSession::CameraSession(CameraManager* cm,
     : cameraIndex_(cameraIndex),
       last_(0),
       queueCount_(0),
-      captureCount_(0),
-      printMetadata_(false) {
+      captureCount_(0) {
   char* endptr;
   unsigned long index = strtoul(cameraId.c_str(), &endptr, 10);
   if (*endptr == '\0' && index > 0 && index <= cm->cameras().size())
@@ -36,62 +35,20 @@ CameraSession::CameraSession(CameraManager* cm,
     camera_ = cm->get(cameraId);
 
   if (!camera_) {
-    std::cerr << "Camera " << cameraId << " not found" << std::endl;
+      eprintf("Camera %s not found\n", cameraId.c_str());
     return;
   }
 
   if (camera_->acquire()) {
-    std::cerr << "Failed to acquire camera " << cameraId << std::endl;
+      eprintf("Failed to acquire camera %s\n", cameraId.c_str());
     return;
   }
-
-  StreamRoles roles = StreamKeyValueParser::roles(options_[OptStream]);
 
   std::unique_ptr<CameraConfiguration> config =
-      camera_->generateConfiguration(roles);
-  if (!config || config->size() != roles.size()) {
+      camera_->generateConfiguration();
+  if (!config || config->size() != 1) {
     std::cerr << "Failed to get default stream configuration" << std::endl;
     return;
-  }
-
-  /* Apply configuration if explicitly requested. */
-  if (StreamKeyValueParser::updateConfiguration(config.get(),
-                                                options_[OptStream])) {
-    std::cerr << "Failed to update configuration" << std::endl;
-    return;
-  }
-
-  bool strictFormats = options_.isSet(OptStrictFormats);
-
-  if (options_.isSet(OptDisplay)) {
-    if (roles.size() != 1) {
-      std::cerr << "Display doesn't support multiple streams" << std::endl;
-      return;
-    }
-
-    if (roles[0] != StreamRole::Viewfinder) {
-      std::cerr << "Display requires a viewfinder stream" << std::endl;
-      return;
-    }
-  }
-
-  switch (config->validate()) {
-    case CameraConfiguration::Valid:
-      break;
-
-    case CameraConfiguration::Adjusted:
-      if (strictFormats) {
-        std::cout << "Adjusting camera configuration disallowed by "
-                     "--strict-formats argument"
-                  << std::endl;
-        return;
-      }
-      std::cout << "Camera configuration adjusted" << std::endl;
-      break;
-
-    case CameraConfiguration::Invalid:
-      std::cout << "Camera configuration invalid" << std::endl;
-      return;
   }
 
   config_ = std::move(config);
@@ -145,7 +102,6 @@ int CameraSession::start() {
 
   queueCount_ = 0;
   captureCount_ = 0;
-  printMetadata_ = options_.isSet(OptMetadata);
 
   ret = camera_->configure(config_.get());
   if (ret < 0) {
@@ -161,9 +117,7 @@ int CameraSession::start() {
   }
 
   camera_->requestCompleted.connect(this, &CameraSession::requestComplete);
-
-  if (options_.isSet(OptDisplay))
-    sink_ = std::make_unique<KMSSink>(options_[OptDisplay].toString());
+    sink_ = std::make_unique<KMSSink>("");
 
   if (sink_) {
     ret = sink_->configure(*config_);
@@ -338,6 +292,7 @@ void CameraSession::processRequest(Request* request) {
 
   std::cout << info.str() << std::endl;
 
+#if 0
   if (printMetadata_) {
     const ControlList& requestMetadata = request->metadata();
     for (const auto& ctrl : requestMetadata) {
@@ -346,6 +301,7 @@ void CameraSession::processRequest(Request* request) {
                 << std::endl;
     }
   }
+#endif
 
   /*
    * Notify the user that capture is complete if the limit has just been

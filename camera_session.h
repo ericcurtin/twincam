@@ -31,7 +31,6 @@ class CameraSession {
   ~CameraSession();
 
   bool isValid() const { return config_ != nullptr; }
-  const OptionsParser::Options& options() { return options_; }
 
   libcamera::Camera* camera() { return camera_.get(); }
   libcamera::CameraConfiguration* config() { return config_.get(); }
@@ -53,7 +52,6 @@ class CameraSession {
   void processRequest(libcamera::Request* request);
   void sinkRelease(libcamera::Request* request);
 
-  const OptionsParser::Options& options_;
   std::shared_ptr<libcamera::Camera> camera_;
   std::unique_ptr<libcamera::CameraConfiguration> config_;
 
@@ -65,7 +63,6 @@ class CameraSession {
 
   unsigned int queueCount_;
   unsigned int captureCount_;
-  bool printMetadata_;
 
   std::unique_ptr<libcamera::FrameBufferAllocator> allocator_;
   std::vector<std::unique_ptr<libcamera::Request>> requests_;
