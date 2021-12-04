@@ -43,13 +43,12 @@ class CamApp {
 
   std::unique_ptr<CameraManager> cm_;
 
-  std::atomic_uint loopUsers_;
   EventLoop loop_;
 };
 
 CamApp* CamApp::app_ = nullptr;
 
-CamApp::CamApp() : loopUsers_(0) {
+CamApp::CamApp() {
   CamApp::app_ = this;
 }
 
@@ -95,8 +94,7 @@ void CamApp::cameraRemoved(std::shared_ptr<Camera> cam) {
 }
 
 void CamApp::captureDone() {
-  if (--loopUsers_ == 0)
-    EventLoop::instance()->exit(0);
+  EventLoop::instance()->exit(0);
 }
 
 int CamApp::run(int argc, char** argv) {
@@ -158,21 +156,17 @@ int CamApp::run(int argc, char** argv) {
         session->infoConfiguration();
     }
   }
+#endif
 
-  /* 4. Start capture. */
-  for (const auto& session : sessions) {
-    if (!session->options().isSet(OptCapture))
-      continue;
+  CameraSession session(cm_.get(), "1", 0);
 
-    ret = session->start();
-    if (ret) {
-      std::cout << "Failed to start camera session" << std::endl;
-      return ret;
-    }
-
-    loopUsers_++;
+  int ret = session.start();
+  if (ret) {
+    printf("Failed to start camera session\n");
+    return ret;
   }
 
+#if 0
   /* 5. Enable hotplug monitoring. */
   if (options_.isSet(OptMonitor)) {
     std::cout << "Monitoring new hotplug and unplug events" << std::endl;
@@ -185,16 +179,11 @@ int CamApp::run(int argc, char** argv) {
   }
 
   if (loopUsers_)
-    loop_.exec();
-
-  /* 6. Stop capture. */
-  for (const auto& session : sessions) {
-    if (!session->options().isSet(OptCapture))
-      continue;
-
-    session->stop();
-  }
 #endif
+
+  loop_.exec();
+
+  session.stop();
 
   return 0;
 }
