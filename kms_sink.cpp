@@ -283,7 +283,7 @@ bool KMSSink::processRequest(libcamera::Request* camRequest) {
     drmRequest->addProperty(plane_, "CRTC_W", size_.width);
     drmRequest->addProperty(plane_, "CRTC_H", size_.height);
 
-    flags |= DRM::AtomicRequest::FlagAllowModeset;
+    // flags |= DRM::AtomicRequest::FlagAllowModeset;
   }
 
   pending_ = std::make_unique<Request>(drmRequest, camRequest);
