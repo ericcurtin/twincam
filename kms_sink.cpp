@@ -107,18 +107,6 @@ int KMSSink::configure(const libcamera::CameraConfiguration& config) {
   const libcamera::StreamConfiguration& cfg = config.at(0);
 
   const std::vector<DRM::Mode>& modes = connector_->modes();
-#if 0
-  const auto iter =
-      std::find_if(modes.begin(), modes.end(), [&](const DRM::Mode& mode) {
-        return mode.hdisplay == cfg.size.width &&
-               mode.vdisplay == cfg.size.height;
-      });
-
-  if (iter == modes.end()) {
-    eprintf("No mode matching %s\n", cfg.size.toString().c_str());
-    return -EINVAL;
-  }
-#endif
 
   int ret = configurePipeline(cfg.pixelFormat);
   if (ret < 0)
@@ -193,31 +181,6 @@ break_all:
 
   printf("Using KMS plane %d, CRTC %d, connector %s (%d)\n", plane_->id(),
          crtc_->id(), connector_->name().c_str(), connector_->id());
-
-  return 0;
-}
-
-int KMSSink::start() {
-#if 0
-  std::unique_ptr<DRM::AtomicRequest> request;
-
-  /* Disable all CRTCs and planes to start from a known valid state. */
-  request = std::make_unique<DRM::AtomicRequest>(&dev_);
-
-  for (const DRM::Crtc& crtc : dev_.crtcs())
-    request->addProperty(&crtc, "ACTIVE", 0);
-
-  for (const DRM::Plane& plane : dev_.planes()) {
-    request->addProperty(&plane, "CRTC_ID", 0);
-    request->addProperty(&plane, "FB_ID", 0);
-  }
-
-  int ret = request->commit(DRM::AtomicRequest::FlagAllowModeset);
-  if (ret < 0) {
-    eprintf("Failed to disable CRTCs and planes: %s\n", strerror(-ret));
-    return ret;
-  }
-#endif
 
   return 0;
 }

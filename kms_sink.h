@@ -28,7 +28,6 @@ class KMSSink {
   void mapBuffer(libcamera::FrameBuffer* buffer);
 
   int configure(const libcamera::CameraConfiguration& config);
-  int start();
   int stop();
 
   bool processRequest(libcamera::Request* request);

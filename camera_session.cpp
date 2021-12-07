@@ -195,14 +195,6 @@ int CameraSession::startCapture() {
     requests_.push_back(std::move(request));
   }
 
-  if (sink_) {
-    ret = sink_->start();
-    if (ret) {
-      printf("Failed to start frame sink\n");
-      return ret;
-    }
-  }
-
   ret = camera_->start();
   if (ret) {
     printf("Failed to start capture\n");
@@ -290,17 +282,6 @@ void CameraSession::processRequest(Request* request) {
   }
 
   puts(info.str().c_str());
-
-#if 0
-  if (printMetadata_) {
-    const ControlList& requestMetadata = request->metadata();
-    for (const auto& ctrl : requestMetadata) {
-      const ControlId* id = controls::controls.at(ctrl.first);
-      std::cout << "\t" << id->name() << " = " << ctrl.second.toString()
-                << std::endl;
-    }
-  }
-#endif
 
   /*
    * Notify the user that capture is complete if the limit has just been

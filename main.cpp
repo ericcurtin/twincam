@@ -119,44 +119,6 @@ int CamApp::run(int argc, char** argv) {
             "  -h, --help                  Print this help\n");
     }
   }
-#if 0
-  /* 2. Create the camera sessions. */
-  std::vector<std::unique_ptr<CameraSession>> sessions;
-
-  if (options_.isSet(OptCamera)) {
-    unsigned int index = 0;
-
-    for (const OptionValue& camera : options_[OptCamera].toArray()) {
-      std::unique_ptr<CameraSession> session = std::make_unique<CameraSession>(
-          cm_.get(), camera.toString(), index, camera.children());
-      if (!session->isValid()) {
-        std::cout << "Failed to create camera session" << std::endl;
-        return -EINVAL;
-      }
-
-      std::cout << "Using camera " << session->camera()->id() << " as cam"
-                << index << std::endl;
-
-      session->captureDone.connect(this, &CamApp::captureDone);
-
-      sessions.push_back(std::move(session));
-      index++;
-    }
-  }
-
-  /* 3. Print camera information. */
-  if (options_.isSet(OptListControls) || options_.isSet(OptListProperties) ||
-      options_.isSet(OptInfo)) {
-    for (const auto& session : sessions) {
-      if (options_.isSet(OptListControls))
-        session->listControls();
-      if (options_.isSet(OptListProperties))
-        session->listProperties();
-      if (options_.isSet(OptInfo))
-        session->infoConfiguration();
-    }
-  }
-#endif
 
   CameraSession session(cm_.get(), "1", 0);
 
@@ -165,21 +127,6 @@ int CamApp::run(int argc, char** argv) {
     printf("Failed to start camera session\n");
     return ret;
   }
-
-#if 0
-  /* 5. Enable hotplug monitoring. */
-  if (options_.isSet(OptMonitor)) {
-    std::cout << "Monitoring new hotplug and unplug events" << std::endl;
-    std::cout << "Press Ctrl-C to interrupt" << std::endl;
-
-    cm_->cameraAdded.connect(this, &CamApp::cameraAdded);
-    cm_->cameraRemoved.connect(this, &CamApp::cameraRemoved);
-
-    loopUsers_++;
-  }
-
-  if (loopUsers_)
-#endif
 
   loop_.exec();
 
