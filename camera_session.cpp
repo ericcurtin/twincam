@@ -57,42 +57,6 @@ CameraSession::~CameraSession() {
     camera_->release();
 }
 
-void CameraSession::listControls() const {
-  for (const auto& ctrl : camera_->controls()) {
-    const ControlId* id = ctrl.first;
-    const ControlInfo& info = ctrl.second;
-
-    printf("Control: %s: %s\n", id->name().c_str(), info.toString().c_str());
-  }
-}
-
-void CameraSession::listProperties() const {
-  for (const auto& prop : camera_->properties()) {
-    const ControlId* id = properties::properties.at(prop.first);
-    const ControlValue& value = prop.second;
-
-    printf("Property: %s = %s\n", id->name().c_str(), value.toString().c_str());
-  }
-}
-
-void CameraSession::infoConfiguration() const {
-  unsigned int index = 0;
-  for (const StreamConfiguration& cfg : *config_) {
-    printf("%d: %s\n", index, cfg.toString().c_str());
-
-    const StreamFormats& formats = cfg.formats();
-    for (PixelFormat pixelformat : formats.pixelformats()) {
-      printf(" * Pixelformat: %s %s\n", pixelformat.toString().c_str(),
-             formats.range(pixelformat).toString().c_str());
-
-      for (const Size& size : formats.sizes(pixelformat))
-        printf("  - %s\n", size.toString().c_str());
-    }
-
-    index++;
-  }
-}
-
 int CameraSession::start() {
   int ret;
 

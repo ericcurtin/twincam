@@ -100,23 +100,7 @@ Property::Property(Device* dev, drmModePropertyRes* property)
     enums_[property->enums[i].value] = property->enums[i].name;
 }
 
-Blob::Blob(Device* dev, const libcamera::Span<const uint8_t>& data)
-    : Object(dev, 0, Object::TypeBlob) {
-  drmModeCreatePropertyBlob(dev->fd(), data.data(), data.size(), &id_);
-}
-
-Blob::~Blob() {
-  if (isValid())
-    drmModeDestroyPropertyBlob(device()->fd(), id());
-}
-
 Mode::Mode(const drmModeModeInfo& mode) : drmModeModeInfo(mode) {}
-
-std::unique_ptr<Blob> Mode::toBlob(Device* dev) const {
-  libcamera::Span<const uint8_t> data{reinterpret_cast<const uint8_t*>(this),
-                                      sizeof(*this)};
-  return std::make_unique<Blob>(dev, data);
-}
 
 Crtc::Crtc(Device* dev, const drmModeCrtc* crtc, unsigned int index)
     : Object(dev, crtc->crtc_id, Object::TypeCrtc),
@@ -304,27 +288,6 @@ int AtomicRequest::addProperty(const Object* object,
   }
 
   return addProperty(object->id(), prop->id(), value);
-}
-
-int AtomicRequest::addProperty(const Object* object,
-                               const std::string& property,
-                               std::unique_ptr<Blob> blob) {
-  if (!valid_)
-    return -EINVAL;
-
-  const Property* prop = object->property(property);
-  if (!prop) {
-    valid_ = false;
-    return -EINVAL;
-  }
-
-  int ret = addProperty(object->id(), prop->id(), blob->id());
-  if (ret < 0)
-    return ret;
-
-  blobs_.emplace_back(std::move(blob));
-
-  return 0;
 }
 
 int AtomicRequest::addProperty(uint32_t object,

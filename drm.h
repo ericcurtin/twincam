@@ -117,19 +117,9 @@ class PropertyValue {
   uint64_t value_;
 };
 
-class Blob : public Object {
- public:
-  Blob(Device* dev, const libcamera::Span<const uint8_t>& data);
-  ~Blob();
-
-  bool isValid() const { return id() != 0; }
-};
-
 class Mode : public drmModeModeInfo {
  public:
   Mode(const drmModeModeInfo& mode);
-
-  std::unique_ptr<Blob> toBlob(Device* dev) const;
 };
 
 class Crtc : public Object {
@@ -251,9 +241,6 @@ class AtomicRequest {
   int addProperty(const Object* object,
                   const std::string& property,
                   uint64_t value);
-  int addProperty(const Object* object,
-                  const std::string& property,
-                  std::unique_ptr<Blob> blob);
   int commit(unsigned int flags = 0);
 
  private:
@@ -267,7 +254,6 @@ class AtomicRequest {
   Device* dev_;
   bool valid_;
   drmModeAtomicReq* request_;
-  std::list<std::unique_ptr<Blob>> blobs_;
 };
 
 class Device {
