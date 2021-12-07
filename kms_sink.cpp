@@ -198,6 +198,7 @@ break_all:
 }
 
 int KMSSink::start() {
+#if 0
   std::unique_ptr<DRM::AtomicRequest> request;
 
   /* Disable all CRTCs and planes to start from a known valid state. */
@@ -216,6 +217,7 @@ int KMSSink::start() {
     eprintf("Failed to disable CRTCs and planes: %s\n", strerror(-ret));
     return ret;
   }
+#endif
 
   return 0;
 }
