@@ -57,6 +57,8 @@ class KMSSink {
   libcamera::PixelFormat format_;
   libcamera::Size size_;
   unsigned int stride_;
+  unsigned int x_;  // Where to start drawing camera output
+  unsigned int y_;  // Where to start drawing camera output
 
   std::map<libcamera::FrameBuffer*, std::unique_ptr<DRM::FrameBuffer>> buffers_;
 

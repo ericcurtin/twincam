@@ -114,6 +114,8 @@ int KMSSink::configure(const libcamera::CameraConfiguration& config) {
 
   mode_ = &modes[0];
   size_ = cfg.size;
+  x_ = (mode_->hdisplay - size_.width) / 2;
+  y_ = (mode_->vdisplay - size_.height) / 2;
   stride_ = cfg.stride;
 
   return 0;
@@ -241,14 +243,8 @@ bool KMSSink::processRequest(libcamera::Request* camRequest) {
     drmRequest->addProperty(plane_, "SRC_Y", 0 << 16);
     drmRequest->addProperty(plane_, "SRC_W", size_.width << 16);
     drmRequest->addProperty(plane_, "SRC_H", size_.height << 16);
-    drmRequest->addProperty(
-        plane_, "CRTC_X",
-        (mode_->hdisplay - size_.width) /
-            2);  // This is what determines output starting pixel
-    drmRequest->addProperty(
-        plane_, "CRTC_Y",
-        (mode_->vdisplay - size_.height) /
-            2);  // This is what determines output starting pixel
+    drmRequest->addProperty(plane_, "CRTC_X", x_);
+    drmRequest->addProperty(plane_, "CRTC_Y", y_);
     drmRequest->addProperty(plane_, "CRTC_W", size_.width);
     drmRequest->addProperty(plane_, "CRTC_H", size_.height);
 
