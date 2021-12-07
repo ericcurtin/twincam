@@ -241,7 +241,11 @@ void CameraSession::requestComplete(Request* request) {
    * Defer processing of the completed request to the event loop, to avoid
    * blocking the camera manager thread.
    */
+#if __cplusplus > 201703L
   EventLoop::instance()->callLater([=, this]() { processRequest(request); });
+#else
+  EventLoop::instance()->callLater([=]() { processRequest(request); });
+#endif
 }
 
 void CameraSession::processRequest(Request* request) {

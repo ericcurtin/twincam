@@ -261,10 +261,10 @@ FrameBuffer::FrameBuffer(Device* dev) : Object(dev, 0, Object::TypeFb) {}
 
 FrameBuffer::~FrameBuffer() {
   for (const auto& plane : planes_) {
-    struct drm_gem_close gem_close = {
-        .handle = plane.second.handle,
-        .pad = 0,
-    };
+    struct drm_gem_close gem_close;
+    gem_close.handle = plane.second.handle;
+    gem_close.pad = 0;
+
     int ret;
 
     do {

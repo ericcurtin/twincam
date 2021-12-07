@@ -3,7 +3,7 @@ project('twincam', 'c', 'cpp',
     default_options : [
         'werror=true',
         'warning_level=3',
-        'cpp_std=c++20',
+        'cpp_std=c++14',
     ],
     license : 'LGPL 2.1+')
 
