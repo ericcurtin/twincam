@@ -274,12 +274,12 @@ bool KMSSink::processRequest(libcamera::Request* camRequest) {
     drmRequest->addProperty(plane_, "CRTC_ID", crtc_->id());
     drmRequest->addProperty(plane_, "SRC_X", 0 << 16);
     drmRequest->addProperty(plane_, "SRC_Y", 0 << 16);
-    drmRequest->addProperty(plane_, "SRC_W", mode_->hdisplay << 16);
-    drmRequest->addProperty(plane_, "SRC_H", mode_->vdisplay << 16);
+    drmRequest->addProperty(plane_, "SRC_W", size_.width  << 16);
+    drmRequest->addProperty(plane_, "SRC_H", size_.height << 16);
     drmRequest->addProperty(plane_, "CRTC_X", 0);
     drmRequest->addProperty(plane_, "CRTC_Y", 0);
-    drmRequest->addProperty(plane_, "CRTC_W", mode_->hdisplay);
-    drmRequest->addProperty(plane_, "CRTC_H", mode_->vdisplay);
+    drmRequest->addProperty(plane_, "CRTC_W", size_.width);
+    drmRequest->addProperty(plane_, "CRTC_H", size_.height);
 
     flags |= DRM::AtomicRequest::FlagAllowModeset;
   }
