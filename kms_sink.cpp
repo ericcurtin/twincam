@@ -271,7 +271,7 @@ bool KMSSink::processRequest(libcamera::Request* camRequest) {
     drmRequest->addProperty(connector_, "CRTC_ID", crtc_->id());
 
     // drmRequest->addProperty(crtc_, "ACTIVE", 1);
-    drmRequest->addProperty(crtc_, "MODE_ID", mode_->toBlob(&dev_));
+    // drmRequest->addProperty(crtc_, "MODE_ID", mode_->toBlob(&dev_));
 
     drmRequest->addProperty(plane_, "CRTC_ID", crtc_->id());
     drmRequest->addProperty(plane_, "SRC_X", 0 << 16);
