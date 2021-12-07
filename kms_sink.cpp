@@ -107,21 +107,24 @@ int KMSSink::configure(const libcamera::CameraConfiguration& config) {
   const libcamera::StreamConfiguration& cfg = config.at(0);
 
   const std::vector<DRM::Mode>& modes = connector_->modes();
+#if 0
   const auto iter =
       std::find_if(modes.begin(), modes.end(), [&](const DRM::Mode& mode) {
         return mode.hdisplay == cfg.size.width &&
                mode.vdisplay == cfg.size.height;
       });
+
   if (iter == modes.end()) {
     eprintf("No mode matching %s\n", cfg.size.toString().c_str());
     return -EINVAL;
   }
+#endif
 
   int ret = configurePipeline(cfg.pixelFormat);
   if (ret < 0)
     return ret;
 
-  mode_ = &*iter;
+  mode_ = &modes[0];
   size_ = cfg.size;
   stride_ = cfg.stride;
 
