@@ -6,7 +6,7 @@
  */
 
 #include "event_loop.h"
-#include "main.h"
+#include "twincam.h"
 
 #include <assert.h>
 #include <event2/event.h>

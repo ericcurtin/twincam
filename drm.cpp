@@ -23,7 +23,7 @@
 #include <libdrm/drm_mode.h>
 
 #include "event_loop.h"
-#include "main.h"
+#include "twincam.h"
 
 namespace DRM {
 

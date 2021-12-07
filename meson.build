@@ -17,7 +17,7 @@ twincam_sources = files([
     'camera_session.cpp',
     'event_loop.cpp',
     'image.cpp',
-    'main.cpp',
+    'twincam.cpp',
     'drm.cpp',
     'kms_sink.cpp'
 ])

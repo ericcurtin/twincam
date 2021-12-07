@@ -6,7 +6,7 @@
  */
 
 #include "image.h"
-#include "main.h"
+#include "twincam.h"
 
 #include <assert.h>
 #include <errno.h>

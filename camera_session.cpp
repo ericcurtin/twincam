@@ -15,7 +15,7 @@
 #include "camera_session.h"
 #include "event_loop.h"
 #include "kms_sink.h"
-#include "main.h"
+#include "twincam.h"
 
 using namespace libcamera;
 
@@ -229,10 +229,10 @@ void CameraSession::requestComplete(Request* request) {
   if (request->status() == Request::RequestCancelled)
     return;
 
-  /*
-   * Defer processing of the completed request to the event loop, to avoid
-   * blocking the camera manager thread.
-   */
+    /*
+     * Defer processing of the completed request to the event loop, to avoid
+     * blocking the camera manager thread.
+     */
 #if __cplusplus > 201703L
   EventLoop::instance()->callLater([=, this]() { processRequest(request); });
 #else

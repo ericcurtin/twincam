@@ -20,7 +20,7 @@
 #include <libcamera/stream.h>
 
 #include "drm.h"
-#include "main.h"
+#include "twincam.h"
 
 KMSSink::KMSSink(const std::string& connectorName)
     : connector_(nullptr), crtc_(nullptr), plane_(nullptr), mode_(nullptr) {
@@ -239,10 +239,16 @@ bool KMSSink::processRequest(libcamera::Request* camRequest) {
     // drmRequest->addProperty(plane_, "CRTC_ID", crtc_->id());
     drmRequest->addProperty(plane_, "SRC_X", 0 << 16);
     drmRequest->addProperty(plane_, "SRC_Y", 0 << 16);
-    drmRequest->addProperty(plane_, "SRC_W", size_.width  << 16);
+    drmRequest->addProperty(plane_, "SRC_W", size_.width << 16);
     drmRequest->addProperty(plane_, "SRC_H", size_.height << 16);
-    drmRequest->addProperty(plane_, "CRTC_X", (mode_->hdisplay - size_.width) / 2); // This is what determines output starting pixel
-    drmRequest->addProperty(plane_, "CRTC_Y", (mode_->vdisplay - size_.height) / 2); // This is what determines output starting pixel
+    drmRequest->addProperty(
+        plane_, "CRTC_X",
+        (mode_->hdisplay - size_.width) /
+            2);  // This is what determines output starting pixel
+    drmRequest->addProperty(
+        plane_, "CRTC_Y",
+        (mode_->vdisplay - size_.height) /
+            2);  // This is what determines output starting pixel
     drmRequest->addProperty(plane_, "CRTC_W", size_.width);
     drmRequest->addProperty(plane_, "CRTC_H", size_.height);
 
