@@ -276,8 +276,8 @@ bool KMSSink::processRequest(libcamera::Request* camRequest) {
     drmRequest->addProperty(plane_, "SRC_Y", 0 << 16);
     drmRequest->addProperty(plane_, "SRC_W", size_.width  << 16);
     drmRequest->addProperty(plane_, "SRC_H", size_.height << 16);
-    drmRequest->addProperty(plane_, "CRTC_X", 0);
-    drmRequest->addProperty(plane_, "CRTC_Y", 0);
+    drmRequest->addProperty(plane_, "CRTC_X", mode_->hdisplay - size_.width); // This is what determines output starting pixel
+    drmRequest->addProperty(plane_, "CRTC_Y", 0); // This is what determines output starting pixel
     drmRequest->addProperty(plane_, "CRTC_W", size_.width);
     drmRequest->addProperty(plane_, "CRTC_H", size_.height);
 
