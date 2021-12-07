@@ -85,18 +85,6 @@ void CamApp::quit() {
   loop_.exit();
 }
 
-void CamApp::cameraAdded(std::shared_ptr<Camera> cam) {
-  printf("Camera Added: %s\n", cam->id().c_str());
-}
-
-void CamApp::cameraRemoved(std::shared_ptr<Camera> cam) {
-  printf("Camera Removed: %s\n", cam->id().c_str());
-}
-
-void CamApp::captureDone() {
-  EventLoop::instance()->exit(0);
-}
-
 int CamApp::run(int argc, char** argv) {
   for (int opt; (opt = getopt(argc, argv, "lch")) != -1;) {
     switch (opt) {
