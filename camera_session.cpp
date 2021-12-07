@@ -47,6 +47,8 @@ CameraSession::CameraSession(CameraManager* cm,
     return;
   }
 
+  config->at(0).pixelFormat = PixelFormat::fromString("YUYV");
+
   config_ = std::move(config);
 }
 
