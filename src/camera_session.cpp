@@ -7,7 +7,6 @@
 
 #include <limits.h>
 #include <iomanip>
-#include <sstream>
 
 #include <libcamera/control_ids.h>
 #include <libcamera/property_ids.h>
@@ -218,25 +217,20 @@ void CameraSession::processRequest(Request* request) {
 
   bool requeue = true;
 
-  std::stringstream info;
-  info << ts / 1000000000 << "." << std::setw(6) << std::setfill('0')
-       << ts / 1000 % 1000000 << " (" << std::fixed << std::setprecision(2)
-       << fps << " fps)";
-
+  printf("%.6f (%.2f fps)", ts / 1000000000.0, fps);
   for (auto it = buffers.begin(); it != buffers.end(); ++it) {
     const Stream* stream = it->first;
     FrameBuffer* buffer = it->second;
 
     const FrameMetadata& metadata = buffer->metadata();
 
-    info << " " << streamNames_[stream] << " seq: " << std::setw(6)
-         << std::setfill('0') << metadata.sequence << " bytesused: ";
-
+    printf(" %s seq: %d bytesused: ", streamNames_[stream].c_str(),
+           metadata.sequence);
     unsigned int nplane = 0;
     for (const FrameMetadata::Plane& plane : metadata.planes()) {
-      info << plane.bytesused;
+      printf("%d", plane.bytesused);
       if (++nplane < metadata.planes().size())
-        info << "/";
+        printf("/");
     }
   }
 
@@ -245,7 +239,7 @@ void CameraSession::processRequest(Request* request) {
       requeue = false;
   }
 
-  puts(info.str().c_str());
+  puts("");
 
   /*
    * Notify the user that capture is complete if the limit has just been
