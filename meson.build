@@ -14,11 +14,11 @@ libdrm = dependency('libdrm')
 incdir = include_directories('/usr/include/libcamera')
 
 twincam_sources = files([
-    'camera_session.cpp',
-    'event_loop.cpp',
-    'twincam.cpp',
-    'drm.cpp',
-    'kms_sink.cpp'
+    'src/camera_session.cpp',
+    'src/event_loop.cpp',
+    'src/twincam.cpp',
+    'src/drm.cpp',
+    'src/kms_sink.cpp'
 ])
 
 twincam  = executable('twincam', twincam_sources, include_directories : incdir,
