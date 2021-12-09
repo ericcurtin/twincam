@@ -18,7 +18,8 @@ twincam_sources = files([
     'src/event_loop.cpp',
     'src/twincam.cpp',
     'src/drm.cpp',
-    'src/kms_sink.cpp'
+    'src/kms_sink.cpp',
+    'src/image.cpp'
 ])
 
 twincam  = executable('twincam', twincam_sources, include_directories : incdir,

@@ -123,6 +123,17 @@ int CameraSession::startCapture() {
       return -ENOMEM;
     }
 
+    for (const std::unique_ptr<FrameBuffer> &buffer : allocator_->buffers(cfg.stream())) {
+        /* Map memory buffers and cache the mappings. */
+        std::unique_ptr<Image> image =
+            Image::fromFrameBuffer(buffer.get(), Image::MapMode::ReadOnly);
+        if (!image) {
+            eprintf("Can't allocate image buffers\n");
+        }
+
+        mappedBuffers_[buffer.get()] = std::move(image);
+    }
+
     unsigned int allocated = allocator_->buffers(cfg.stream()).size();
     nbuffers = std::min(nbuffers, allocated);
   }

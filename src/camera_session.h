@@ -21,6 +21,8 @@
 #include <libcamera/request.h>
 #include <libcamera/stream.h>
 
+#include "image.h"
+
 class KMSSink;
 
 class CameraSession {
@@ -66,4 +68,5 @@ class CameraSession {
 
   std::unique_ptr<libcamera::FrameBufferAllocator> allocator_;
   std::vector<std::unique_ptr<libcamera::Request>> requests_;
+  std::map<libcamera::FrameBuffer *, std::unique_ptr<Image>> mappedBuffers_;
 };
