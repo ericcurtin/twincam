@@ -18,17 +18,12 @@
 
 using namespace libcamera;
 
-CameraSession::CameraSession(CameraManager* cm,
-                             const std::string& cameraId,
-                             unsigned int cameraIndex)
-    : cameraIndex_(cameraIndex), last_(0), queueCount_(0), captureCount_(0) {
-  char* endptr;
-  unsigned long index = strtoul(cameraId.c_str(), &endptr, 10);
-  if (*endptr == '\0' && index > 0 && index <= cm->cameras().size())
-    camera_ = cm->cameras()[index - 1];
-  else
-    camera_ = cm->get(cameraId);
-}
+CameraSession::CameraSession(CameraManager* cm)
+    : camera_(cm->cameras()[0]),
+      cameraIndex_(0),
+      last_(0),
+      queueCount_(0),
+      captureCount_(0) {}
 
 CameraSession::~CameraSession() {
   if (camera_)

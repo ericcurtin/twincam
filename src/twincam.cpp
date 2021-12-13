@@ -88,8 +88,6 @@ void CamApp::quit() {
 int CamApp::run(int argc, char** argv) {
   for (int opt; (opt = getopt(argc, argv, "lch")) != -1;) {
     switch (opt) {
-      case 'l':
-        break;
       case 'c':
         printf("Available cameras:\n");
         for (size_t i = 0; i < cm_->cameras().size(); ++i) {
@@ -102,14 +100,13 @@ int CamApp::run(int argc, char** argv) {
         printf(
             "Usage: twincam [OPTIONS]\n\n"
             "Options:\n"
-            "  -l, --list-displays         List displays\n"
             "  -c, --list-cameras          List cameras\n"
             "  -h, --help                  Print this help\n");
     }
   }
 
-  CameraSession session(cm_.get(), "1", 0);
-  int ret = session.init();
+  CameraSession session(cm_.get());
+  int ret = session.start();
   if (ret) {
     printf("Failed to init camera session\n");
     return ret;

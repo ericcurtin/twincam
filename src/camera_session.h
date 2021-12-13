@@ -27,9 +27,7 @@ class KMSSink;
 
 class CameraSession {
  public:
-  CameraSession(libcamera::CameraManager* cm,
-                const std::string& cameraId,
-                unsigned int cameraIndex);
+  CameraSession(libcamera::CameraManager* cm);
   ~CameraSession();
 
   int init();
