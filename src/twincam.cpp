@@ -107,7 +107,7 @@ int CamApp::run(int argc, char** argv) {
 
   if (cm_->cameras().empty()) {
     printf("No cameras available\n");
-    return -EINTR;
+    return 0;
   }
 
   CameraSession session(cm_.get());
