@@ -6,13 +6,13 @@
  */
 
 #include "image.h"
+#include "twincam.h"
 
 #include <assert.h>
 #include <errno.h>
 #include <string.h>
 #include <sys/mman.h>
 #include <unistd.h>
-#include <iostream>
 #include <map>
 
 using namespace libcamera;
@@ -48,11 +48,13 @@ std::unique_ptr<Image> Image::fromFrameBuffer(const FrameBuffer* buffer,
     const size_t length = mappedBuffers[fd].dmabufLength;
 
     if (plane.offset > length || plane.offset + plane.length > length) {
-      std::cerr << "plane is out of buffer: buffer length=" << length
-                << ", plane offset=" << plane.offset
-                << ", plane length=" << plane.length << std::endl;
+      eprintf(
+          "plane is out of buffer: buffer length=%ld, plane offset=%d, plane "
+          "length=%d\n",
+          length, plane.offset, plane.length);
       return nullptr;
     }
+
     size_t& mapLength = mappedBuffers[fd].mapLength;
     mapLength =
         std::max(mapLength, static_cast<size_t>(plane.offset + plane.length));
@@ -66,7 +68,7 @@ std::unique_ptr<Image> Image::fromFrameBuffer(const FrameBuffer* buffer,
           mmap(nullptr, info.mapLength, mmapFlags, MAP_SHARED, fd, 0);
       if (address == MAP_FAILED) {
         int error = -errno;
-        std::cerr << "Failed to mmap plane: " << strerror(-error) << std::endl;
+        eprintf("Failed to mmap plane: %s\n", strerror(-error));
         return nullptr;
       }
 
