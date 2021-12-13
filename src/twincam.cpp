@@ -111,7 +111,7 @@ int CamApp::run(int argc, char** argv) {
   }
 
   CameraSession session(cm_.get());
-  int ret = session.start();
+  int ret = session.init();
   if (ret) {
     printf("Failed to init camera session\n");
     return ret;
