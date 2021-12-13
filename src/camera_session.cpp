@@ -28,32 +28,36 @@ CameraSession::CameraSession(CameraManager* cm,
     camera_ = cm->cameras()[index - 1];
   else
     camera_ = cm->get(cameraId);
+}
 
+CameraSession::~CameraSession() {
+  if (camera_)
+    camera_->release();
+}
+
+int CameraSession::init() {
   if (!camera_) {
-    eprintf("Camera %s not found\n", cameraId.c_str());
-    return;
+    eprintf("Camera not found\n");
+    return 1;
   }
 
   if (camera_->acquire()) {
-    eprintf("Failed to acquire camera %s\n", cameraId.c_str());
-    return;
+    eprintf("Failed to acquire camera\n");
+    return 0;
   }
 
   std::unique_ptr<CameraConfiguration> config =
       camera_->generateConfiguration({libcamera::Viewfinder});
   if (!config || config->size() != 1) {
     eprintf("Failed to get default stream configuration\n");
-    return;
+    return 0;
   }
 
   config->at(0).pixelFormat = PixelFormat::fromString("YUYV");
 
   config_ = std::move(config);
-}
 
-CameraSession::~CameraSession() {
-  if (camera_)
-    camera_->release();
+  return 0;
 }
 
 int CameraSession::start() {

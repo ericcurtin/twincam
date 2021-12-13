@@ -32,6 +32,7 @@ class CameraSession {
                 unsigned int cameraIndex);
   ~CameraSession();
 
+  int init();
   bool isValid() const { return config_ != nullptr; }
 
   libcamera::Camera* camera() { return camera_.get(); }
