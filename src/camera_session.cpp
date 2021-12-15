@@ -13,6 +13,7 @@
 
 #include "camera_session.h"
 #include "event_loop.h"
+
 #include "kms_sink.h"
 #include "twincam.h"
 
@@ -122,16 +123,19 @@ int CameraSession::startCapture() {
       return -ENOMEM;
     }
 
-    for (const std::unique_ptr<FrameBuffer> &buffer : allocator_->buffers(cfg.stream())) {
-        /* Map memory buffers and cache the mappings. */
-        std::unique_ptr<Image> image =
-            Image::fromFrameBuffer(buffer.get(), Image::MapMode::ReadOnly);
-        if (!image) {
-            eprintf("Can't allocate image buffers\n");
-        }
+#if 0  // not priority right now, for MJPG mainly
+    for (const std::unique_ptr<FrameBuffer>& buffer :
+         allocator_->buffers(cfg.stream())) {
+      /* Map memory buffers and cache the mappings. */
+      std::unique_ptr<Image> image =
+          Image::fromFrameBuffer(buffer.get(), Image::MapMode::ReadOnly);
+      if (!image) {
+        eprintf("Can't allocate image buffers\n");
+      }
 
-        mappedBuffers_[buffer.get()] = std::move(image);
+      mappedBuffers_[buffer.get()] = std::move(image);
     }
+#endif
 
     unsigned int allocated = allocator_->buffers(cfg.stream()).size();
     nbuffers = std::min(nbuffers, allocated);
@@ -242,6 +246,11 @@ void CameraSession::processRequest(Request* request) {
       if (++nplane < metadata.planes().size())
         printf("/");
     }
+
+#if 0  // not priority right now, for MJPG mainly
+    Image* image = mappedBuffers_[buffer].get();
+    converter_.convert(image, size, &image_);
+#endif
   }
 
   if (sink_) {

@@ -21,7 +21,9 @@
 #include <libcamera/request.h>
 #include <libcamera/stream.h>
 
+#if 0  // not priority right now, for MJPG mainly
 #include "image.h"
+#endif
 
 class KMSSink;
 
@@ -65,7 +67,13 @@ class CameraSession {
   unsigned int queueCount_;
   unsigned int captureCount_;
 
+#if 0  // not priority right now, for MJPG mainly
+  FormatConverter converter_;
+#endif
+
   std::unique_ptr<libcamera::FrameBufferAllocator> allocator_;
   std::vector<std::unique_ptr<libcamera::Request>> requests_;
-  std::map<libcamera::FrameBuffer *, std::unique_ptr<Image>> mappedBuffers_;
+#if 0  // not priority right now, for MJPG mainly
+  std::map<libcamera::FrameBuffer*, std::unique_ptr<Image>> mappedBuffers_;
+#endif
 };
