@@ -4,8 +4,7 @@ project('twincam', 'c', 'cpp',
         'werror=true',
         'warning_level=3',
         'cpp_std=c++17'
-    ],
-    license : 'LGPL 2.1+')
+    ])
 
 libcamera = dependency('libcamera')
 libevent = dependency('libevent_pthreads')
