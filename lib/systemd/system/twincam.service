@@ -1,0 +1,17 @@
+[Unit]
+Description=Show twincam
+DefaultDependencies=no
+Wants=systemd-ask-password-plymouth.path systemd-vconsole-setup.service
+After=systemd-vconsole-setup.service systemd-udev-trigger.service systemd-udevd.service
+Before=systemd-ask-password-plymouth.service
+ConditionKernelCommandLine=!plymouth.enable=0
+ConditionVirtualization=!container
+IgnoreOnIsolate=true
+
+[Service]
+ExecStart=/usr/bin/twincam
+Type=simple
+RemainAfterExit=yes
+KillMode=mixed
+SendSIGKILL=no
+
