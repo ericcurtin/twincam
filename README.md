@@ -19,7 +19,7 @@ cd twincam
 meson build --prefix=/usr && ninja -v -C build && sudo ninja -v -C build install
 ```
 
-Then switch to a tty without a DE running via Ctrl+Alt+F? (whichever key does not have DE running F1, F2, F3, etc.) and run:
+Then switch to a tty without a DE running via Ctrl+Alt+F? (whichever tty does not have DE running F1, F2, F3, etc.) and run:
 
 ```
 twincam
