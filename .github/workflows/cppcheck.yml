@@ -1,0 +1,21 @@
+name: cpp_check
+on: [push, pull_request]
+jobs:
+  cpp-check:
+    name: Run static analysis
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Git and cppcheck env
+        run: |
+          sudo apt install -y git
+          sudo apt install -y gcc
+          sudo apt install -y make
+          sudo apt install -y autoconf
+          sudo apt install -y automake
+          sudo apt install -y cppcheck
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run cpp-check
+        run: |
+          /bin/bash ./tests/cpp_check.sh
+      - run: echo "Job's status is ${{ job.status }}."
