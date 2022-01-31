@@ -1,5 +1,5 @@
 name: cpp_check
-on: [push]
+on: [push, pull_request]
 jobs:
   cpp-check:
     name: Run static analysis
@@ -16,5 +16,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Run cpp-check
-        run: ./tests/cpp_check.sh
+        run: |
+          ./tests/cpp_check.sh
       - run: echo "Job's status is ${{ job.status }}."
