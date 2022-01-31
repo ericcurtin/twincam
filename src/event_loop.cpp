@@ -59,7 +59,7 @@ void EventLoop::addEvent(int fd,
                          const std::function<void()>& callback) {
   std::unique_ptr<Event> event = std::make_unique<Event>(callback);
   short events =
-      (type & Read ? EV_READ : 0) | (type & Write ? EV_WRITE : 0) | EV_PERSIST;
+      ((type & Read) ? EV_READ : 0) | ((type & Write) ? EV_WRITE : 0) | EV_PERSIST;
 
   event->event_ =
       event_new(base_, fd, events, &EventLoop::Event::dispatch, event.get());
