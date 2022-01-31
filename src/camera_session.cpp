@@ -191,7 +191,7 @@ int CameraSession::startCapture() {
     }
   }
 
-  printf("cam%d: Capture until user interrupts by SIGINT\n", cameraIndex_);
+  printf("cam%u: Capture until user interrupts by SIGINT\n", cameraIndex_);
 
   return 0;
 }

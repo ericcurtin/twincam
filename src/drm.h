@@ -211,10 +211,6 @@ class Plane : public Object {
 
 class FrameBuffer : public Object {
  public:
-  struct Plane {
-    uint32_t handle;
-  };
-
   ~FrameBuffer();
 
  private:

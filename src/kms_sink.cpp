@@ -181,7 +181,7 @@ break_all:
     return -EPIPE;
   }
 
-  printf("Using KMS plane %d, CRTC %d, connector %s (%d)\n", plane_->id(),
+  printf("Using KMS plane %u, CRTC %u, connector %s (%u)\n", plane_->id(),
          crtc_->id(), connector_->name().c_str(), connector_->id());
 
   return 0;

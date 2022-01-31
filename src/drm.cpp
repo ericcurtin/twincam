@@ -183,7 +183,7 @@ Connector::Connector(Device* dev, const drmModeConnector* connector)
         std::find_if(encoders.begin(), encoders.end(),
                      [=](const Encoder& e) { return e.id() == encoderId; });
     if (encoder == encoders.end()) {
-      eprintf("Encoder %d not found\n", encoderId);
+      eprintf("Encoder %u not found\n", encoderId);
       continue;
     }
 
@@ -334,7 +334,7 @@ int Device::init() {
    * from drmOpen() is of no practical use as any modern system will
    * handle that through udev or an equivalent component.
    */
-  snprintf(name, sizeof(name), "/dev/dri/card%u", 0);
+  snprintf(name, sizeof(name), "/dev/dri/card%d", 0);
   fd_ = open(name, O_RDWR | O_CLOEXEC);
   if (fd_ < 0) {
     ret = -errno;
