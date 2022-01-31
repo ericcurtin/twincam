@@ -3,11 +3,11 @@
 set -e
 
 if [ -n "$CI" ] ; then
-  apt install -y gcc
-  apt install -y make
-  apt install -y autoconf
-  apt install -y automake
-  apt install -y cppcheck
+  sudo apt install -y gcc
+  sudo apt install -y make
+  sudo apt install -y autoconf
+  sudo apt install -y automake
+  sudo apt install -y cppcheck
 fi
  
 if command -v cppcheck > /dev/null; then
