@@ -17,5 +17,5 @@ if command -v cppcheck > /dev/null; then
   supp="$supp --suppress=unknownMacro"
   arg="-q --force $u --enable=all $inc $supp --error-exitcode=1"
   cppcheck="xargs cppcheck $arg"
-  find . -name  "*.h" -o -name "*.cpp"| $cppcheck  --language=c++ 2>&1
+  find . -name "*.cpp"| $cppcheck  --language=c++ 2>&1
 fi
