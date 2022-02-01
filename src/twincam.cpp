@@ -9,6 +9,7 @@
 #include <string.h>
 #include <atomic>
 #include <iomanip>
+#include <unistd.h>
 
 #include <libcamera/libcamera.h>
 #include <libcamera/property_ids.h>
