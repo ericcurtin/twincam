@@ -91,7 +91,7 @@ int CamApp::run(int argc, char** argv) {
       case 'c':
         printf("Available cameras:\n");
         for (size_t i = 0; i < cm_->cameras().size(); ++i) {
-          printf("%zu: %s\n", (unsigned long)i, cameraName(cm_->cameras()[i].get()).c_str());
+          printf("%zu: %s\n", i, cameraName(cm_->cameras()[i].get()).c_str());
         }
 
         break;
