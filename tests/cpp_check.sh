@@ -12,10 +12,10 @@ fi
  
 if command -v cppcheck > /dev/null; then
   u="$u -U __REDIRECT_NTH -U _BSD_RUNE_T_ -U _TYPE_size_t -U __LDBL_REDIR1_DECL"
-  supp="--suppress=missingInclude --suppress=noExplicitConstructor"
+  supp="--suppress=missingInclude --suppress=unusedFunction --suppress=noExplicitConstructor"
   supp="$supp --suppress=useInitializationList --suppress=uninitMemberVar"
-  supp="$supp --suppress=unknownMacro"
+  supp="$supp --suppress=unknownMacro --suppress=unusedStructMember"
   arg="-q --force $u --enable=all $inc $supp --error-exitcode=1"
   cppcheck="xargs cppcheck $arg"
-  find . -name "*.cpp"| $cppcheck  --language=c++ 2>&1
+  find . -name  "*.h" -o -name "*.cpp"| $cppcheck  --language=c++ 2>&1
 fi
