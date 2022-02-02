@@ -214,7 +214,6 @@ class FrameBuffer : public Object {
   struct Plane {
     uint32_t handle;
   };
-
   ~FrameBuffer();
 
  private:

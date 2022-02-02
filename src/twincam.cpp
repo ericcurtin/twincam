@@ -9,6 +9,7 @@
 #include <string.h>
 #include <atomic>
 #include <iomanip>
+#include <unistd.h>
 
 #include <libcamera/libcamera.h>
 #include <libcamera/property_ids.h>
@@ -91,7 +92,7 @@ int CamApp::run(int argc, char** argv) {
       case 'c':
         printf("Available cameras:\n");
         for (size_t i = 0; i < cm_->cameras().size(); ++i) {
-          printf("%ld: %s\n", i, cameraName(cm_->cameras()[i].get()).c_str());
+          printf("%zu: %s\n", i, cameraName(cm_->cameras()[i].get()).c_str());
         }
 
         break;
