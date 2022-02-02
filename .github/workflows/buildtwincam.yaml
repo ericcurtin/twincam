@@ -1,14 +1,14 @@
-name: cpp_check
+name: build_twincam 
 on: [push, pull_request]
 jobs:
-  cpp-check:
+  build_twincam:
     name: Run static analysis
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Run cpp-check
+      - name: Build twincam app and libcamera
         run: |
           export CI=true
-          /bin/bash ./tests/cpp_check.sh
+          /bin/bash ./tests/build_twincam.sh
       - run: echo "Job's status is ${{ job.status }}."
