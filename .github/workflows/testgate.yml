@@ -1,0 +1,20 @@
+name: code_gate
+on: [push, pull_request]
+jobs:
+  test-gate:
+    name: Run code analysis
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setting gate packages
+        run: |
+          export CI=true
+          /bin/bash ./tests/prepare_env.sh
+      - name: Build twincam app and libcamera 
+        run: |
+          /bin/bash ./tests/build_twincam.sh
+      - name: Run cpp-check
+        run: |
+          /bin/bash ./tests/cpp_check.sh
+      - run: echo "Job's status is ${{ job.status }}."
