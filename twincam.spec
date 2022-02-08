@@ -12,9 +12,11 @@ BuildRequires:  gcc-g++
 BuildRequires:  ninja-build
 BuildRequires:  libevent-devel
 BuildRequires:  libcamera-devel
+BuildRequires:  libdrm-devel
 
 Requires:       libevent
 Requires:       libcamera
+Requires:       libdrm
 
 %description
 A lightweight camera application
