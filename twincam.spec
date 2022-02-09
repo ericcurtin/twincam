@@ -1,6 +1,6 @@
 Name:           twincam
 Version:        0.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        A lightweight camera application
 
 License:        GPLv2
@@ -10,12 +10,12 @@ Source0:        %{url}/archive/%{version}/%{name}-%{version}.tar.gz
 BuildRequires:  meson
 BuildRequires:  gcc-g++
 BuildRequires:  ninja-build
-BuildRequires:  libevent-devel
-BuildRequires:  libcamera-devel
-BuildRequires:  libdrm-devel
+BuildRequires:  pkgconfig(libevent_pthreads)
+BuildRequires:  pkgconfig(libcamera)
+BuildRequires:  pkgconfig(libdrm)
 
 %description
-A lightweight camera application
+%{summary}.
 
 %prep
 %autosetup
@@ -39,6 +39,11 @@ exit 0
 %{_bindir}/twincam
 
 %changelog
+* Wed Feb  9 2022 Eric Curtin <ecurtin@redhat.com> - 0.2-2
+- Changes after review
+- Switch to pkgconfig names
+- Summary and description are indentical, so simplify
+
 * Wed Feb  9 2022 Eric Curtin <ecurtin@redhat.com> - 0.2-1
 - Update to new upstream release
 - Fixes for building on 32 bit platforms
