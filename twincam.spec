@@ -1,6 +1,6 @@
 Name:           twincam
 Version:        0.2
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        A lightweight camera application
 
 License:        GPLv2
@@ -30,15 +30,16 @@ BuildRequires:  pkgconfig(libdrm)
 %install
 %meson_install
 
-%pre
-exit 0
-
 %files
 %license COPYING
 %doc README.md
 %{_bindir}/twincam
 
 %changelog
+* Wed Feb  9 2022 Eric Curtin <ecurtin@redhat.com> - 0.2-3
+- Changes after review
+- Remove section that does nothing
+
 * Wed Feb  9 2022 Eric Curtin <ecurtin@redhat.com> - 0.2-2
 - Changes after review
 - Switch to pkgconfig names
