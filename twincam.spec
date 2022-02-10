@@ -1,6 +1,6 @@
 Name:           twincam
 Version:        0.2
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        A lightweight camera application
 
 License:        GPLv2
@@ -8,7 +8,7 @@ URL:            https://github.com/ericcurtin/twincam
 Source0:        %{url}/archive/%{version}/%{name}-%{version}.tar.gz
 
 BuildRequires:  meson
-BuildRequires:  gcc-g++
+BuildRequires:  gcc-c++
 BuildRequires:  ninja-build
 BuildRequires:  pkgconfig(libevent_pthreads)
 BuildRequires:  pkgconfig(libcamera)
@@ -36,6 +36,10 @@ BuildRequires:  pkgconfig(libdrm)
 %{_bindir}/twincam
 
 %changelog
+* Thu Feb 10 2022 Eric Curtin <ecurtin@redhat.com> - 0.2-4
+- Changes after review
+- Change gcc-g++ to gcc-c++
+
 * Wed Feb  9 2022 Eric Curtin <ecurtin@redhat.com> - 0.2-3
 - Changes after review
 - Remove section that does nothing
