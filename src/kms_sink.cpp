@@ -258,6 +258,12 @@ bool KMSSink::processRequest(libcamera::Request* camRequest) {
     int ret = drmRequest->commit(flags);
     if (ret < 0) {
       eprintf("Failed to commit atomic request: %s\n", strerror(-ret));
+      if (-ret == EACCES) {
+        eprintf(
+            "You need to run 'sudo fgconsole -n | xargs sudo chvt' to switch\n"
+            "out of Desktop Environment if you still have Gnome, XFCE, etc. \n"
+            "running\n");
+      }
     }
 
     queued_ = std::move(pending_);
