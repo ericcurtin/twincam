@@ -1,6 +1,6 @@
 # twincam
 
-A lightweight camera application
+A lightweight camera application, designed to start quickly in a bare environment
 
 # To build, install and run twincam
 
@@ -19,8 +19,8 @@ cd twincam
 meson build --prefix=/usr && ninja -v -C build && sudo ninja -v -C build install
 ```
 
-Then switch to a tty without a Desktop Environment running via Ctrl+Alt+F? (whichever
-tty does not have DE running F1, F2, F3, etc.) and run:
+Then switch to a tty without a Desktop Environment (Gnome, XFCE, etc.) running via
+Ctrl+Alt+F? (whichever tty does not have DE running F1, F2, F3, etc.) and run:
 
 ```
 twincam
