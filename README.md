@@ -26,3 +26,6 @@ Ctrl+Alt+F? (whichever tty does not have DE running F1, F2, F3, etc.) and run:
 twincam
 ```
 
+## Code Quality & Security scanning
+> Sonarcloud   
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=iamianmullins_twincam&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=iamianmullins_twincam)
