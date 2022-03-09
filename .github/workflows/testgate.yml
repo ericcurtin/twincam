@@ -4,6 +4,8 @@ jobs:
   test-gate:
     name: Run code analysis
     runs-on: ubuntu-20.04
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -17,4 +19,7 @@ jobs:
       - name: Run cpp-check
         run: |
           /bin/bash ./tests/cpp_check.sh
+      - name: Run sonarqube
+        run: |
+          /bin/bash ./tests/sonar.sh clean
       - run: echo "Job's status is ${{ job.status }}."
