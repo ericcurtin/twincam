@@ -28,4 +28,4 @@ twincam
 
 ## Code Quality & Security scanning
 > Sonarcloud   
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=iamianmullins_twincam&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=iamianmullins_twincam)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=ericcurtin_twincam&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=ericcurtin_twincam)
