@@ -13,18 +13,11 @@ clean() {
 
 # sonarcloud
 export SONAR_TOKEN="56af817d0e1cab1e8ba71fd26bfee5d397f845dd"
-
-projectKey= sed '1q;d' sonar-project.properties #sonar-project.properties
-projectOrg= sed '2q;d' sonar-project.properties #sonar-project.properties
-projectName= sed '5q;d' sonar-project.properties #sonar-project.properties
 mkdir -p $HOME/.sonar
 SONAR_SCANNER_VERSION="4.7.0.2747"
 SONAR_SCANNER_DOWNLOAD_URL="https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$SONAR_SCANNER_VERSION-linux.zip"
 curl -sSLo $HOME/.sonar/sonar-scanner.zip $SONAR_SCANNER_DOWNLOAD_URL
 unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
-echo $projectname >>$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux/conf/sonar-scanner.properties
-echo $projectKey >>$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux/conf/sonar-scanner.properties
-echo $projectOrg >>$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux/conf/sonar-scanner.properties
 PATH="$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux/bin:$PATH"
 SONAR_SERVER_URL="https://sonarcloud.io"
 BUILD_WRAPPER_DOWNLOAD_URL="$SONAR_SERVER_URL/static/cpp/build-wrapper-linux-x86.zip"
