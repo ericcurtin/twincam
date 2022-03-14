@@ -30,6 +30,7 @@ class CamApp {
   void cleanup() const;
 
   int exec(int argc, char** argv);
+  void mainLoop();
   void quit();
 
  private:

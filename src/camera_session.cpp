@@ -14,7 +14,6 @@
 #include "camera_session.h"
 #include "event_loop.h"
 
-#include "kms_sink.h"
 #include "twincam.h"
 
 using namespace libcamera;
@@ -72,7 +71,7 @@ int CameraSession::start() {
   }
 
   camera_->requestCompleted.connect(this, &CameraSession::requestComplete);
-  sink_ = std::make_unique<KMSSink>("");
+  sink_ = std::make_unique<SDLSink>();
 
   if (sink_) {
     ret = sink_->configure(*config_);
@@ -166,6 +165,14 @@ int CameraSession::startCapture() {
     }
 
     requests_.push_back(std::move(request));
+  }
+
+  if (sink_) {
+    ret = sink_->start();
+    if (ret) {
+      printf("Failed to start frame sink\n");
+      return ret;
+    }
   }
 
   ret = camera_->start();

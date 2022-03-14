@@ -15,19 +15,38 @@
 
 #include <libcamera/base/signal.h>
 
+#include <SDL2/SDL.h>
 #include <libcamera/camera.h>
 #include <libcamera/geometry.h>
 #include <libcamera/pixel_format.h>
 
-#include "drm.h"
+#include "image.h"
+
+class Device {
+ public:
+  Device();
+  ~Device();
+
+  int init();
+
+  int fd_;
+
+  libcamera::Signal<Image*> requestComplete;
+
+ private:
+  void drmEvent();
+  static void pageFlipComplete(int fd,
+                               unsigned int sequence,
+                               unsigned int tv_sec,
+                               unsigned int tv_usec,
+                               void* user_data);
+};
 
 class KMSSink {
  public:
-  KMSSink(const std::string& connectorName);
-
+  KMSSink(const libcamera::CameraConfiguration& config);
   void mapBuffer(libcamera::FrameBuffer* buffer);
-
-  int configure(const libcamera::CameraConfiguration& config);
+  int commit(Image* img);
   int stop();
 
   bool processRequest(libcamera::Request* request);
@@ -37,33 +56,31 @@ class KMSSink {
  private:
   class Request {
    public:
-    Request(DRM::AtomicRequest* drmRequest, libcamera::Request* camRequest)
-        : drmRequest_(drmRequest), camRequest_(camRequest) {}
+    Request(Image* imgRequest, libcamera::Request* camRequest)
+        : imgRequest_(imgRequest), camRequest_(camRequest) {}
 
-    std::unique_ptr<DRM::AtomicRequest> drmRequest_;
+    std::unique_ptr<Image> imgRequest_;
     libcamera::Request* camRequest_;
   };
 
   int configurePipeline(const libcamera::PixelFormat& format);
-  void requestComplete(DRM::AtomicRequest* const request);
+  void requestComplete(Image* request);
 
-  DRM::Device dev_;
+  Device device_;
 
-  const DRM::Connector* connector_ = nullptr;
-  const DRM::Crtc* crtc_ = nullptr;
-  const DRM::Plane* plane_ = nullptr;
-  const DRM::Mode* mode_ = nullptr;
-
+  libcamera::Signal<Image*> sigRequestComplete;
   libcamera::PixelFormat format_;
   libcamera::Size size_;
   unsigned int stride_;
-  unsigned int x_;  // Where to start drawing camera output
-  unsigned int y_;  // Where to start drawing camera output
 
-  std::map<libcamera::FrameBuffer*, std::unique_ptr<DRM::FrameBuffer>> buffers_;
+  SDL_Window* sdl_screen;
+  SDL_Renderer* sdl_renderer;
+  SDL_Texture* sdl_texture;
+  SDL_Rect sdl_rect;
 
   std::mutex lock_;
   std::unique_ptr<Request> pending_;
   std::unique_ptr<Request> queued_;
   std::unique_ptr<Request> active_;
+  std::map<libcamera::FrameBuffer*, std::unique_ptr<Image>> buffers_;
 };

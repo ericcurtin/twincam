@@ -35,11 +35,10 @@ class Image {
 
   libcamera::Span<uint8_t> data(unsigned int plane);
   libcamera::Span<const uint8_t> data(unsigned int plane) const;
+  Image();
 
  private:
   LIBCAMERA_DISABLE_COPY(Image)
-
-  Image();
 
   std::vector<libcamera::Span<uint8_t>> maps_;
   std::vector<libcamera::Span<uint8_t>> planes_;
