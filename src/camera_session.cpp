@@ -232,9 +232,9 @@ void CameraSession::processRequest(Request* request) {
   bool requeue = true;
 
   printf("%.6f (%.2f fps)", ts / 1000000000.0, fps);
-  for (auto it = buffers.begin(); it != buffers.end(); ++it) {
-    const Stream* stream = it->first;
-    const FrameBuffer* buffer = it->second;
+  for (auto& it : buffers) {
+    const Stream* stream = (it).first;
+    const FrameBuffer* buffer = (it).second;
 
     const FrameMetadata& metadata = buffer->metadata();
 
