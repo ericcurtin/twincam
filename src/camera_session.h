@@ -29,7 +29,7 @@ class KMSSink;
 
 class CameraSession {
  public:
-  CameraSession(libcamera::CameraManager* cm);
+  CameraSession(const libcamera::CameraManager* const cm);
   ~CameraSession();
 
   int init();

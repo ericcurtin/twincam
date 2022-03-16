@@ -60,7 +60,7 @@ class Object {
   const PropertyValue* propertyValue(const std::string& name) const;
   const std::vector<PropertyValue>& properties() const { return properties_; }
 
- protected:
+ private:
   virtual int setup() { return 0; }
 
   uint32_t id_;

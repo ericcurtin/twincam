@@ -153,6 +153,8 @@ std::string CamApp::cameraName(const Camera* camera) {
       case properties::CameraLocationExternal:
         name = "External camera ";
         break;
+      default:
+        break;
     }
   }
 

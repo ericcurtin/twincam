@@ -167,7 +167,6 @@ Connector::Connector(Device* dev, const drmModeConnector* connector)
       status_ = Status::Disconnected;
       break;
 
-    case DRM_MODE_UNKNOWNCONNECTION:
     default:
       status_ = Status::Unknown;
       break;
