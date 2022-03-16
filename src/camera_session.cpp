@@ -67,7 +67,7 @@ int CameraSession::start() {
     printf("Failed to configure camera\n");
     return ret;
   }
-  
+
   streamNames_.clear();
   for (unsigned int index = 0; index < config_->size(); ++index) {
     const StreamConfiguration& cfg = config_->at(index);
@@ -210,11 +210,7 @@ void CameraSession::requestComplete(Request* request) {
      * Defer processing of the completed request to the event loop, to avoid
      * blocking the camera manager thread.
      */
-#if __cplusplus > 201703L
-  EventLoop::instance()->callLater([=, this]() { processRequest(request); });
-#else
   EventLoop::instance()->callLater([request, this]() { processRequest(request); });
-#endif
 }
 
 void CameraSession::processRequest(Request* request) {
