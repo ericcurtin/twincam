@@ -225,7 +225,7 @@ bool KMSSink::processRequest(libcamera::Request* camRequest) {
   if (iter == buffers_.end())
     return true;
 
-  DRM::FrameBuffer* drmBuffer = iter->second.get();
+  const DRM::FrameBuffer* drmBuffer = iter->second.get();
 
   unsigned int flags = DRM::AtomicRequest::FlagAsync;
   DRM::AtomicRequest* drmRequest = new DRM::AtomicRequest(&dev_);
@@ -273,7 +273,7 @@ bool KMSSink::processRequest(libcamera::Request* camRequest) {
 }
 
 void KMSSink::requestComplete(DRM::AtomicRequest* request) {
-  std::lock_guard<std::mutex> lock(lock_);
+  const std::lock_guard<std::mutex> lock(lock_);
 
   assert(queued_ && queued_->drmRequest_.get() == request);
 

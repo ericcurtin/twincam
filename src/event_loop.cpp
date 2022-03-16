@@ -88,7 +88,7 @@ void EventLoop::dispatchCall() {
   std::function<void()> call;
 
   {
-    std::unique_lock<std::mutex> locker(lock_);
+    const std::unique_lock<std::mutex> locker(lock_);
     if (calls_.empty())
       return;
 

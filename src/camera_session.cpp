@@ -116,7 +116,7 @@ int CameraSession::startCapture() {
 
   /* Identify the stream with the least number of buffers. */
   unsigned int nbuffers = UINT_MAX;
-  for (StreamConfiguration& cfg : *config_) {
+  for (const StreamConfiguration& cfg : *config_) {
     ret = allocator_->allocate(cfg.stream());
     if (ret < 0) {
       eprintf("Can't allocate buffers\n");
@@ -153,7 +153,7 @@ int CameraSession::startCapture() {
       return -ENOMEM;
     }
 
-    for (StreamConfiguration& cfg : *config_) {
+    for (const StreamConfiguration& cfg : *config_) {
       Stream* stream = cfg.stream();
       const std::vector<std::unique_ptr<FrameBuffer>>& buffers =
           allocator_->buffers(stream);
@@ -180,7 +180,7 @@ int CameraSession::startCapture() {
     return ret;
   }
 
-  for (std::unique_ptr<Request>& request : requests_) {
+  for (const std::unique_ptr<Request>& request : requests_) {
     ret = queueRequest(request.get());
     if (ret < 0) {
       eprintf("Can't queue request\n");
@@ -234,7 +234,7 @@ void CameraSession::processRequest(Request* request) {
   printf("%.6f (%.2f fps)", ts / 1000000000.0, fps);
   for (auto it = buffers.begin(); it != buffers.end(); ++it) {
     const Stream* stream = it->first;
-    FrameBuffer* buffer = it->second;
+    const FrameBuffer* buffer = it->second;
 
     const FrameMetadata& metadata = buffer->metadata();
 
