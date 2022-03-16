@@ -19,7 +19,7 @@
 
 using namespace libcamera;
 
-CameraSession::CameraSession(CameraManager* cm)
+CameraSession::CameraSession(CameraManager * const cm)
     : camera_(cm->cameras()[0]),
       cameraIndex_(0),
       last_(0),
