@@ -213,7 +213,7 @@ void CameraSession::requestComplete(Request* request) {
 #if __cplusplus > 201703L
   EventLoop::instance()->callLater([=, this]() { processRequest(request); });
 #else
-  EventLoop::instance()->callLater([=]() { processRequest(request); });
+  EventLoop::instance()->callLater([request, this]() { processRequest(request); });
 #endif
 }
 
@@ -233,8 +233,8 @@ void CameraSession::processRequest(Request* request) {
 
   printf("%.6f (%.2f fps)", ts / 1000000000.0, fps);
   for (auto& it : buffers) {
-    const Stream* stream = (it).first;
-    const FrameBuffer* buffer = (it).second;
+    const Stream* stream = it.first;
+    const FrameBuffer* buffer = it.second;
 
     const FrameMetadata& metadata = buffer->metadata();
 
