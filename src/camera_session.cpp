@@ -19,7 +19,7 @@
 
 using namespace libcamera;
 
-CameraSession::CameraSession(CameraManager * const cm)
+CameraSession::CameraSession(CameraManager *const cm)
     : camera_(cm->cameras()[0]),
       cameraIndex_(0),
       last_(0),
@@ -67,10 +67,10 @@ int CameraSession::start() {
     printf("Failed to configure camera\n");
     return ret;
   }
-
+  
   streamNames_.clear();
   for (unsigned int index = 0; index < config_->size(); ++index) {
-    StreamConfiguration& cfg = config_->at(index);
+    const StreamConfiguration& cfg = config_->at(index);
     streamNames_[cfg.stream()] = "cam" + std::to_string(cameraIndex_) +
                                  "-stream" + std::to_string(index);
   }
