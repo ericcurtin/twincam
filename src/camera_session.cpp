@@ -19,7 +19,7 @@
 
 using namespace libcamera;
 
-CameraSession::CameraSession(CameraManager* cm)
+CameraSession::CameraSession(CameraManager* const cm)
     : camera_(cm->cameras()[0]),
       cameraIndex_(0),
       last_(0),
@@ -67,10 +67,10 @@ int CameraSession::start() {
     printf("Failed to configure camera\n");
     return ret;
   }
-
+  
   streamNames_.clear();
   for (unsigned int index = 0; index < config_->size(); ++index) {
-    StreamConfiguration& cfg = config_->at(index);
+    const StreamConfiguration& cfg = config_->at(index);
     streamNames_[cfg.stream()] = "cam" + std::to_string(cameraIndex_) +
                                  "-stream" + std::to_string(index);
   }
@@ -116,7 +116,7 @@ int CameraSession::startCapture() {
 
   /* Identify the stream with the least number of buffers. */
   unsigned int nbuffers = UINT_MAX;
-  for (StreamConfiguration& cfg : *config_) {
+  for (const StreamConfiguration& cfg : *config_) {
     ret = allocator_->allocate(cfg.stream());
     if (ret < 0) {
       eprintf("Can't allocate buffers\n");
@@ -153,7 +153,7 @@ int CameraSession::startCapture() {
       return -ENOMEM;
     }
 
-    for (StreamConfiguration& cfg : *config_) {
+    for (const StreamConfiguration& cfg : *config_) {
       Stream* stream = cfg.stream();
       const std::vector<std::unique_ptr<FrameBuffer>>& buffers =
           allocator_->buffers(stream);
@@ -180,7 +180,7 @@ int CameraSession::startCapture() {
     return ret;
   }
 
-  for (std::unique_ptr<Request>& request : requests_) {
+  for (const std::unique_ptr<Request>& request : requests_) {
     ret = queueRequest(request.get());
     if (ret < 0) {
       eprintf("Can't queue request\n");
@@ -213,7 +213,7 @@ void CameraSession::requestComplete(Request* request) {
 #if __cplusplus > 201703L
   EventLoop::instance()->callLater([=, this]() { processRequest(request); });
 #else
-  EventLoop::instance()->callLater([=]() { processRequest(request); });
+  EventLoop::instance()->callLater([request, this]() { processRequest(request); });
 #endif
 }
 
@@ -232,9 +232,9 @@ void CameraSession::processRequest(Request* request) {
   bool requeue = true;
 
   printf("%.6f (%.2f fps)", ts / 1000000000.0, fps);
-  for (auto it = buffers.begin(); it != buffers.end(); ++it) {
-    const Stream* stream = it->first;
-    FrameBuffer* buffer = it->second;
+  for (auto& it : buffers) {
+    const Stream* stream = it.first;
+    const FrameBuffer* buffer = it.second;
 
     const FrameMetadata& metadata = buffer->metadata();
 
