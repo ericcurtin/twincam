@@ -12,7 +12,7 @@ clean() {
 }
 
 # sonarcloud
-export SONAR_TOKEN="75577afaf581cbf052f5e927ea8562d97b5e9c19"
+export SONAR_TOKEN="44c84548eb18cdb52d0fc102d178bb5b82dcf641"
 mkdir -p $HOME/.sonar
 SONAR_SCANNER_VERSION="4.7.0.2747"
 SONAR_SCANNER_DOWNLOAD_URL="https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$SONAR_SCANNER_VERSION-linux.zip"
