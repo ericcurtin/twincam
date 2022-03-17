@@ -176,8 +176,7 @@ void signalHandler([[maybe_unused]] int signal) {
 
 int main(int argc, char** argv) {
   CamApp app;
-  int ret = app.init();
-  if (ret)
+  if (int ret = app.init(); ret)
     return ret == -EINTR ? 0 : EXIT_FAILURE;
 
   struct sigaction sa = {};
