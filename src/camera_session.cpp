@@ -228,10 +228,9 @@ void CameraSession::processRequest(Request* request) {
   bool requeue = true;
 
   printf("%.6f (%.2f fps)", ts / 1000000000.0, fps);
-  for (const std::pair<const libcamera::Stream* const, libcamera::FrameBuffer*>&
-           p : buffers) {
-    const Stream* stream = p.first;
-    const FrameBuffer* buffer = p.second;
+  for (const auto& [stream, buffer] : buffers) {
+    //    const Stream* stream = p.first;
+    //    const FrameBuffer* buffer = p.second;
 
     const FrameMetadata& metadata = buffer->metadata();
 
