@@ -141,7 +141,8 @@ int KMSSink::configurePipeline(const libcamera::PixelFormat& format) {
     case libcamera::formats::RGBA8888:
       xFormat = libcamera::formats::RGBX8888;
       break;
-    default: std::cout << "default\n"; // no error
+    default: 
+      eprintf("Format not recognised\n");
       break;
   }
 
