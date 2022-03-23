@@ -229,9 +229,6 @@ void CameraSession::processRequest(Request* request) {
 
   printf("%.6f (%.2f fps)", ts / 1000000000.0, fps);
   for (const auto& [stream, buffer] : buffers) {
-    //    const Stream* stream = p.first;
-    //    const FrameBuffer* buffer = p.second;
-
     const FrameMetadata& metadata = buffer->metadata();
 
     printf(" %s seq: %d bytesused: ", streamNames_[stream].c_str(),
