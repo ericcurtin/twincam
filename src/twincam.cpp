@@ -154,7 +154,6 @@ std::string CamApp::cameraName(const Camera* camera) {
         name = "External camera ";
         break;
       default:
-        name = "Camera location unknown"
         break;
     }
   }
