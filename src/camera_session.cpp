@@ -249,8 +249,7 @@ void CameraSession::processRequest(Request* request) {
 #endif
   }
 
-  if (sink_) {
-    if (!sink_->processRequest(request))
+  if (sink_ && !sink_->processRequest(request)) {
       requeue = false;
   }
 
