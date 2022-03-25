@@ -24,8 +24,7 @@
 
 KMSSink::KMSSink(const std::string& connectorName)
     : connector_(nullptr), crtc_(nullptr), plane_(nullptr), mode_(nullptr) {
-  int ret = dev_.init();
-  if (ret < 0)
+  if (dev_.init() < 0)
     return;
 
   /*
@@ -108,9 +107,8 @@ int KMSSink::configure(const libcamera::CameraConfiguration& config) {
 
   const std::vector<DRM::Mode>& modes = connector_->modes();
 
-  int ret = configurePipeline(cfg.pixelFormat);
-  if (ret < 0)
-    return ret;
+  if (configurePipeline(cfg.pixelFormat) < 0)
+    return configurePipeline(cfg.pixelFormat);
 
   mode_ = &modes[0];
   size_ = cfg.size;
@@ -199,8 +197,9 @@ int KMSSink::stop() {
   request.addProperty(plane_, "CRTC_ID", 0);
   request.addProperty(plane_, "FB_ID", 0);
 
-  int ret = request.commit(DRM::AtomicRequest::FlagAllowModeset);
-  if (ret < 0) {
+  
+  if (request.commit(DRM::AtomicRequest::FlagAllowModeset) < 0) {
+    int ret = request.commit(DRM::AtomicRequest::FlagAllowModeset);
     eprintf("Failed to stop display pipeline: %s\n", strerror(-ret));
     return ret;
   }

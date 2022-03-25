@@ -68,8 +68,7 @@ void EventLoop::addEvent(int fd,
     return;
   }
 
-  int ret = event_add(event->event_, nullptr);
-  if (ret < 0) {
+  if (event_add(event->event_, nullptr) < 0) {
     eprintf("Failed to add event for fd %d\n", fd);
     return;
   }
