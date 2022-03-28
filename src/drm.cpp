@@ -55,7 +55,7 @@ Object::~Object() {}
 
 const Property* Object::property(const std::string& name) const {
   for (const PropertyValue& pv : properties_) {
-    const Property* property =
+    const auto* property =
         static_cast<const Property*>(dev_->object(pv.id()));
     if (property && property->name() == name)
       return property;
@@ -66,7 +66,7 @@ const Property* Object::property(const std::string& name) const {
 
 const PropertyValue* Object::propertyValue(const std::string& name) const {
   for (const PropertyValue& pv : properties_) {
-    const Property* property =
+    const auto* property =
         static_cast<const Property*>(dev_->object(pv.id()));
     if (property && property->name() == name)
       return &pv;
@@ -555,7 +555,7 @@ void Device::pageFlipComplete([[maybe_unused]] int fd,
                               [[maybe_unused]] unsigned int tv_sec,
                               [[maybe_unused]] unsigned int tv_usec,
                               void* user_data) {
-  AtomicRequest* request = static_cast<AtomicRequest*>(user_data);
+  auto* request = static_cast<AtomicRequest*>(user_data);
   request->device()->requestComplete.emit(request);
 }
 
