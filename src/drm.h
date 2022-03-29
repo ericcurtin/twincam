@@ -56,8 +56,8 @@ class Object {
   uint32_t id() const { return id_; }
   Type type() const { return type_; }
 
-  const Property* property(const std::string& name) const;
-  const PropertyValue* propertyValue(const std::string& name) const;
+  const Property* property(const std::string_view& name) const;
+  const PropertyValue* propertyValue(const std::string_view& name) const;
   const std::vector<PropertyValue>& properties() const { return properties_; }
 
  private:

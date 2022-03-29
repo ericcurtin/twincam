@@ -53,7 +53,7 @@ Object::Object(Device* dev, uint32_t id, Type type)
 
 Object::~Object() {}
 
-const Property* Object::property(const std::string& name) const {
+const Property* Object::property(const std::string_view& name) const {
   for (const PropertyValue& pv : properties_) {
     const auto* property =
         static_cast<const Property*>(dev_->object(pv.id()));
@@ -64,7 +64,7 @@ const Property* Object::property(const std::string& name) const {
   return nullptr;
 }
 
-const PropertyValue* Object::propertyValue(const std::string& name) const {
+const PropertyValue* Object::propertyValue(const std::string_view& name) const {
   for (const PropertyValue& pv : properties_) {
     const auto* property =
         static_cast<const Property*>(dev_->object(pv.id()));
