@@ -253,7 +253,7 @@ bool KMSSink::processRequest(libcamera::Request* camRequest) {
 
   pending_ = std::make_unique<Request>(drmRequest, camRequest);
 
-  std::lock_guard<std::mutex> lock(lock_);
+  std::scoped_lock<std::mutex> lock(lock_);
 
   if (!queued_) {
     int ret = drmRequest->commit(flags);
