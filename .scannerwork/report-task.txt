@@ -1,0 +1,7 @@
+organization=ericcurtin
+projectKey=ericcurtin_twincam
+serverUrl=https://sonarcloud.io
+serverVersion=8.0.0.27934
+dashboardUrl=https://sonarcloud.io/dashboard?id=ericcurtin_twincam
+ceTaskId=AX_akRMXLUyO3D_XsJbg
+ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AX_akRMXLUyO3D_XsJbg

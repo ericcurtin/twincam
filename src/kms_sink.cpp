@@ -107,8 +107,8 @@ int KMSSink::configure(const libcamera::CameraConfiguration& config) {
 
   const std::vector<DRM::Mode>& modes = connector_->modes();
 
-  if (configurePipeline(cfg.pixelFormat) < 0)
-    return configurePipeline(cfg.pixelFormat);
+if (int ret = configurePipeline(cfg.pixelFormat); ret < 0)
+    return ret;
 
   mode_ = &modes[0];
   size_ = cfg.size;
@@ -196,12 +196,10 @@ int KMSSink::stop() {
   request.addProperty(crtc_, "MODE_ID", 0);
   request.addProperty(plane_, "CRTC_ID", 0);
   request.addProperty(plane_, "FB_ID", 0);
-
   
-  if (request.commit(DRM::AtomicRequest::FlagAllowModeset) < 0) {
-    int ret = request.commit(DRM::AtomicRequest::FlagAllowModeset);
-    eprintf("Failed to stop display pipeline: %s\n", strerror(-ret));
-    return ret;
+  if (int ret = request.commit(DRM::AtomicRequest::FlagAllowModeset)) {
+     eprintf("Failed to stop display pipeline: %s\n", strerror(-ret));
+     return ret;
   }
 
   /* Free all buffers. */
