@@ -56,8 +56,8 @@ class Object {
   uint32_t id() const { return id_; }
   Type type() const { return type_; }
 
-  const Property* property(const std::string& name) const;
-  const PropertyValue* propertyValue(const std::string& name) const;
+  const Property* property(const std::string_view& name) const;
+  const PropertyValue* propertyValue(const std::string_view& name) const;
   const std::vector<PropertyValue>& properties() const { return properties_; }
 
  private:
@@ -92,9 +92,9 @@ class Property : public Object {
 
   bool isImmutable() const { return flags_ & DRM_MODE_PROP_IMMUTABLE; }
 
-  const std::vector<uint64_t> values() const { return values_; }
+  std::vector<uint64_t> values() const { return values_; }
   const std::map<uint32_t, std::string>& enums() const { return enums_; }
-  const std::vector<uint32_t> blobs() const { return blobs_; }
+  std::vector<uint32_t> blobs() const { return blobs_; }
 
  private:
   Type type_;
@@ -214,7 +214,7 @@ class FrameBuffer : public Object {
   struct Plane {
     uint32_t handle;
   };
-  ~FrameBuffer();
+  ~FrameBuffer() final;
 
  private:
   friend class Device;
