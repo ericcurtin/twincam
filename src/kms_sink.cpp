@@ -197,7 +197,7 @@ int KMSSink::stop() {
   request.addProperty(plane_, "CRTC_ID", 0);
   request.addProperty(plane_, "FB_ID", 0);
   
-  if (int ret = request.commit(DRM::AtomicRequest::FlagAllowModeset)) {
+  if (int ret = request.commit(DRM::AtomicRequest::FlagAllowModeset); ret < 0) {
      eprintf("Failed to stop display pipeline: %s\n", strerror(-ret));
      return ret;
   }
