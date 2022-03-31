@@ -292,11 +292,12 @@ int AtomicRequest::addProperty(const Object* object,
 int AtomicRequest::addProperty(uint32_t object,
                                uint32_t property,
                                uint64_t value) {
-  int ret = drmModeAtomicAddProperty(request_, object, property, value);
-  if (ret < 0) {
+  if (int ret = drmModeAtomicAddProperty(request_, object, property, value); ret < 0) {
     valid_ = false;
     return ret;
   }
+
+
 
   return 0;
 }
@@ -512,8 +513,8 @@ std::unique_ptr<FrameBuffer> Device::createFrameBuffer(
     int fd = plane.fd.get();
     uint32_t handle;
 
-    auto iter = fb->planes_.find(fd);
-    if (iter == fb->planes_.end()) {
+  
+    if (auto iter = fb->planes_.find(fd); iter == fb->planes_.end()) {
       ret = drmPrimeFDToHandle(fd_, plane.fd.get(), &handle);
       if (ret < 0) {
         ret = -errno;

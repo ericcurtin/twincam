@@ -254,8 +254,7 @@ bool KMSSink::processRequest(libcamera::Request* camRequest) {
   std::scoped_lock<std::mutex> lock(lock_);
 
   if (!queued_) {
-    int ret = drmRequest->commit(flags);
-    if (ret < 0) {
+    if (int ret = drmRequest->commit(flags); ret < 0) {
       eprintf("Failed to commit atomic request: %s\n", strerror(-ret));
       if (-ret == EACCES) {
         eprintf(
