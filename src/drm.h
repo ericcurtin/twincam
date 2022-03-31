@@ -65,8 +65,7 @@ class Object {
 
   uint32_t id_;
 
- private:
-  friend Device;
+ friend Device;
 
   Device* dev_;
   Type type_;
