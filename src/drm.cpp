@@ -51,7 +51,7 @@ Object::Object(Device* dev, uint32_t id, Type type)
   drmModeFreeObjectProperties(properties);
 }
 
-Object::~Object() {}
+Object::~Object() = default;
 
 const Property* Object::property(const std::string_view& name) const {
   for (const PropertyValue& pv : properties_) {
@@ -292,8 +292,8 @@ int AtomicRequest::addProperty(const Object* object,
 int AtomicRequest::addProperty(uint32_t object,
                                uint32_t property,
                                uint64_t value) {
-  int ret = drmModeAtomicAddProperty(request_, object, property, value);
-  if (ret < 0) {
+  if (int ret = drmModeAtomicAddProperty(request_, object, property, value);
+      ret < 0) {
     valid_ = false;
     return ret;
   }
@@ -510,8 +510,7 @@ std::unique_ptr<FrameBuffer> Device::createFrameBuffer(
     int fd = plane.fd.get();
     uint32_t handle;
 
-    auto iter = fb->planes_.find(fd);
-    if (iter == fb->planes_.end()) {
+    if (auto iter = fb->planes_.find(fd); iter == fb->planes_.end()) {
       ret = drmPrimeFDToHandle(fd_, plane.fd.get(), &handle);
       if (ret < 0) {
         ret = -errno;
