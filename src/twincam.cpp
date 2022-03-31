@@ -96,7 +96,6 @@ int CamApp::run(int argc, char** argv) {
         }
 
         break;
-      case 'h':
       default:
         printf(
             "Usage: twincam [OPTIONS]\n\n"
