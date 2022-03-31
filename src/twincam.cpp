@@ -60,8 +60,7 @@ CamApp* CamApp::instance() {
 int CamApp::init() {
   cm_ = std::make_unique<CameraManager>();
 
-  int ret = cm_->start();
-  if (ret) {
+  if (int ret = cm_->start(); ret) {
     printf("Failed to start camera manager: %s\n", strerror(-ret));
     return ret;
   }
