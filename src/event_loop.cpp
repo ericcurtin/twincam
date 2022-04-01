@@ -57,7 +57,7 @@ void EventLoop::callLater(const std::function<void()>& func) {
 void EventLoop::addEvent(int fd,
                          EventType type,
                          const std::function<void()>& callback) {
-  std::unique_ptr<Event> event = std::make_unique<Event>(callback);
+ auto event = std::make_unique<Event>(callback);
   short events =
       ((type & Read) ? EV_READ : 0) | ((type & Write) ? EV_WRITE : 0) | EV_PERSIST;
 
@@ -79,7 +79,7 @@ void EventLoop::addEvent(int fd,
 void EventLoop::dispatchCallback([[maybe_unused]] evutil_socket_t fd,
                                  [[maybe_unused]] short flags,
                                  void* param) {
-  EventLoop* loop = static_cast<EventLoop*>(param);
+  auto* loop = static_cast<EventLoop*>(param);
   loop->dispatchCall();
 }
 
@@ -109,6 +109,6 @@ EventLoop::Event::~Event() {
 void EventLoop::Event::dispatch([[maybe_unused]] int fd,
                                 [[maybe_unused]] short events,
                                 void* arg) {
-  Event* event = static_cast<Event*>(arg);
+  auto* event = static_cast<Event*>(arg);
   event->callback_();
 }

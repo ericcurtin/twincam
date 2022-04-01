@@ -227,7 +227,7 @@ bool KMSSink::processRequest(libcamera::Request* camRequest) {
   const DRM::FrameBuffer* drmBuffer = iter->second.get();
 
   unsigned int flags = DRM::AtomicRequest::FlagAsync;
-  DRM::AtomicRequest* drmRequest = new DRM::AtomicRequest(&dev_);
+  auto* drmRequest = new DRM::AtomicRequest(&dev_);
   drmRequest->addProperty(plane_, "FB_ID", drmBuffer->id());
 
   if (!active_ && !queued_) {
