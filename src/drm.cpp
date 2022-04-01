@@ -51,7 +51,7 @@ Object::Object(Device* dev, uint32_t id, Type type)
   drmModeFreeObjectProperties(properties);
 }
 
-Object::~Object() {}
+Object::~Object() = default;
 
 const Property* Object::property(const std::string_view& name) const {
   for (const PropertyValue& pv : properties_) {
