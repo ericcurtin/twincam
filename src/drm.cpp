@@ -322,8 +322,6 @@ Device::~Device() {
 }
 
 int Device::init() {
-  constexpr size_t NODE_NAME_MAX = sizeof("/dev/dri/card255");
-  char name[NODE_NAME_MAX];
   int ret;
 
   /*
@@ -333,7 +331,7 @@ int Device::init() {
    * from drmOpen() is of no practical use as any modern system will
    * handle that through udev or an equivalent component.
    */
-  snprintf(name, sizeof(name), "/dev/dri/card%d", 0);
+  const char* name = "/dev/dri/card0";
   fd_ = open(name, O_RDWR | O_CLOEXEC);
   if (fd_ < 0) {
     ret = -errno;
