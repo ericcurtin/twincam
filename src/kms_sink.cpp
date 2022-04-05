@@ -234,9 +234,7 @@ bool KMSSink::processRequest(libcamera::Request* camRequest) {
     /* Enable the display pipeline on the first frame. */
     drmRequest->addProperty(connector_, "CRTC_ID", crtc_->id());
 
-    // drmRequest->addProperty(crtc_, "ACTIVE", 1);
 
-    // drmRequest->addProperty(plane_, "CRTC_ID", crtc_->id());
     drmRequest->addProperty(plane_, "SRC_X", 0 << 16);
     drmRequest->addProperty(plane_, "SRC_Y", 0 << 16);
     drmRequest->addProperty(plane_, "SRC_W", size_.width << 16);
@@ -246,7 +244,6 @@ bool KMSSink::processRequest(libcamera::Request* camRequest) {
     drmRequest->addProperty(plane_, "CRTC_W", size_.width);
     drmRequest->addProperty(plane_, "CRTC_H", size_.height);
 
-    // flags |= DRM::AtomicRequest::FlagAllowModeset;
   }
 
   pending_ = std::make_unique<Request>(drmRequest, camRequest);
