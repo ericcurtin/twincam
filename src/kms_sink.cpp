@@ -151,7 +151,7 @@ int KMSSink::configurePipeline(const libcamera::PixelFormat& format) {
   for (const DRM::Encoder* encoder : connector_->encoders()) {
     for (const DRM::Crtc* crtc : encoder->possibleCrtcs()) {
       for (const DRM::Plane* plane : crtc->planes()) {
-        if (plane->type() != DRM::Plane::TypePrimary)
+        if (plane->planeType() != DRM::Plane::TypePrimary)
           continue;
 
         if (plane->supportsFormat(format)) {
