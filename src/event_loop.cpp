@@ -46,7 +46,7 @@ void EventLoop::exit(int code) {
 }
 
 void EventLoop::callLater(const std::function<void()>& func) {
-  std::unique_lock<std::mutex> locker(lock_);
+  std::unique_lock locker(lock_);
   calls_.push_back(func);
 
   event_base_once(base_, -1, EV_TIMEOUT, dispatchCallback, this, nullptr);
@@ -84,7 +84,7 @@ void EventLoop::dispatchCallback([[maybe_unused]] evutil_socket_t fd,
 void EventLoop::dispatchCall() {
   std::function<void()> call;
 
-  const std::unique_lock<std::mutex> locker(lock_);
+  const std::unique_lock locker(lock_);
   if (calls_.empty())
     return;
   call = calls_.front();
