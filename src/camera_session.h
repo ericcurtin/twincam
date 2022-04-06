@@ -21,6 +21,8 @@
 #include <libcamera/request.h>
 #include <libcamera/stream.h>
 
+#include "sdl_sink.h"
+
 #if 0  // not priority right now, for MJPG mainly
 #include "image.h"
 #endif
@@ -59,7 +61,7 @@ class CameraSession {
   std::unique_ptr<libcamera::CameraConfiguration> config_;
 
   std::map<const libcamera::Stream*, std::string> streamNames_;
-  std::unique_ptr<KMSSink> sink_;
+  std::unique_ptr<SDLSink> sink_;
   unsigned int cameraIndex_;
 
   uint64_t last_;

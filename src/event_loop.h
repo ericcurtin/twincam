@@ -19,6 +19,8 @@ struct event_base;
 class EventLoop {
  public:
   enum EventType {
+    Default = 0, /* the event can be triggered only by a timeout or by manual
+                    activation */
     Read = 1,
     Write = 2,
   };

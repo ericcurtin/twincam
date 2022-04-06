@@ -6,11 +6,11 @@
  */
 
 #include "event_loop.h"
-#include "twincam.h"
 
 #include <assert.h>
 #include <event2/event.h>
 #include <event2/thread.h>
+#include <iostream>
 
 EventLoop* EventLoop::instance_ = nullptr;
 
@@ -57,19 +57,28 @@ void EventLoop::callLater(const std::function<void()>& func) {
 void EventLoop::addEvent(int fd,
                          EventType type,
                          const std::function<void()>& callback) {
-  auto event = std::make_unique<Event>(callback);
+  std::unique_ptr<Event> event = std::make_unique<Event>(callback);
   short events =
-      ((type & Read) ? EV_READ : 0) | ((type & Write) ? EV_WRITE : 0) | EV_PERSIST;
+      (type & Read ? EV_READ : 0) | (type & Write ? EV_WRITE : 0) | EV_PERSIST;
 
   event->event_ =
       event_new(base_, fd, events, &EventLoop::Event::dispatch, event.get());
   if (!event->event_) {
-    eprintf("Failed to create event for fd %d\n", fd);
+    std::cerr << "Failed to create event for fd " << fd << std::endl;
     return;
   }
 
-  if (event_add(event->event_, nullptr) < 0) {
-    eprintf("Failed to add event for fd %d\n", fd);
+  struct timeval* tp = nullptr;
+  struct timeval tv;
+  if (events == EV_PERSIST) { /* EventType = Default */
+    tp = &tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 10000; /* every 10 ms */
+  }
+
+  int ret = event_add(event->event_, tp);
+  if (ret < 0) {
+    std::cerr << "Failed to add event for fd " << fd << std::endl;
     return;
   }
 
@@ -79,7 +88,7 @@ void EventLoop::addEvent(int fd,
 void EventLoop::dispatchCallback([[maybe_unused]] evutil_socket_t fd,
                                  [[maybe_unused]] short flags,
                                  void* param) {
-  auto* loop = static_cast<EventLoop*>(param);
+  EventLoop* loop = static_cast<EventLoop*>(param);
   loop->dispatchCall();
 }
 
@@ -87,7 +96,7 @@ void EventLoop::dispatchCall() {
   std::function<void()> call;
 
   {
-    const std::unique_lock<std::mutex> locker(lock_);
+    std::unique_lock<std::mutex> locker(lock_);
     if (calls_.empty())
       return;
 
@@ -109,6 +118,6 @@ EventLoop::Event::~Event() {
 void EventLoop::Event::dispatch([[maybe_unused]] int fd,
                                 [[maybe_unused]] short events,
                                 void* arg) {
-  auto* event = static_cast<Event*>(arg);
+  Event* event = static_cast<Event*>(arg);
   event->callback_();
 }
