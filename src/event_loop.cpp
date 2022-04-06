@@ -46,10 +46,8 @@ void EventLoop::exit(int code) {
 }
 
 void EventLoop::callLater(const std::function<void()>& func) {
-  {
-    std::unique_lock<std::mutex> locker(lock_);
-    calls_.push_back(func);
-  }
+  std::unique_lock<std::mutex> locker(lock_);
+  calls_.push_back(func);
 
   event_base_once(base_, -1, EV_TIMEOUT, dispatchCallback, this, nullptr);
 }
