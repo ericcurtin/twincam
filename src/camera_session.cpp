@@ -20,8 +20,7 @@
 using namespace libcamera;
 
 CameraSession::CameraSession(const CameraManager* const cm)
-    : camera_(cm->cameras()[0]),
-      cameraIndex_(0){}
+    : camera_(cm->cameras()[0]) {}
 
 CameraSession::~CameraSession() {
   if (camera_)
