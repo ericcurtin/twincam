@@ -84,14 +84,11 @@ void EventLoop::dispatchCallback([[maybe_unused]] evutil_socket_t fd,
 void EventLoop::dispatchCall() {
   std::function<void()> call;
 
-  {
-    const std::unique_lock<std::mutex> locker(lock_);
-    if (calls_.empty())
-      return;
-
-    call = calls_.front();
-    calls_.pop_front();
-  }
+  const std::unique_lock<std::mutex> locker(lock_);
+  if (calls_.empty())
+    return;
+  call = calls_.front();
+  calls_.pop_front();
 
   call();
 }
