@@ -60,12 +60,12 @@ class CameraSession {
 
   std::map<const libcamera::Stream*, std::string> streamNames_;
   std::unique_ptr<KMSSink> sink_;
-  unsigned int cameraIndex_;
+  unsigned int cameraIndex_ = 0;
 
-  uint64_t last_;
+  uint64_t last_ = 0;
 
-  unsigned int queueCount_;
-  unsigned int captureCount_;
+  unsigned int queueCount_ = 0;
+  unsigned int captureCount_ = 0 ;
 
 #if 0  // not priority right now, for MJPG mainly
   FormatConverter converter_;

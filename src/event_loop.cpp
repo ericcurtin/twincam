@@ -99,7 +99,7 @@ void EventLoop::dispatchCall() {
 }
 
 EventLoop::Event::Event(const std::function<void()>& callback)
-    : callback_(callback), event_(nullptr) {}
+    : callback_(callback) {}
 
 EventLoop::Event::~Event() {
   event_del(event_);

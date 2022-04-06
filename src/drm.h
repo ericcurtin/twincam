@@ -250,7 +250,7 @@ class AtomicRequest {
   int addProperty(uint32_t object, uint32_t property, uint64_t value);
 
   Device* dev_;
-  bool valid_;
+  bool valid_ = true;
   drmModeAtomicReq* request_;
 };
 
@@ -294,7 +294,7 @@ class Device {
                                unsigned int tv_usec,
                                void* user_data);
 
-  int fd_;
+  int fd_ = -1;
 
   std::list<Crtc> crtcs_;
   std::list<Encoder> encoders_;

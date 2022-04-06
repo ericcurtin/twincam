@@ -43,7 +43,7 @@ class EventLoop {
     static void dispatch(int fd, short events, void* arg);
 
     std::function<void()> callback_;
-    struct event* event_;
+    struct event* event_ = nullptr;
   };
 
   static EventLoop* instance_;

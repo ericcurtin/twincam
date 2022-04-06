@@ -22,8 +22,7 @@
 #include "drm.h"
 #include "twincam.h"
 
-KMSSink::KMSSink(const std::string& connectorName)
-    : connector_(nullptr), crtc_(nullptr), plane_(nullptr), mode_(nullptr) {
+KMSSink::KMSSink(const std::string& connectorName) {
   if (dev_.init() < 0)
     return;
 

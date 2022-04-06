@@ -263,7 +263,7 @@ FrameBuffer::~FrameBuffer() {
   drmModeRmFB(device()->fd(), id());
 }
 
-AtomicRequest::AtomicRequest(Device* dev) : dev_(dev), valid_(true) {
+AtomicRequest::AtomicRequest(Device* dev) : dev_(dev){
   request_ = drmModeAtomicAlloc();
   if (!request_)
     valid_ = false;
@@ -314,7 +314,7 @@ int AtomicRequest::commit(unsigned int flags) {
   return drmModeAtomicCommit(dev_->fd(), request_, drmFlags, this);
 }
 
-Device::Device() : fd_(-1) {}
+Device::Device() {}
 
 Device::~Device() {
   if (fd_ != -1)

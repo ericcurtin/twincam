@@ -49,10 +49,10 @@ class KMSSink {
 
   DRM::Device dev_;
 
-  const DRM::Connector* connector_;
-  const DRM::Crtc* crtc_;
-  const DRM::Plane* plane_;
-  const DRM::Mode* mode_;
+  const DRM::Connector* connector_ = nullptr;
+  const DRM::Crtc* crtc_ = nullptr;
+  const DRM::Plane* plane_ = nullptr;
+  const DRM::Mode* mode_ = nullptr;
 
   libcamera::PixelFormat format_;
   libcamera::Size size_;
