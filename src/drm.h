@@ -287,7 +287,7 @@ class Device {
 
   int getResources();
 
-  void drmEvent();
+  void drmEvent() const;
   static void pageFlipComplete(int fd,
                                unsigned int sequence,
                                unsigned int tv_sec,

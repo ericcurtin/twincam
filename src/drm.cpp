@@ -539,7 +539,7 @@ std::unique_ptr<FrameBuffer> Device::createFrameBuffer(
   return fb;
 }
 
-void Device::drmEvent() {
+void Device::drmEvent() const {
   drmEventContext ctx{};
   ctx.version = DRM_EVENT_CONTEXT_VERSION;
   ctx.page_flip_handler = &Device::pageFlipComplete;
