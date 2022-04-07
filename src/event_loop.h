@@ -31,7 +31,11 @@ class EventLoop {
   int exec();
   void exit(int code = 0);
 
-  void callLater(const std::function<void()>& func);
+  void callLater(const std::function<void()>);
+
+  void pushCallList(const std::function<void()>& func);
+
+  void popCallList(const std::function<void()>);
 
   void addEvent(int fd, EventType type, const std::function<void()>& handler);
 
