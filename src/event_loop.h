@@ -58,5 +58,5 @@ class EventLoop {
   static void dispatchCallback(evutil_socket_t fd, short flags, void* param);
   void dispatchCall();
   void pushCallList(const std::function<void()>& func);
-  void popCallList(std::function<void()>& func);
+  void popCallList(std::function<void()>& call);
 };
