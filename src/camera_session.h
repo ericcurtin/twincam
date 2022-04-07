@@ -65,7 +65,7 @@ class CameraSession {
   uint64_t last_ = 0;
 
   unsigned int queueCount_ = 0;
-  unsigned int captureCount_ = 0 ;
+  unsigned int captureCount_ = 0;
 
 #if 0  // not priority right now, for MJPG mainly
   FormatConverter converter_;

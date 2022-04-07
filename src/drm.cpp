@@ -263,7 +263,7 @@ FrameBuffer::~FrameBuffer() {
   drmModeRmFB(device()->fd(), id());
 }
 
-AtomicRequest::AtomicRequest(Device* dev) : dev_(dev){
+AtomicRequest::AtomicRequest(Device* dev) : dev_(dev) {
   request_ = drmModeAtomicAlloc();
   if (!request_)
     valid_ = false;
