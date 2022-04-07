@@ -22,8 +22,7 @@
 #include "drm.h"
 #include "twincam.h"
 
-KMSSink::KMSSink(const std::string& connectorName)
-    : connector_(nullptr), crtc_(nullptr), plane_(nullptr), mode_(nullptr) {
+KMSSink::KMSSink(const std::string& connectorName) {
   if (dev_.init() < 0)
     return;
 
@@ -151,7 +150,7 @@ int KMSSink::configurePipeline(const libcamera::PixelFormat& format) {
   for (const DRM::Encoder* encoder : connector_->encoders()) {
     for (const DRM::Crtc* crtc : encoder->possibleCrtcs()) {
       for (const DRM::Plane* plane : crtc->planes()) {
-        if (plane->type() != DRM::Plane::TypePrimary)
+        if (plane->planeType() != DRM::Plane::TypePrimary)
           continue;
 
         if (plane->supportsFormat(format)) {
@@ -234,9 +233,7 @@ bool KMSSink::processRequest(libcamera::Request* camRequest) {
     /* Enable the display pipeline on the first frame. */
     drmRequest->addProperty(connector_, "CRTC_ID", crtc_->id());
 
-    // drmRequest->addProperty(crtc_, "ACTIVE", 1);
 
-    // drmRequest->addProperty(plane_, "CRTC_ID", crtc_->id());
     drmRequest->addProperty(plane_, "SRC_X", 0 << 16);
     drmRequest->addProperty(plane_, "SRC_Y", 0 << 16);
     drmRequest->addProperty(plane_, "SRC_W", size_.width << 16);
@@ -246,7 +243,6 @@ bool KMSSink::processRequest(libcamera::Request* camRequest) {
     drmRequest->addProperty(plane_, "CRTC_W", size_.width);
     drmRequest->addProperty(plane_, "CRTC_H", size_.height);
 
-    // flags |= DRM::AtomicRequest::FlagAllowModeset;
   }
 
   pending_ = std::make_unique<Request>(drmRequest, camRequest);
@@ -271,7 +267,7 @@ bool KMSSink::processRequest(libcamera::Request* camRequest) {
 }
 
 void KMSSink::requestComplete(DRM::AtomicRequest* request) {
-  const std::lock_guard<std::mutex> lock(lock_);
+  const std::lock_guard lock(lock_);
 
   assert(queued_ && queued_->drmRequest_.get() == request);
 

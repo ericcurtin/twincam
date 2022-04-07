@@ -86,7 +86,7 @@ class Property : public Object {
 
   Property(Device* dev, drmModePropertyRes* property);
 
-  Type type() const { return type_; }
+  Type propertyType() const { return type_; }
   const std::string& name() const { return name_; }
 
   bool isImmutable() const { return flags_ & DRM_MODE_PROP_IMMUTABLE; }
@@ -141,7 +141,7 @@ class Encoder : public Object {
  public:
   Encoder(Device* dev, const drmModeEncoder* encoder);
 
-  uint32_t type() const { return type_; }
+  uint32_t encoderType() const { return type_; }
 
   const std::vector<const Crtc*>& possibleCrtcs() const {
     return possibleCrtcs_;
@@ -162,7 +162,7 @@ class Connector : public Object {
 
   Connector(Device* dev, const drmModeConnector* connector);
 
-  uint32_t type() const { return type_; }
+  uint32_t connectorType() const { return type_; }
   const std::string& name() const { return name_; }
 
   Status status() const { return status_; }
@@ -188,7 +188,7 @@ class Plane : public Object {
 
   Plane(Device* dev, const drmModePlane* plane);
 
-  Type type() const { return type_; }
+  Type planeType() const { return type_; }
   const std::vector<uint32_t>& formats() const { return formats_; }
   const std::vector<const Crtc*>& possibleCrtcs() const {
     return possibleCrtcs_;
@@ -250,7 +250,7 @@ class AtomicRequest {
   int addProperty(uint32_t object, uint32_t property, uint64_t value);
 
   Device* dev_;
-  bool valid_;
+  bool valid_ = true;
   drmModeAtomicReq* request_;
 };
 
@@ -287,14 +287,14 @@ class Device {
 
   int getResources();
 
-  void drmEvent();
+  void drmEvent() const;
   static void pageFlipComplete(int fd,
                                unsigned int sequence,
                                unsigned int tv_sec,
                                unsigned int tv_usec,
                                void* user_data);
 
-  int fd_;
+  int fd_ = -1;
 
   std::list<Crtc> crtcs_;
   std::list<Encoder> encoders_;
