@@ -314,7 +314,7 @@ int AtomicRequest::commit(unsigned int flags) {
   return drmModeAtomicCommit(dev_->fd(), request_, drmFlags, this);
 }
 
-Device::Device() {}
+Device::Device() = default;
 
 Device::~Device() {
   if (fd_ != -1)
