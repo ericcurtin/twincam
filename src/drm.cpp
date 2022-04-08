@@ -243,9 +243,9 @@ int Plane::setup() {
 FrameBuffer::FrameBuffer(Device* dev) : Object(dev, 0, Object::TypeFb) {}
 
 FrameBuffer::~FrameBuffer() {
-  for (const auto& plane : planes_) {
+  for (const auto& [plane, value] : planes_) {
     struct drm_gem_close gem_close;
-    gem_close.handle = plane.second.handle;
+    gem_close.handle = value.handle;
     gem_close.pad = 0;
 
     int ret;
@@ -451,8 +451,8 @@ int Device::getResources() {
 
   /* Collect all property IDs and create Property instances. */
   std::set<uint32_t> properties;
-  for (const auto& object : objects_) {
-    for (const PropertyValue& value : object.second->properties())
+    for (const auto& [object, value] : objects_) { 
+    for (const PropertyValue& value : value->properties())
       properties.insert(value.id());
   }
 
@@ -472,10 +472,10 @@ int Device::getResources() {
   }
 
   /* Finally, perform all delayed setup of mode objects. */
-  for (auto& object : objects_) {
-    ret = object.second->setup();
+    for (const auto& [object, value] : objects_) {
+    ret = value->setup();
     if (ret < 0) {
-      eprintf("Failed to setup object %d: %s\n", object.second->id(),
+      eprintf("Failed to setup object %d: %s\n", value->id(),
               strerror(-ret));
       return ret;
     }
