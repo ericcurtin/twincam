@@ -266,7 +266,7 @@ bool KMSSink::processRequest(libcamera::Request* camRequest) {
   return false;
 }
 
-void KMSSink::requestComplete(DRM::AtomicRequest* request) {
+void KMSSink::requestComplete(DRM::AtomicRequest* const request) {
   const std::lock_guard lock(lock_);
 
   assert(queued_ && queued_->drmRequest_.get() == request);
