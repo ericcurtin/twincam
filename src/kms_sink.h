@@ -45,7 +45,7 @@ class KMSSink {
   };
 
   int configurePipeline(const libcamera::PixelFormat& format);
-  void requestComplete(DRM::AtomicRequest* request);
+  void requestComplete(DRM::AtomicRequest* const request);
 
   DRM::Device dev_;
 

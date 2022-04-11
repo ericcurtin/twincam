@@ -109,7 +109,7 @@ class PropertyValue {
   PropertyValue(uint32_t id, uint64_t value) : id_(id), value_(value) {}
 
   uint32_t id() const { return id_; }
-  uint32_t value() const { return value_; }
+  uint64_t value() const { return value_; }
 
  private:
   uint32_t id_;

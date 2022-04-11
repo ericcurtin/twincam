@@ -27,7 +27,7 @@ class CamApp {
   static CamApp* instance();
 
   int init();
-  void cleanup();
+  void cleanup() const;
 
   int exec(int argc, char** argv);
   void quit();
@@ -68,7 +68,7 @@ int CamApp::init() {
   return 0;
 }
 
-void CamApp::cleanup() {
+void CamApp::cleanup() const {
   cm_->stop();
 }
 

@@ -110,6 +110,6 @@ EventLoop::Event::~Event() {
 void EventLoop::Event::dispatch([[maybe_unused]] int fd,
                                 [[maybe_unused]] short events,
                                 void* arg) {
-  auto* event = static_cast<Event*>(arg);
+  const auto* event = static_cast<Event*>(arg);
   event->callback_();
 }
