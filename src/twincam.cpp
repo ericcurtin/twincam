@@ -68,7 +68,7 @@ int CamApp::init() {
   return 0;
 }
 
-void CamApp::cleanup() const{
+void CamApp::cleanup() const {
   cm_->stop();
 }
 

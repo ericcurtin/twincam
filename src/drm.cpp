@@ -451,7 +451,7 @@ int Device::getResources() {
 
   /* Collect all property IDs and create Property instances. */
   std::set<uint32_t> properties;
-    for (const auto& [object, value] : objects_) { 
+  for (const auto& [object, value] : objects_) {
     for (const PropertyValue& value : value->properties())
       properties.insert(value.id());
   }
@@ -472,11 +472,10 @@ int Device::getResources() {
   }
 
   /* Finally, perform all delayed setup of mode objects. */
-    for (const auto& [object, value] : objects_) {
+  for (const auto& [object, value] : objects_) {
     ret = value->setup();
     if (ret < 0) {
-      eprintf("Failed to setup object %d: %s\n", value->id(),
-              strerror(-ret));
+      eprintf("Failed to setup object %d: %s\n", value->id(), strerror(-ret));
       return ret;
     }
   }
