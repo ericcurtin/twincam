@@ -9,17 +9,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Setting gate packages
+      - name: Build
         run: |
           export CI=true
-          /bin/bash ./tests/prepare_env.sh
-      - name: Build twincam app and libcamera 
-        run: |
-          /bin/bash ./tests/build_twincam.sh
-      - name: Run cpp-check
-        run: |
-          /bin/bash ./tests/cpp_check.sh
-      - name: Run sonarqube
-        run: |
-          /bin/bash ./tests/sonar.sh clean
+          /bin/bash tests/run-all.sh
       - run: echo "Job's status is ${{ job.status }}."
