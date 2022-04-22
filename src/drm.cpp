@@ -452,8 +452,8 @@ int Device::getResources() {
   /* Collect all property IDs and create Property instances. */
   std::set<uint32_t> properties;
   for (const auto& [object, value] : objects_) {
-    for (const PropertyValue& value : value->properties())
-      properties.insert(value.id());
+    for (const PropertyValue& v : value->properties())
+      properties.insert(v.id());
   }
 
   for (uint32_t id : properties) {
