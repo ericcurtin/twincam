@@ -46,7 +46,7 @@ void EventLoop::exit(int code) {
 }
 
 void EventLoop::pushCallList(const std::function<void()>& func) {
-  std::unique_lock<std::mutex> locker(lock_);
+  std::unique_lock locker(lock_);
   calls_.push_back(func);
 }
 
@@ -85,7 +85,7 @@ void EventLoop::dispatchCallback([[maybe_unused]] evutil_socket_t fd,
 }
 
 void EventLoop::popCallList(std::function<void()>& call) {
-  const std::unique_lock<std::mutex> locker(lock_);
+  const std::unique_lock locker(lock_);
   if (calls_.empty())
     return;
 
