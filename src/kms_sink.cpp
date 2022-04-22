@@ -106,7 +106,7 @@ int KMSSink::configure(const libcamera::CameraConfiguration& config) {
 
   const std::vector<DRM::Mode>& modes = connector_->modes();
 
-if (int ret = configurePipeline(cfg.pixelFormat); ret < 0)
+  if (int ret = configurePipeline(cfg.pixelFormat); ret < 0)
     return ret;
 
   mode_ = &modes[0];
@@ -118,7 +118,7 @@ if (int ret = configurePipeline(cfg.pixelFormat); ret < 0)
   return 0;
 }
 
-int KMSSink::configurePipeline(const libcamera::PixelFormat& format) {
+int KMSSink::selectPipeline(const libcamera::PixelFormat& format) {
   /*
    * If the requested format has an alpha channel, also consider the X
    * variant.
@@ -157,27 +157,27 @@ int KMSSink::configurePipeline(const libcamera::PixelFormat& format) {
           crtc_ = crtc;
           plane_ = plane;
           format_ = format;
-          goto break_all;
+          return 0;
         }
 
         if (plane->supportsFormat(xFormat)) {
           crtc_ = crtc;
           plane_ = plane;
           format_ = xFormat;
-          goto break_all;
+          return 0;
         }
       }
     }
   }
 
-// hack to fix
-break_all:
+  return -EPIPE;
+}
 
-  if (!crtc_) {
+int KMSSink::configurePipeline(const libcamera::PixelFormat& format) {
+  if (int ret = selectPipeline(format)) {
     eprintf("Unable to find display pipeline for format %s\n",
             format.toString().c_str());
-
-    return -EPIPE;
+    return ret;
   }
 
   printf("Using KMS plane %u, CRTC %u, connector %s (%u)\n", plane_->id(),
@@ -195,10 +195,10 @@ int KMSSink::stop() {
   request.addProperty(crtc_, "MODE_ID", 0);
   request.addProperty(plane_, "CRTC_ID", 0);
   request.addProperty(plane_, "FB_ID", 0);
-  
+
   if (int ret = request.commit(DRM::AtomicRequest::FlagAllowModeset); ret < 0) {
-     eprintf("Failed to stop display pipeline: %s\n", strerror(-ret));
-     return ret;
+    eprintf("Failed to stop display pipeline: %s\n", strerror(-ret));
+    return ret;
   }
 
   /* Free all buffers. */
@@ -233,7 +233,6 @@ bool KMSSink::processRequest(libcamera::Request* camRequest) {
     /* Enable the display pipeline on the first frame. */
     drmRequest->addProperty(connector_, "CRTC_ID", crtc_->id());
 
-
     drmRequest->addProperty(plane_, "SRC_X", 0 << 16);
     drmRequest->addProperty(plane_, "SRC_Y", 0 << 16);
     drmRequest->addProperty(plane_, "SRC_W", size_.width << 16);
@@ -242,7 +241,6 @@ bool KMSSink::processRequest(libcamera::Request* camRequest) {
     drmRequest->addProperty(plane_, "CRTC_Y", y_);
     drmRequest->addProperty(plane_, "CRTC_W", size_.width);
     drmRequest->addProperty(plane_, "CRTC_H", size_.height);
-
   }
 
   pending_ = std::make_unique<Request>(drmRequest, camRequest);

@@ -55,8 +55,7 @@ Object::~Object() = default;
 
 const Property* Object::property(const std::string_view& name) const {
   for (const PropertyValue& pv : properties_) {
-    const auto* property =
-        static_cast<const Property*>(dev_->object(pv.id()));
+    const auto* property = static_cast<const Property*>(dev_->object(pv.id()));
     if (property && property->name() == name)
       return property;
   }
@@ -66,8 +65,7 @@ const Property* Object::property(const std::string_view& name) const {
 
 const PropertyValue* Object::propertyValue(const std::string_view& name) const {
   for (const PropertyValue& pv : properties_) {
-    const auto* property =
-        static_cast<const Property*>(dev_->object(pv.id()));
+    const auto* property = static_cast<const Property*>(dev_->object(pv.id()));
     if (property && property->name() == name)
       return &pv;
   }
@@ -452,8 +450,8 @@ int Device::getResources() {
   /* Collect all property IDs and create Property instances. */
   std::set<uint32_t> properties;
   for (const auto& [object, value] : objects_) {
-    for (const PropertyValue& value : value->properties())
-      properties.insert(value.id());
+    for (const PropertyValue& v : value->properties())
+      properties.insert(v.id());
   }
 
   for (uint32_t id : properties) {

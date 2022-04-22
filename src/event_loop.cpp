@@ -46,7 +46,7 @@ void EventLoop::exit(int code) {
 }
 
 void EventLoop::pushCallList(const std::function<void()>& func) {
-  std::unique_lock<std::mutex> locker(lock_);
+  std::unique_lock locker(lock_);
   calls_.push_back(func);
 }
 
@@ -59,8 +59,8 @@ void EventLoop::addEvent(int fd,
                          EventType type,
                          const std::function<void()>& callback) {
   auto event = std::make_unique<Event>(callback);
-  short events =
-      ((type & Read) ? EV_READ : 0) | ((type & Write) ? EV_WRITE : 0) | EV_PERSIST;
+  short events = ((type & Read) ? EV_READ : 0) |
+                 ((type & Write) ? EV_WRITE : 0) | EV_PERSIST;
 
   event->event_ =
       event_new(base_, fd, events, &EventLoop::Event::dispatch, event.get());
@@ -85,7 +85,7 @@ void EventLoop::dispatchCallback([[maybe_unused]] evutil_socket_t fd,
 }
 
 void EventLoop::popCallList(std::function<void()>& call) {
-  const std::unique_lock<std::mutex> locker(lock_);
+  const std::unique_lock locker(lock_);
   if (calls_.empty())
     return;
 
