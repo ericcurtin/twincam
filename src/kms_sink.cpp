@@ -37,12 +37,12 @@ KMSSink::KMSSink(const std::string& connectorName) {
         continue;
 
       connector_ = &conn;
-      return;
+      break;
     }
 
     if (conn.status() == DRM::Connector::Connected) {
       connector_ = &conn;
-      return;
+      break;
     }
 
     if (!connector_ && conn.status() == DRM::Connector::Unknown)
