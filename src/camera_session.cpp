@@ -123,7 +123,7 @@ int CameraSession::startCapture() {
   int ret;
 
   /* Identify the stream with the least number of buffers. */
-  unsigned int nbuffers = UINT_MAX;
+  size_t nbuffers = UINT_MAX;
   for (const StreamConfiguration& cfg : *config_) {
     ret = allocator_->allocate(cfg.stream());
     if (ret < 0) {
@@ -145,7 +145,7 @@ int CameraSession::startCapture() {
     }
 #endif
 
-    unsigned int allocated = allocator_->buffers(cfg.stream()).size();
+    size_t allocated = allocator_->buffers(cfg.stream()).size();
     nbuffers = std::min(nbuffers, allocated);
   }
 
