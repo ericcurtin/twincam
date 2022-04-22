@@ -118,7 +118,7 @@ if (int ret = configurePipeline(cfg.pixelFormat); ret < 0)
   return 0;
 }
 
-int KMSSink::configurePipeline(const libcamera::PixelFormat& format) {
+int KMSSink::selectPipeline(const libcamera::PixelFormat& format) {
   /*
    * If the requested format has an alpha channel, also consider the X
    * variant.
@@ -157,33 +157,33 @@ int KMSSink::configurePipeline(const libcamera::PixelFormat& format) {
           crtc_ = crtc;
           plane_ = plane;
           format_ = format;
-          goto break_all;
+          return 0;
         }
 
         if (plane->supportsFormat(xFormat)) {
           crtc_ = crtc;
           plane_ = plane;
           format_ = xFormat;
-          goto break_all;
+          return 0;
         }
       }
     }
   }
-
-// hack to fix
-break_all:
-
-  if (!crtc_) {
+  return -EPIPE;
+}
+int KMSSink::configurePipeline(const libcamera::PixelFormat &format)
+{
+	const int ret = selectPipeline(format);
+	if (ret) {
     eprintf("Unable to find display pipeline for format %s\n",
             format.toString().c_str());
-
-    return -EPIPE;
-  }
+		return ret;
+	}
 
   printf("Using KMS plane %u, CRTC %u, connector %s (%u)\n", plane_->id(),
          crtc_->id(), connector_->name().c_str(), connector_->id());
 
-  return 0;
+	return 0;
 }
 
 int KMSSink::stop() {
