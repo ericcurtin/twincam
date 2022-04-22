@@ -173,8 +173,7 @@ int KMSSink::selectPipeline(const libcamera::PixelFormat& format) {
 }
 int KMSSink::configurePipeline(const libcamera::PixelFormat &format)
 {
-	const int ret = selectPipeline(format);
-	if (ret) {
+	if (int ret = selectPipeline(format)) {
     eprintf("Unable to find display pipeline for format %s\n",
             format.toString().c_str());
 		return ret;
