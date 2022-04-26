@@ -17,6 +17,7 @@
 #include "camera_session.h"
 #include "event_loop.h"
 #include "twincam.h"
+#include "uptime.h"
 
 using namespace libcamera;
 
@@ -73,6 +74,7 @@ void CamApp::cleanup() const {
 }
 
 int CamApp::exec(int argc, char** argv) {
+  PRINT_UPTIME();
   int ret;
 
   ret = run(argc, argv);
@@ -86,6 +88,7 @@ void CamApp::quit() {
 }
 
 int CamApp::run(int argc, char** argv) {
+  PRINT_UPTIME();
   for (int opt; (opt = getopt(argc, argv, "lch")) != -1;) {
     switch (opt) {
       case 'c':
@@ -175,6 +178,7 @@ void signalHandler([[maybe_unused]] int signal) {
 }
 
 int main(int argc, char** argv) {
+  PRINT_UPTIME();
   CamApp app;
   if (int ret = app.init(); ret)
     return ret == -EINTR ? 0 : EXIT_FAILURE;
