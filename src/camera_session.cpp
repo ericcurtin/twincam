@@ -16,11 +16,14 @@
 
 #include "kms_sink.h"
 #include "twincam.h"
+#include "uptime.h"
 
 using namespace libcamera;
 
 CameraSession::CameraSession(const CameraManager* const cm)
-    : camera_(cm->cameras()[0]) {}
+    : camera_(cm->cameras()[0]) {
+  PRINT_UPTIME();
+}
 
 CameraSession::~CameraSession() {
   if (camera_)
@@ -28,6 +31,7 @@ CameraSession::~CameraSession() {
 }
 
 int CameraSession::init() {
+  PRINT_UPTIME();
   if (!camera_) {
     eprintf("Camera not found\n");
     return 1;
@@ -65,6 +69,7 @@ int CameraSession::init() {
 }
 
 int CameraSession::start() {
+  PRINT_UPTIME();
   int ret;
 
   queueCount_ = 0;
@@ -120,6 +125,7 @@ void CameraSession::stop() {
 }
 
 int CameraSession::startCapture() {
+  PRINT_UPTIME();
   int ret;
 
   /* Identify the stream with the least number of buffers. */
@@ -205,6 +211,7 @@ int CameraSession::startCapture() {
 }
 
 int CameraSession::queueRequest(Request* request) {
+  PRINT_UPTIME();
   queueCount_++;
 
   return camera_->queueRequest(request);
