@@ -7,9 +7,10 @@ A lightweight camera application, designed to start quickly in a bare environmen
 On fedora (steps should be similar on other platforms):
 
 ```
-sudo dnf install -y git gcc g++ libevent libevent-devel openssl openssl-devel gnutls \
-  gnutls-devel meson boost boost-devel python3-jinja2 python3-ply python3-yaml libdrm \
-  libdrm-devel systemd-udev doxygen cmake graphviz libatomic
+sudo dnf install -y git gcc g++ libevent libevent-devel openssl openssl-devel \
+  gnutls gnutls-devel meson boost boost-devel python3-jinja2 python3-ply \
+  python3-yaml libdrm libdrm-devel systemd-udev doxygen cmake graphviz \
+  libatomic texlive-latex
 git clone https://git.libcamera.org/libcamera/libcamera.git
 cd libcamera
 meson build --prefix=/usr && ninja -v -C build && sudo ninja -v -C build install
