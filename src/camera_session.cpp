@@ -47,6 +47,18 @@ int CameraSession::init() {
 
   config->at(0).pixelFormat = PixelFormat::fromString("YUYV");
 
+  switch (config->validate()) {
+    case CameraConfiguration::Valid:
+      break;
+
+    case CameraConfiguration::Adjusted:
+      break;
+
+    case CameraConfiguration::Invalid:
+      eprintf("Camera configuration invalid\n");
+      return 2;
+  }
+
   config_ = std::move(config);
 
   return 0;
@@ -60,7 +72,7 @@ int CameraSession::start() {
 
   ret = camera_->configure(config_.get());
   if (ret < 0) {
-    printf("Failed to configure camera\n");
+    printf("Failed: %d = camera_->configure(config_.get())\n", ret);
     return ret;
   }
 
