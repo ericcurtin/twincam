@@ -101,6 +101,8 @@ int CamApp::run(int argc, char** argv) {
             "Options:\n"
             "  -c, --list-cameras          List cameras\n"
             "  -h, --help                  Print this help\n");
+
+        return 0;
     }
   }
 
