@@ -89,7 +89,7 @@ void CamApp::quit() {
 
 int CamApp::run(int argc, char** argv) {
   PRINT_UPTIME();
-  for (int opt; (opt = getopt(argc, argv, "lch")) != -1;) {
+  for (int opt; (opt = getopt(argc, argv, "chu")) != -1;) {
     switch (opt) {
       case 'c':
         printf("Available cameras:\n");
@@ -98,12 +98,16 @@ int CamApp::run(int argc, char** argv) {
         }
 
         break;
+      case 'u':
+        print_uptime = true;
+        break;
       default:
         printf(
             "Usage: twincam [OPTIONS]\n\n"
             "Options:\n"
             "  -c, --list-cameras          List cameras\n"
-            "  -h, --help                  Print this help\n");
+            "  -h, --help                  Print this help\n"
+            "  -u, --uptime                Trace the uptime\n");
     }
   }
 
@@ -177,8 +181,10 @@ void signalHandler([[maybe_unused]] int signal) {
   CamApp::instance()->quit();
 }
 
+bool print_uptime = false;
 int main(int argc, char** argv) {
-  PRINT_UPTIME();
+  PRINT_UPTIME();  // Although this is never printed, it's important because it
+                   // sets the initial timer
   CamApp app;
   if (int ret = app.init(); ret)
     return ret == -EINTR ? 0 : EXIT_FAILURE;
