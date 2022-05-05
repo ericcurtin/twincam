@@ -44,6 +44,7 @@ class KMSSink {
     libcamera::Request* camRequest_;
   };
 
+  void findRequestConnector(const std::string& connectorName);
   int selectPipeline(const libcamera::PixelFormat& format);
   int configurePipeline(const libcamera::PixelFormat& format);
   void requestComplete(DRM::AtomicRequest* const request);

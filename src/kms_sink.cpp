@@ -26,6 +26,20 @@ KMSSink::KMSSink(const std::string& connectorName) {
   if (dev_.init() < 0)
     return;
 
+  findRequestConnector(connectorName);
+
+  if (!connector_) {
+    if (!connectorName.empty())
+      eprintf("Connector %s not found\n", connectorName.c_str());
+    else
+      eprintf("No connected connector found\n");
+    return;
+  }
+
+  dev_.requestComplete.connect(this, &KMSSink::requestComplete);
+}
+
+void KMSSink::findRequestConnector(const std::string& connectorName) {
   /*
    * Find the requested connector. If no specific connector is requested,
    * pick the first connected connector or, if no connector is connected,
@@ -37,27 +51,17 @@ KMSSink::KMSSink(const std::string& connectorName) {
         continue;
 
       connector_ = &conn;
-      break;
+      return;
     }
 
     if (conn.status() == DRM::Connector::Connected) {
       connector_ = &conn;
-      break;
+      return;
     }
 
     if (!connector_ && conn.status() == DRM::Connector::Unknown)
       connector_ = &conn;
   }
-
-  if (!connector_) {
-    if (!connectorName.empty())
-      eprintf("Connector %s not found\n", connectorName.c_str());
-    else
-      eprintf("No connected connector found\n");
-    return;
-  }
-
-  dev_.requestComplete.connect(this, &KMSSink::requestComplete);
 }
 
 void KMSSink::mapBuffer(libcamera::FrameBuffer* buffer) {
