@@ -61,6 +61,9 @@ int CameraSession::init() {
     case CameraConfiguration::Invalid:
       eprintf("Camera configuration invalid\n");
       return 2;
+
+    default:
+      break;
   }
 
   config_ = std::move(config);

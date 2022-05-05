@@ -9,7 +9,7 @@ int uptime(float* up, float* elapsed) {
   int fd;
   const char* filename = "/proc/uptime";
   char buf[32];
-  int n;
+  ssize_t n;
   if ((fd = open(filename, O_RDONLY)) == -1) {
     fputs("Error: /proc must be mounted\n", stderr);
     fflush(NULL);
