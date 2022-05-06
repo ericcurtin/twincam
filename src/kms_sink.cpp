@@ -33,23 +33,7 @@ KMSSink::KMSSink(const std::string& connectorName) {
    * pick the first connected connector or, if no connector is connected,
    * the first connector with unknown status.
    */
-  for (const DRM::Connector& conn : dev_.connectors()) {
-    if (!connectorName.empty()) {
-      if (conn.name() != connectorName)
-        continue;
-
-      connector_ = &conn;
-      break;
-    }
-
-    if (conn.status() == DRM::Connector::Connected) {
-      connector_ = &conn;
-      break;
-    }
-
-    if (!connector_ && conn.status() == DRM::Connector::Unknown)
-      connector_ = &conn;
-  }
+  findRequestedConnector(connectorName);
 
   if (!connector_) {
     if (!connectorName.empty())
@@ -60,6 +44,31 @@ KMSSink::KMSSink(const std::string& connectorName) {
   }
 
   dev_.requestComplete.connect(this, &KMSSink::requestComplete);
+}
+
+void KMSSink::findRequestedConnector(const std::string& connectorName) {
+  /*
+   * Find the requested connector. If no specific connector is requested,
+   * pick the first connected connector or, if no connector is connected,
+   * the first connector with unknown status.
+   */
+  for (const DRM::Connector& conn : dev_.connectors()) {
+    if (!connectorName.empty()) {
+      if (conn.name() != connectorName)
+        continue;
+
+      connector_ = &conn;
+      return;
+    }
+
+    if (conn.status() == DRM::Connector::Connected) {
+      connector_ = &conn;
+      return;
+    }
+
+    if (!connector_ && conn.status() == DRM::Connector::Unknown)
+      connector_ = &conn;
+  }
 }
 
 void KMSSink::mapBuffer(libcamera::FrameBuffer* buffer) {

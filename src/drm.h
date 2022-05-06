@@ -12,6 +12,7 @@
 #include <list>
 #include <map>
 #include <memory>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -278,6 +279,14 @@ class Device {
       const std::array<uint32_t, 4>& strides);
 
   libcamera::Signal<AtomicRequest*> requestComplete;
+
+  void setPossiblePlanesForEachCRTC(std::list<DRM::Crtc>& crtcs_,
+                                    const std::list<DRM::Plane>& planes_);
+  int performAllDelayedSetupOfModeObjects(
+      const std::map<unsigned int, DRM::Object*>& objects_);
+  void collectPropertyIDsAndCreatePropertyInstances(
+      const std::map<unsigned int, DRM::Object*>& objects_,
+      std::set<unsigned int>& properties);
 
  private:
   Device(const Device&) = delete;
