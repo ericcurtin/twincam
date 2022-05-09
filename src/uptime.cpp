@@ -68,4 +68,5 @@ void write_uptime_to_file() {
   }
 
   close(fd);
+  free(uptime_buf);
 }

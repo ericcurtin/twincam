@@ -195,7 +195,9 @@ std::string CamApp::cameraName(const Camera* camera) {
 void signalHandler([[maybe_unused]] int signal) {
   printf("Exiting\n");
   CamApp::instance()->quit();
-  write_uptime_to_file();
+  if (!uptime_filename.empty()) {
+    write_uptime_to_file();
+  }
 }
 
 bool print_uptime = false;
