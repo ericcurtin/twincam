@@ -30,10 +30,18 @@ int vasnprintfcat(char** str,
     return -1;
   }
 
-  if (*size + additional_size > *capacity) {
-    for (*capacity = 16; *size + additional_size - 1 > *capacity;
-         *capacity *= 2) {
-    }
+  const size_t new_size = *size + additional_size;
+  if (new_size > *capacity) {
+    *capacity = new_size;
+
+    // Get closes power of 2
+    --*capacity;
+    *capacity |= *capacity >> 1;
+    *capacity |= *capacity >> 2;
+    *capacity |= *capacity >> 4;
+    *capacity |= *capacity >> 8;
+    *capacity |= *capacity >> 16;
+    ++*capacity;
 
     *str = (char*)realloc(*str, *capacity);
 
