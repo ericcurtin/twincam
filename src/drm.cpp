@@ -462,12 +462,12 @@ int Device::getResources() {
     objects_[obj.id()] = &obj;
   }
 
-  performAllDelayedSetupOfModeObjects(objects_);
-
-  return 0;
+  return performAllDelayedSetupOfModeObjects(objects_);
 }
 
-void Device::setPossiblePlanesForEachCRTC(std::__cxx11::list<DRM::Crtc>& crtcs_, const std::__cxx11::list<DRM::Plane>& planes_){
+void Device::setPossiblePlanesForEachCRTC(
+    std::__cxx11::list<DRM::Crtc>& crtcs_,
+    const std::__cxx11::list<DRM::Plane>& planes_) {
   /* Set the possible planes for each CRTC. */
   for (Crtc& crtc : crtcs_) {
     for (const Plane& plane : planes_) {
@@ -477,9 +477,10 @@ void Device::setPossiblePlanesForEachCRTC(std::__cxx11::list<DRM::Crtc>& crtcs_,
   }
 }
 
-int Device::performAllDelayedSetupOfModeObjects(const std::map<unsigned int, DRM::Object*>& objects_){
+int Device::performAllDelayedSetupOfModeObjects(
+    const std::map<unsigned int, DRM::Object*>& objects_) {
   int ret = 0;
-/* Finally, perform all delayed setup of mode objects. */
+  /* Finally, perform all delayed setup of mode objects. */
   for (const auto& [object, value] : objects_) {
     ret = value->setup();
     if (ret < 0) {
@@ -490,11 +491,13 @@ int Device::performAllDelayedSetupOfModeObjects(const std::map<unsigned int, DRM
   return ret;
 }
 
-void Device::collectPropertyIDsAndCreatePropertyInstances(const std::map<unsigned int, DRM::Object*>& objects_, std::set<unsigned int>& properties){
-    for (const auto& [object, value] : objects_) {
-      for (const PropertyValue& v : value->properties())
-        properties.insert(v.id());
-    }
+void Device::collectPropertyIDsAndCreatePropertyInstances(
+    const std::map<unsigned int, DRM::Object*>& objects_,
+    std::set<unsigned int>& properties) {
+  for (const auto& [object, value] : objects_) {
+    for (const PropertyValue& v : value->properties())
+      properties.insert(v.id());
+  }
 }
 
 const Object* Device::object(uint32_t id) {

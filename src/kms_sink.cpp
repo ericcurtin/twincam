@@ -46,8 +46,8 @@ KMSSink::KMSSink(const std::string& connectorName) {
   dev_.requestComplete.connect(this, &KMSSink::requestComplete);
 }
 
-void KMSSink::findRequestedConnector(const std::string& connectorName){
-/*
+void KMSSink::findRequestedConnector(const std::string& connectorName) {
+  /*
    * Find the requested connector. If no specific connector is requested,
    * pick the first connected connector or, if no connector is connected,
    * the first connector with unknown status.
@@ -70,8 +70,6 @@ void KMSSink::findRequestedConnector(const std::string& connectorName){
       connector_ = &conn;
   }
 }
-
-
 
 void KMSSink::mapBuffer(libcamera::FrameBuffer* buffer) {
   PRINT_UPTIME();
