@@ -4,6 +4,7 @@ set -e
 
 if [ -n "$CI" ] ; then
   export DEBIAN_FRONTEND=noninteractive
+  git fetch --unshallow &
   sudo apt update || true
   sudo apt install -y clang || true
   sudo apt install -y gnutls-dev || true
