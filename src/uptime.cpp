@@ -4,6 +4,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <memory>
+#include <string>
+
+#include "twincam.h"
+#include "uptime.h"
 
 int uptime(float* up, float* elapsed) {
   int fd;
@@ -45,4 +50,22 @@ int uptime(float* up, float* elapsed) {
   setlocale(LC_NUMERIC, savelocale);
   free(savelocale);
   return 0;
+}
+
+void write_uptime_to_file() {
+  int fd = open(uptime_filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 00666);
+  if (fd < 0) {
+    eprintf(
+        "errno: %d, %d = open(%s, "
+        "O_WRONLY|O_CREAT|O_TRUNC)\n",
+        errno, fd, uptime_filename.c_str());
+  }
+
+  ssize_t ret = write(fd, uptime_buf, uptime_buf_size);
+  if (ret < 0) {
+    eprintf("errno: %d, %ld = write(%d, uptime_buf, %zu)\n", errno, ret, fd,
+            uptime_buf_size);
+  }
+
+  close(fd);
 }

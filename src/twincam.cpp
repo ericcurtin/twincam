@@ -5,11 +5,12 @@
  * main.cpp - cam - The libcamera swiss army knife
  */
 
+#include <getopt.h>
 #include <signal.h>
 #include <string.h>
+#include <unistd.h>
 #include <atomic>
 #include <iomanip>
-#include <unistd.h>
 
 #include <libcamera/libcamera.h>
 #include <libcamera/property_ids.h>
@@ -89,7 +90,12 @@ void CamApp::quit() {
 
 int CamApp::run(int argc, char** argv) {
   PRINT_UPTIME();
-  for (int opt; (opt = getopt(argc, argv, "chu")) != -1;) {
+  const struct option options[] = {{"list-cameras", no_argument, 0, 'c'},
+                                   {"help", no_argument, 0, 'h'},
+                                   {"uptime", optional_argument, 0, 'u'},
+                                   {NULL, 0, 0, '\0'}};
+  for (int opt;
+       (opt = getopt_long(argc, argv, "chu::", options, NULL)) != -1;) {
     switch (opt) {
       case 'c':
         printf("Available cameras:\n");
@@ -100,14 +106,23 @@ int CamApp::run(int argc, char** argv) {
         break;
       case 'u':
         print_uptime = true;
+        if (((optarg == NULL && optind < argc && argv[optind][0] != '-')
+                 ? (bool)(optarg = argv[optind++])
+                 : (optarg != NULL))) {
+          uptime_filename = optarg;
+        }
+
+        printf("uptime_filename %s\n", uptime_filename.c_str());
         break;
       default:
         printf(
             "Usage: twincam [OPTIONS]\n\n"
             "Options:\n"
-            "  -c, --list-cameras          List cameras\n"
-            "  -h, --help                  Print this help\n"
-            "  -u, --uptime                Trace the uptime\n");
+            "  -c, --list-cameras  List cameras\n"
+            "  -h, --help          Print this help\n"
+            "  -u, --uptime        Trace the uptime (output "
+            "to file if specified, otherwise "
+            "stdout\n");
         return 0;
     }
   }
@@ -180,9 +195,14 @@ std::string CamApp::cameraName(const Camera* camera) {
 void signalHandler([[maybe_unused]] int signal) {
   printf("Exiting\n");
   CamApp::instance()->quit();
+  write_uptime_to_file();
 }
 
 bool print_uptime = false;
+std::string uptime_filename;
+char* uptime_buf = 0;
+size_t uptime_buf_size = 0;
+size_t uptime_buf_capacity = 0;
 int main(int argc, char** argv) {
   PRINT_UPTIME();  // Although this is never printed, it's important because it
                    // sets the initial timer

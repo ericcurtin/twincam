@@ -27,6 +27,7 @@ if [ -n "$CI" ] ; then
   sudo apt install -y vim || true
   sudo apt install -y python3-jinja2 || true
   sudo apt install -y python3-ply || true
+  sudo apt install -y libgtest-dev || true
 else
   echo "skipping building packages"
 fi
