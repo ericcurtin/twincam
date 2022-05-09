@@ -95,7 +95,7 @@ int CamApp::run(int argc, char** argv) {
                                    {"uptime", optional_argument, 0, 'u'},
                                    {NULL, 0, 0, '\0'}};
   for (int opt;
-       (opt = getopt_long(argc, argv, "chu::", options, NULL)) != -1;) {
+       (opt = getopt_long(argc, argv, "chu::s", options, NULL)) != -1;) {
     switch (opt) {
       case 'c':
         printf("Available cameras:\n");
@@ -114,6 +114,11 @@ int CamApp::run(int argc, char** argv) {
 
         printf("uptime_filename %s\n", uptime_filename.c_str());
         break;
+      case 's':
+        print_uptime = true;
+        uptime_syslog = true;
+        openlog("twincam", 0, LOG_LOCAL1);
+        break;
       default:
         printf(
             "Usage: twincam [OPTIONS]\n\n"
@@ -122,7 +127,8 @@ int CamApp::run(int argc, char** argv) {
             "  -h, --help          Print this help\n"
             "  -u, --uptime        Trace the uptime (output "
             "to file if specified, otherwise "
-            "stdout\n");
+            "stdout\n"
+            "  -s, --syslog        Trace the uptime in syslog\n");
         return 0;
     }
   }
@@ -198,9 +204,14 @@ void signalHandler([[maybe_unused]] int signal) {
   if (!uptime_filename.empty()) {
     write_uptime_to_file();
   }
+
+  if (uptime_syslog) {
+    closelog();
+  }
 }
 
 bool print_uptime = false;
+bool uptime_syslog = false;
 std::string uptime_filename;
 char* uptime_buf = 0;
 size_t uptime_buf_size = 0;
