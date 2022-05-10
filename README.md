@@ -1,5 +1,6 @@
 # twincam
 
+[![GitHub Build Status](https://github.com/inotify-tools/inotify-tools/workflows/build/badge.svg)](https://github.com/ericcurtin/twincam/actions)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=ericcurtin_twincam&metric=bugs)](https://sonarcloud.io/summary/new_code?id=ericcurtin_twincam)
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=ericcurtin_twincam&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=ericcurtin_twincam)
 
