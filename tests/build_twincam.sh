@@ -1,34 +1,35 @@
 #!/bin/bash
 
-set -e
+set -ex
 
-echo "check if libcamera exist" 
 if [ -d "../libcamera" ]; then
   rm -rf ../libcamera
 fi
 
+if [ "$EUID" -ne 0 ]; then
+  prefix="sudo"
+fi
+
 build() {
-  meson build --buildtype=release --prefix=/usr && ninja -v -C build && sudo ninja -v -C build install
+  meson build --buildtype=release --prefix=/usr
+  ninja -v -C build
+  $prefix ninja -v -C build install
 }
 
-cd ..
-echo "$(pwd)"
-echo "clone libcamera" 
-git clone https://git.libcamera.org/libcamera/libcamera.git
-cd libcamera
-echo "build libcamera"
+mkdir ../libcamera
+git clone https://git.libcamera.org/libcamera/libcamera.git ../libcamera
+cd ../libcamera
 build
-cd ../twincam
-echo "$(pwd)"
+cd -
 
-echo "build twincam"
 export PKG_CONFIG_PATH="/usr/lib64/pkgconfig/"
 export CC=clang
 export CXX=clang++
+git clean -fdx > /dev/null 2>&1
 build
 
-git clean -fdx
 export CC=gcc
 export CXX=g++
+git clean -fdx > /dev/null 2>&1
 build
 
