@@ -1,5 +1,8 @@
 # twincam
 
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=ericcurtin_twincam&metric=bugs)](https://sonarcloud.io/summary/new_code?id=ericcurtin_twincam)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=ericcurtin_twincam&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=ericcurtin_twincam)
+
 A lightweight camera application, designed to start quickly in a bare environment
 
 # To build, install and run twincam
@@ -27,6 +30,3 @@ Ctrl+Alt+F? (whichever tty does not have DE running F1, F2, F3, etc.) and run:
 twincam
 ```
 
-## Code Quality & Security scanning
-> Sonarcloud   
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=ericcurtin_twincam&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=ericcurtin_twincam)
