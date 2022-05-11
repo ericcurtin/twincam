@@ -94,15 +94,13 @@ int CameraSession::start() {
   camera_->requestCompleted.connect(this, &CameraSession::requestComplete);
   sink_ = std::make_unique<KMSSink>("");
 
-  if (sink_) {
-    ret = sink_->configure(*config_);
-    if (ret < 0) {
-      printf("Failed to configure frame sink\n");
-      return ret;
-    }
-
-    sink_->requestProcessed.connect(this, &CameraSession::sinkRelease);
+  ret = sink_->configure(*config_);
+  if (ret < 0) {
+    printf("Failed to configure frame sink\n");
+    return ret;
   }
+
+  sink_->requestProcessed.connect(this, &CameraSession::sinkRelease);
 
   allocator_ = std::make_unique<FrameBufferAllocator>(camera_);
 
@@ -247,10 +245,11 @@ void CameraSession::processRequest(Request* request) {
   bool requeue = true;
 
   printf("%.6f (%.2f fps)", ts / 1000000000.0, fps);
-  for (const auto& [stream, buffer] : buffers) {
-    const FrameMetadata& metadata = buffer->metadata();
+  for (const std::pair<const libcamera::Stream* const, libcamera::FrameBuffer*>&
+           buf : buffers) {
+    const FrameMetadata& metadata = buf.second->metadata();
 
-    printf(" %s seq: %d bytesused: ", streamNames_[stream].c_str(),
+    printf(" %s seq: %d bytesused: ", streamNames_[buf.first].c_str(),
            metadata.sequence);
     unsigned int nplane = 0;
     for (const FrameMetadata::Plane& plane : metadata.planes()) {

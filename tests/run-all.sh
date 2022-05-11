@@ -1,7 +1,6 @@
 #!/bin/bash
 
-set -e
-
+set -ex
 
 if command -v podman > /dev/null; then
   container="podman"
