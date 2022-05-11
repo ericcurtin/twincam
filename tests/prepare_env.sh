@@ -33,4 +33,6 @@ $prefix apt install -y python3-jinja2 || true
 $prefix apt install -y python3-ply || true
 $prefix apt install -y libgtest-dev || true
 $prefix apt install -y libyaml-dev || true
+$prefix apt install -y curl || true
+$prefix apt install -y zip || true
 
