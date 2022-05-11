@@ -6,33 +6,40 @@ if [ "$EUID" -ne 0 ]; then
   prefix="sudo"
 fi
 
-export DEBIAN_FRONTEND=noninteractive
-$prefix apt update || true
-$prefix apt install -y git || true
-git fetch --unshallow &
-$prefix apt install -y clang || true
-$prefix apt install -y gnutls-dev || true
-$prefix apt install -y libboost-dev || true
-$prefix apt install -y meson || true
-$prefix apt install -y python3-jinja2 || true
-$prefix apt install -y python3-ply || true
-$prefix apt install -y python3-yaml || true
-$prefix apt install -y cmake || true
-$prefix apt install -y pkg-config || true
-$prefix apt install -y libevent-dev || true
-$prefix apt install -y libdrm-dev || true
-$prefix apt install -y gcc || true
-$prefix apt install -y make || true
-$prefix apt install -y autoconf || true
-$prefix apt install -y automake || true
-$prefix apt install -y cppcheck || true
-$prefix apt install -y libsdl2-dev || true
-$prefix apt install -y meson || true
-$prefix apt install -y vim || true
-$prefix apt install -y python3-jinja2 || true
-$prefix apt install -y python3-ply || true
-$prefix apt install -y libgtest-dev || true
-$prefix apt install -y libyaml-dev || true
-$prefix apt install -y curl || true
-$prefix apt install -y zip || true
+if command -v apt > /dev/null; then
+  export DEBIAN_FRONTEND=noninteractive
+  $prefix apt update || true
+  $prefix apt install -y git || true
+  git fetch --unshallow &
+  $prefix apt install -y clang || true
+  $prefix apt install -y gnutls-dev || true
+  $prefix apt install -y libboost-dev || true
+  $prefix apt install -y meson || true
+  $prefix apt install -y python3-jinja2 || true
+  $prefix apt install -y python3-ply || true
+  $prefix apt install -y python3-yaml || true
+  $prefix apt install -y cmake || true
+  $prefix apt install -y pkg-config || true
+  $prefix apt install -y libevent-dev || true
+  $prefix apt install -y libdrm-dev || true
+  $prefix apt install -y gcc || true
+  $prefix apt install -y make || true
+  $prefix apt install -y autoconf || true
+  $prefix apt install -y automake || true
+  $prefix apt install -y cppcheck || true
+  $prefix apt install -y libsdl2-dev || true
+  $prefix apt install -y meson || true
+  $prefix apt install -y vim || true
+  $prefix apt install -y python3-jinja2 || true
+  $prefix apt install -y python3-ply || true
+  $prefix apt install -y libgtest-dev || true
+  $prefix apt install -y libyaml-dev || true
+  $prefix apt install -y curl || true
+  $prefix apt install -y zip || true
+elif command -v dnf > /dev/null; then
+  $prefix dnf install -y git gcc g++ libevent libevent-devel openssl \
+    openssl-devel gnutls gnutls-devel meson boost boost-devel python3-jinja2 \
+    python3-ply python3-yaml libdrm libdrm-devel systemd-udev doxygen cmake \
+    graphviz libatomic texlive-latex cppcheck libyaml-devel clang zip
+fi
 
