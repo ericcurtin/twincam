@@ -10,6 +10,7 @@
 #include "twincam.h"
 #include "uptime.h"
 
+float init_time = 0;
 int uptime(float* up, float* elapsed) {
   int fd;
   const char* filename = "/proc/uptime";
@@ -39,7 +40,6 @@ int uptime(float* up, float* elapsed) {
     return 104;
   }
 
-  static float init_time = 0;
   if (init_time) {
     *elapsed = *up - init_time;
   } else {

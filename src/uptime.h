@@ -15,25 +15,26 @@ extern size_t uptime_buf_size;
 extern size_t uptime_buf_capacity;
 extern bool print_uptime;
 extern bool uptime_syslog;
+extern float init_time;
 
-#define PRINT_UPTIME()                                                      \
-  do {                                                                      \
-    if (print_uptime) {                                                     \
-      float up;                                                             \
-      float elapsed;                                                        \
-      uptime(&up, &elapsed);                                                \
-      if (!uptime_filename.empty()) {                                       \
-        asnprintfcat(&uptime_buf, &uptime_buf_size, &uptime_buf_capacity,   \
-                     "uptime: %.2f (%.2f), %s at %s:%d\n", up, elapsed,     \
-                     __PRETTY_FUNCTION__, __FILE__, __LINE__);              \
-      }                                                                     \
-                                                                            \
-      if (uptime_syslog) {                                                  \
-        syslog(LOG_INFO, "uptime: %.2f (%.2f), %s at %s:%d\n", up, elapsed, \
-               __PRETTY_FUNCTION__, __FILE__, __LINE__);                    \
-      }                                                                     \
-                                                                            \
-      printf("uptime: %.2f (%.2f), %s at %s:%d\n", up, elapsed,             \
-             __PRETTY_FUNCTION__, __FILE__, __LINE__);                      \
-    }                                                                       \
+#define PRINT_UPTIME()                                                       \
+  do {                                                                       \
+    if (print_uptime) {                                                      \
+      float up;                                                              \
+      float elapsed;                                                         \
+      uptime(&up, &elapsed);                                                 \
+      if (!uptime_filename.empty()) {                                        \
+        asnprintfcat(&uptime_buf, &uptime_buf_size, &uptime_buf_capacity,    \
+                     "%.6f (%.2f), %s at %s:%d\n", up, elapsed,              \
+                     __PRETTY_FUNCTION__, __FILE__, __LINE__);               \
+      }                                                                      \
+                                                                             \
+      if (uptime_syslog) {                                                   \
+        syslog(LOG_INFO, "%.6f (%.2f), %s at %s:%d\n", up, elapsed,          \
+               __PRETTY_FUNCTION__, __FILE__, __LINE__);                     \
+      }                                                                      \
+                                                                             \
+      printf("%.6f (%.2f), %s at %s:%d\n", up, elapsed, __PRETTY_FUNCTION__, \
+             __FILE__, __LINE__);                                            \
+    }                                                                        \
   } while (0)

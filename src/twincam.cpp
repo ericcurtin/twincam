@@ -112,7 +112,6 @@ int CamApp::run(int argc, char** argv) {
           uptime_filename = optarg;
         }
 
-        printf("uptime_filename %s\n", uptime_filename.c_str());
         break;
       case 's':
         print_uptime = true;
@@ -127,7 +126,7 @@ int CamApp::run(int argc, char** argv) {
             "  -h, --help          Print this help\n"
             "  -u, --uptime        Trace the uptime (output "
             "to file if specified, otherwise "
-            "stdout\n"
+            "stdout)\n"
             "  -s, --syslog        Trace the uptime in syslog\n");
         return 0;
     }

@@ -212,8 +212,7 @@ int CameraSession::startCapture() {
 }
 
 int CameraSession::queueRequest(Request* request) {
-  PRINT_UPTIME();
-  queueCount_++;
+  ++queueCount_;
 
   return camera_->queueRequest(request);
 }
@@ -244,13 +243,29 @@ void CameraSession::processRequest(Request* request) {
 
   bool requeue = true;
 
-  printf("%.6f (%.2f fps)", ts / 1000000000.0, fps);
+  const float uptime = ts / 1000000000.0;
+  if (!init_time) {
+    init_time = uptime;
+  }
+
+  const float elapsed = uptime - init_time;
+  printf("%.6f (%.2f), (%.2f fps)", uptime, elapsed, fps);
+  if (uptime_syslog) {
+    syslog(LOG_INFO, "%.6f (%.2f), (%.2f fps)", uptime, elapsed, fps);
+  }
+
   for (const std::pair<const libcamera::Stream* const, libcamera::FrameBuffer*>&
            buf : buffers) {
     const FrameMetadata& metadata = buf.second->metadata();
 
     printf(" %s seq: %d bytesused: ", streamNames_[buf.first].c_str(),
            metadata.sequence);
+    if (uptime_syslog) {
+      syslog(LOG_INFO,
+             " %s seq: %d bytesused: ", streamNames_[buf.first].c_str(),
+             metadata.sequence);
+    }
+
     unsigned int nplane = 0;
     for (const FrameMetadata::Plane& plane : metadata.planes()) {
       printf("%d", plane.bytesused);
