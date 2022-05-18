@@ -249,21 +249,17 @@ void CameraSession::processRequest(Request* request) {
   }
 
   const float elapsed = uptime - init_time;
-  printf("%.6f (%.2f), (%.2f fps)", uptime, elapsed, fps);
-  if (uptime_syslog) {
-    syslog(LOG_INFO, "%.6f (%.2f), (%.2f fps)", uptime, elapsed, fps);
-  }
-
+  char* start_str;
+  asprintf(&start_str, "%.6f (%.2f), (%.2f fps)", uptime, elapsed, fps);
   for (const std::pair<const libcamera::Stream* const, libcamera::FrameBuffer*>&
            buf : buffers) {
     const FrameMetadata& metadata = buf.second->metadata();
 
-    printf(" %s seq: %d bytesused: ", streamNames_[buf.first].c_str(),
-           metadata.sequence);
+    printf("%s %s seq: %d bytesused: ", start_str,
+           streamNames_[buf.first].c_str(), metadata.sequence);
     if (uptime_syslog) {
-      syslog(LOG_INFO,
-             " %s seq: %d bytesused: ", streamNames_[buf.first].c_str(),
-             metadata.sequence);
+      syslog(LOG_INFO, "%s %s seq: %d bytesused: ", start_str,
+             streamNames_[buf.first].c_str(), metadata.sequence);
     }
 
     unsigned int nplane = 0;
@@ -279,6 +275,7 @@ void CameraSession::processRequest(Request* request) {
 #endif
   }
 
+  free(start_str);
   if (sink_ && !sink_->processRequest(request)) {
     requeue = false;
   }
