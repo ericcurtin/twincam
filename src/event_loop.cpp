@@ -65,12 +65,12 @@ void EventLoop::addEvent(int fd,
   event->event_ =
       event_new(base_, fd, events, &EventLoop::Event::dispatch, event.get());
   if (!event->event_) {
-    eprintf("Failed to create event for fd %d\n", fd);
+    eprint("Failed to create event for fd %d\n", fd);
     return;
   }
 
   if (event_add(event->event_, nullptr) < 0) {
-    eprintf("Failed to add event for fd %d\n", fd);
+    eprint("Failed to add event for fd %d\n", fd);
     return;
   }
 

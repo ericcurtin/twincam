@@ -63,7 +63,7 @@ int CamApp::init() {
   cm_ = std::make_unique<CameraManager>();
 
   if (int ret = cm_->start(); ret) {
-    printf("Failed to start camera manager: %s\n", strerror(-ret));
+    print("Failed to start camera manager: %s\n", strerror(-ret));
     return ret;
   }
 
@@ -98,9 +98,9 @@ int CamApp::run(int argc, char** argv) {
        (opt = getopt_long(argc, argv, "chu::s", options, NULL)) != -1;) {
     switch (opt) {
       case 'c':
-        printf("Available cameras:\n");
+        print("Available cameras:\n");
         for (size_t i = 0; i < cm_->cameras().size(); ++i) {
-          printf("%zu: %s\n", i, cameraName(cm_->cameras()[i].get()).c_str());
+          print("%zu: %s\n", i, cameraName(cm_->cameras()[i].get()).c_str());
         }
 
         break;
@@ -115,11 +115,11 @@ int CamApp::run(int argc, char** argv) {
         break;
       case 's':
         print_uptime = true;
-        uptime_syslog = true;
+        to_syslog = true;
         openlog("twincam", 0, LOG_LOCAL1);
         break;
       default:
-        printf(
+        print(
             "Usage: twincam [OPTIONS]\n\n"
             "Options:\n"
             "  -c, --list-cameras  List cameras\n"
@@ -133,20 +133,20 @@ int CamApp::run(int argc, char** argv) {
   }
 
   if (cm_->cameras().empty()) {
-    printf("No cameras available\n");
+    print("No cameras available\n");
     return 0;
   }
 
   CameraSession session(cm_.get());
   int ret = session.init();
   if (ret) {
-    printf("Failed to init camera session\n");
+    print("Failed to init camera session\n");
     return ret;
   }
 
   ret = session.start();
   if (ret) {
-    printf("Failed to start camera session\n");
+    print("Failed to start camera session\n");
     return ret;
   }
 
@@ -198,21 +198,21 @@ std::string CamApp::cameraName(const Camera* camera) {
 }
 
 void signalHandler([[maybe_unused]] int signal) {
-  printf("Exiting\n");
+  print("Exiting\n");
   CamApp::instance()->quit();
   if (!uptime_filename.empty()) {
     write_uptime_to_file();
   }
 
-  if (uptime_syslog) {
+  if (to_syslog) {
     closelog();
   }
 }
 
 bool print_uptime = false;
-bool uptime_syslog = false;
+bool to_syslog = false;
 std::string uptime_filename;
-char* uptime_buf = 0;
+std::string uptime_buf;
 size_t uptime_buf_size = 0;
 size_t uptime_buf_capacity = 0;
 int main(int argc, char** argv) {

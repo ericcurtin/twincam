@@ -19,7 +19,7 @@ twincam_sources = files([
     'src/drm.cpp',
     'src/kms_sink.cpp',
     'src/uptime.cpp',
-    'src/asnprintfcat.cpp'
+    'src/string_printf.cpp'
 ])
 
 twincam  = executable('twincam', twincam_sources, include_directories : incdir,

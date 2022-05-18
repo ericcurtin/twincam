@@ -55,18 +55,17 @@ int uptime(float* up, float* elapsed) {
 void write_uptime_to_file() {
   int fd = open(uptime_filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 00666);
   if (fd < 0) {
-    eprintf(
+    eprint(
         "errno: %d, %d = open(%s, "
         "O_WRONLY|O_CREAT|O_TRUNC)\n",
         errno, fd, uptime_filename.c_str());
   }
 
-  ssize_t ret = write(fd, uptime_buf, uptime_buf_size);
+  ssize_t ret = write(fd, uptime_buf.c_str(), uptime_buf.size());
   if (ret < 0) {
-    eprintf("errno: %d, %ld = write(%d, uptime_buf, %zu)\n", errno, ret, fd,
-            uptime_buf_size);
+    eprint("errno: %d, %ld = write(%d, uptime_buf, %zu)\n", errno, ret, fd,
+           uptime_buf.size());
   }
 
   close(fd);
-  free(uptime_buf);
 }

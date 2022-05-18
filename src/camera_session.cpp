@@ -33,19 +33,19 @@ CameraSession::~CameraSession() {
 int CameraSession::init() {
   PRINT_UPTIME();
   if (!camera_) {
-    eprintf("Camera not found\n");
+    eprint("Camera not found\n");
     return 1;
   }
 
   if (camera_->acquire()) {
-    eprintf("Failed to acquire camera\n");
+    eprint("Failed to acquire camera\n");
     return 0;
   }
 
   std::unique_ptr<CameraConfiguration> config =
       camera_->generateConfiguration({libcamera::Viewfinder});
   if (!config || config->size() != 1) {
-    eprintf("Failed to get default stream configuration\n");
+    eprint("Failed to get default stream configuration\n");
     return 0;
   }
 
@@ -59,7 +59,7 @@ int CameraSession::init() {
       break;
 
     case CameraConfiguration::Invalid:
-      eprintf("Camera configuration invalid\n");
+      eprint("Camera configuration invalid\n");
       return 2;
 
     default:
@@ -80,7 +80,7 @@ int CameraSession::start() {
 
   ret = camera_->configure(config_.get());
   if (ret < 0) {
-    printf("Failed: %d = camera_->configure(config_.get())\n", ret);
+    print("Failed: %d = camera_->configure(config_.get())\n", ret);
     return ret;
   }
 
@@ -96,7 +96,7 @@ int CameraSession::start() {
 
   ret = sink_->configure(*config_);
   if (ret < 0) {
-    printf("Failed to configure frame sink\n");
+    print("Failed to configure frame sink\n");
     return ret;
   }
 
@@ -110,12 +110,12 @@ int CameraSession::start() {
 void CameraSession::stop() {
   int ret = camera_->stop();
   if (ret)
-    printf("Failed to stop capture\n");
+    print("Failed to stop capture\n");
 
   if (sink_) {
     ret = sink_->stop();
     if (ret)
-      printf("Failed to stop frame sink\n");
+      print("Failed to stop frame sink\n");
   }
 
   sink_.reset();
@@ -134,7 +134,7 @@ int CameraSession::startCapture() {
   for (const StreamConfiguration& cfg : *config_) {
     ret = allocator_->allocate(cfg.stream());
     if (ret < 0) {
-      eprintf("Can't allocate buffers\n");
+      eprint("Can't allocate buffers\n");
       return -ENOMEM;
     }
 
@@ -145,7 +145,7 @@ int CameraSession::startCapture() {
       std::unique_ptr<Image> image =
           Image::fromFrameBuffer(buffer.get(), Image::MapMode::ReadOnly);
       if (!image) {
-        eprintf("Can't allocate image buffers\n");
+        eprint("Can't allocate image buffers\n");
       }
 
       mappedBuffers_[buffer.get()] = std::move(image);
@@ -164,7 +164,7 @@ int CameraSession::startCapture() {
   for (unsigned int i = 0; i < nbuffers; i++) {
     std::unique_ptr<Request> request = camera_->createRequest();
     if (!request) {
-      eprintf("Can't create request\n");
+      eprint("Can't create request\n");
       return -ENOMEM;
     }
 
@@ -176,7 +176,7 @@ int CameraSession::startCapture() {
 
       ret = request->addBuffer(stream, buffer.get());
       if (ret < 0) {
-        eprintf("Can't set buffer for request\n");
+        eprint("Can't set buffer for request\n");
         return ret;
       }
 
@@ -189,7 +189,7 @@ int CameraSession::startCapture() {
 
   ret = camera_->start();
   if (ret) {
-    printf("Failed to start capture\n");
+    print("Failed to start capture\n");
     if (sink_)
       sink_->stop();
     return ret;
@@ -198,7 +198,7 @@ int CameraSession::startCapture() {
   for (const std::unique_ptr<Request>& request : requests_) {
     ret = queueRequest(request.get());
     if (ret < 0) {
-      eprintf("Can't queue request\n");
+      eprint("Can't queue request\n");
       camera_->stop();
       if (sink_)
         sink_->stop();
@@ -206,7 +206,7 @@ int CameraSession::startCapture() {
     }
   }
 
-  printf("cam%u: Capture until user interrupts by SIGINT\n", cameraIndex_);
+  print("cam%u: Capture until user interrupts by SIGINT\n", cameraIndex_);
 
   return 0;
 }
@@ -249,24 +249,21 @@ void CameraSession::processRequest(Request* request) {
   }
 
   const float elapsed = uptime - init_time;
-  char* start_str;
-  asprintf(&start_str, "%.6f (%.2f), (%.2f fps)", uptime, elapsed, fps);
+  std::string frame_str =
+      string_printf("%.6f (%.2f), (%.2f fps)", uptime, elapsed, fps);
   for (const std::pair<const libcamera::Stream* const, libcamera::FrameBuffer*>&
            buf : buffers) {
     const FrameMetadata& metadata = buf.second->metadata();
 
-    printf("%s %s seq: %d bytesused: ", start_str,
-           streamNames_[buf.first].c_str(), metadata.sequence);
-    if (uptime_syslog) {
-      syslog(LOG_INFO, "%s %s seq: %d bytesused: ", start_str,
-             streamNames_[buf.first].c_str(), metadata.sequence);
-    }
+    frame_str += string_printf(
+        " %s seq: %d bytesused: ", streamNames_[buf.first].c_str(),
+        metadata.sequence);
 
     unsigned int nplane = 0;
     for (const FrameMetadata::Plane& plane : metadata.planes()) {
-      printf("%d", plane.bytesused);
+      frame_str += string_printf("%d", plane.bytesused);
       if (++nplane < metadata.planes().size())
-        printf("/");
+        frame_str += string_printf("/");
     }
 
 #if 0  // not priority right now, for MJPG mainly
@@ -275,12 +272,11 @@ void CameraSession::processRequest(Request* request) {
 #endif
   }
 
-  free(start_str);
   if (sink_ && !sink_->processRequest(request)) {
     requeue = false;
   }
 
-  puts("");
+  print("%s\n", frame_str.c_str());
 
   /*
    * Notify the user that capture is complete if the limit has just been
