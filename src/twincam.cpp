@@ -20,6 +20,38 @@
 #include "twincam.h"
 #include "uptime.h"
 
+static void vprint(const char* const fmt, va_list args) {
+  if (to_syslog) {
+    vsyslog(LOG_INFO, fmt, args);
+  }
+
+  vprintf(fmt, args);
+}
+
+static void veprint(const char* const fmt, va_list args) {
+  if (to_syslog) {
+    vsyslog(LOG_INFO, fmt, args);
+  }
+
+  vfprintf(stderr, fmt, args);
+}
+
+void print(const char* const fmt, ...) {
+  va_list args;
+
+  va_start(args, fmt);
+  vprint(fmt, args);
+  va_end(args);
+}
+
+void eprint(const char* const fmt, ...) {
+  va_list args;
+
+  va_start(args, fmt);
+  veprint(fmt, args);
+  va_end(args);
+}
+
 using namespace libcamera;
 
 class CamApp {

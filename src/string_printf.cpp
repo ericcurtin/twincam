@@ -4,7 +4,7 @@
 #include <string.h>
 #include <memory>    // For std::unique_ptr
 
-int vasprintf(std::string& str, const char* fmt, va_list args) {
+static int vasprintf(std::string& str, const char* fmt, va_list args) {
   int size = 0;
   va_list tmpa;
 

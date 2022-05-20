@@ -16,6 +16,16 @@ build() {
   $prefix ninja -v -C build install
 }
 
+valgrind_tests() {
+  export PATH="build:$PATH"
+  valgrind twincam &
+  valgrind twincam -h &
+  valgrind twincam -c &
+  valgrind twincam -u &
+  valgrind twincam -s &
+  wait
+}
+
 mkdir ../libcamera
 git clone https://git.libcamera.org/libcamera/libcamera.git ../libcamera
 cd ../libcamera
@@ -27,9 +37,11 @@ export CC=clang
 export CXX=clang++
 git clean -fdx > /dev/null 2>&1
 build
+valgrind_tests
 
 export CC=gcc
 export CXX=g++
 git clean -fdx > /dev/null 2>&1
 build
+valgrind_tests
 
