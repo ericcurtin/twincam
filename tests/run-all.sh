@@ -10,7 +10,7 @@ fi
 
 container_run() {
   cmd="tests/prepare_env.sh && tests/build_twincam.sh && tests/sonar.sh && tests/cpp_check.sh"
-  id=$(sudo $container run -d -it $1 /bin/bash)
+  id=$(sudo $container run --cap-add=SYS_PTRACE -d -it $1 /bin/bash)
   sudo $container exec -it $id /bin/bash -c "mkdir -p $PWD"
   sudo $container cp $PWD $id:$PWD/..
   sudo $container exec -it $id /bin/bash -c "cd $PWD && $cmd"

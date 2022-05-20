@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 if command -v cppcheck > /dev/null; then
   u="$u -U __REDIRECT_NTH -U _BSD_RUNE_T_ -U _TYPE_size_t -U __LDBL_REDIR1_DECL"
@@ -9,5 +9,5 @@ if command -v cppcheck > /dev/null; then
   supp="$supp --suppress=unknownMacro --suppress=unusedStructMember"
   arg="-q --force $u --enable=all $inc $supp --error-exitcode=1"
   cppcheck="xargs cppcheck $arg"
-  find . -name  "*.h" -o -name "*.cpp" | $cppcheck  --language=c++ 2>&1
+  find . -name  "*.h" -o -name "*.cpp" | $cppcheck --language=c++ 2>&1
 fi

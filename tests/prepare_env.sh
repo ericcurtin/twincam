@@ -1,6 +1,6 @@
 #!/bin/bash
   
-set -e
+set -ex
 
 if [ "$EUID" -ne 0 ]; then
   prefix="sudo"
@@ -36,10 +36,14 @@ if command -v apt > /dev/null; then
   $prefix apt install -y libyaml-dev || true
   $prefix apt install -y curl || true
   $prefix apt install -y zip || true
+  $prefix apt install -y valgrind || true
+  $prefix apt install -y libasan5 || true
+  $prefix apt install -y libsdl2-image-dev || true
 elif command -v dnf > /dev/null; then
   $prefix dnf install -y git gcc g++ libevent libevent-devel openssl \
     openssl-devel gnutls gnutls-devel meson boost boost-devel python3-jinja2 \
     python3-ply python3-yaml libdrm libdrm-devel systemd-udev doxygen cmake \
-    graphviz libatomic texlive-latex cppcheck libyaml-devel clang zip
+    graphviz libatomic texlive-latex cppcheck libyaml-devel clang zip valgrind \
+    libasan findutils SDL2_image-devel
 fi
 
