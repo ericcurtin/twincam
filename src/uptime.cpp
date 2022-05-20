@@ -69,3 +69,15 @@ void write_uptime_to_file() {
 
   close(fd);
 }
+
+void uptime_output(const std::string& s) {
+  if (!uptime_filename.empty()) {
+    uptime_buf += s;
+  }
+
+  if (to_syslog) {
+    syslog(LOG_INFO, "%s", s.c_str());
+  }
+
+  print("%s\n", s.c_str());
+}

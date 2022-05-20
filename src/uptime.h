@@ -6,6 +6,7 @@
 #include "string_printf.h"
 
 int uptime(float* up, float* elapsed);
+void uptime_output(const std::string& s);
 void write_uptime_to_file();
 
 extern std::string uptime_filename;
@@ -19,17 +20,9 @@ extern float init_time;
       float up;                                                   \
       float elapsed;                                              \
       uptime(&up, &elapsed);                                      \
-      std::string this_line =                                     \
+      const std::string this_line =                               \
           string_printf("%.6f (%.2f), %s at %s:%d", up, elapsed,  \
                         __PRETTY_FUNCTION__, __FILE__, __LINE__); \
-      if (!uptime_filename.empty()) {                             \
-        uptime_buf += this_line;                                  \
-      }                                                           \
-                                                                  \
-      if (to_syslog) {                                            \
-        syslog(LOG_INFO, "%s", this_line.c_str());                \
-      }                                                           \
-                                                                  \
-      print("%s\n", this_line.c_str());                           \
+      uptime_output(this_line);                                   \
     }                                                             \
   } while (0)
