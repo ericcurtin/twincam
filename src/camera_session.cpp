@@ -243,14 +243,14 @@ void CameraSession::processRequest(Request* request) {
 
   bool requeue = true;
 
-  const float uptime = ts / 1000000000.0;
+  const float uptim = ts / 1000000000.0;
   if (!init_time) {
-    init_time = uptime;
+    init_time = uptim;
   }
 
-  const float elapsed = uptime - init_time;
+  const float elapsed = uptim - init_time;
   std::string frame_str =
-      string_printf("%.6f (%.2f), (%.2f fps)", uptime, elapsed, fps);
+      string_printf("%.6f (%.2f), (%.2f fps)", uptim, elapsed, fps);
   for (const std::pair<const libcamera::Stream* const, libcamera::FrameBuffer*>&
            buf : buffers) {
     const FrameMetadata& metadata = buf.second->metadata();
