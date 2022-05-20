@@ -29,7 +29,7 @@ int vasprintf(std::string& str, const char* fmt, va_list args) {
 
   // format string with original
   // variadic arguments and set new size
-  size = vsprintf(&str[0], fmt, args);
+  size = vsnprintf(&str[0], str.size() + 1, fmt, args);
   return size;
 }
 
