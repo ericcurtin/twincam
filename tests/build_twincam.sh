@@ -13,19 +13,25 @@ fi
 tests() {
   set +e
 
-  twincam
+  $1 twincam
   ret=$?
   if [ "$ret" -ne "0" ] && [ "$ret" -ne "1" ]; then
     exit $ret
   fi
 
-  twincam -c
+  $1 twincam -c
   ret=$?
   if [ "$ret" -ne "0" ] && [ "$ret" -ne "1" ]; then
     exit $ret
   fi
 
-  twincam -u
+  $1 twincam -u
+  ret=$?
+  if [ "$ret" -ne "0" ] && [ "$ret" -ne "1" ]; then
+    exit $ret
+  fi
+
+  $1 twincam -s
   ret=$?
   if [ "$ret" -ne "0" ] && [ "$ret" -ne "1" ]; then
     exit $ret
@@ -33,22 +39,13 @@ tests() {
 
   set -e
 
-  twincam -h
-  twincam -s
+  $1 twincam -h
 }
 
 build() {
   meson build $1 --buildtype=release --prefix=/usr
   ninja -v -C build
   $prefix ninja -v -C build install
-}
-
-valgrind_tests() {
-  valgrind twincam
-  valgrind twincam -h
-  valgrind twincam -c
-  valgrind twincam -u
-  valgrind twincam -s
 }
 
 mkdir ../libcamera
@@ -64,14 +61,14 @@ export CXX=clang++
 git clean -fdx > /dev/null 2>&1
 build
 tests
-valgrind_tests
+tests "valgrind --leak-check=full --error-exitcode=2"
 
 export CC=gcc
 export CXX=g++
 git clean -fdx > /dev/null 2>&1
 build
 tests
-valgrind_tests
+tests "valgrind --leak-check=full --error-exitcode=2"
 
 git clean -fdx > /dev/null 2>&1
 build "-Db_sanitize=address"
