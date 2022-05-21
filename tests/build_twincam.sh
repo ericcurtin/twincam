@@ -19,11 +19,21 @@ tests() {
     exit $ret
   fi
 
+  twincam -c
+  ret=$?
+  if [ "$ret" -ne "0" ] && [ "$ret" -ne "1" ]; then
+    exit $ret
+  fi
+
+  twincam -u
+  ret=$?
+  if [ "$ret" -ne "0" ] && [ "$ret" -ne "1" ]; then
+    exit $ret
+  fi
+
   set -e
 
   twincam -h
-  twincam -c
-  twincam -u
   twincam -s
 }
 
