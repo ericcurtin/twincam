@@ -67,14 +67,14 @@ class CamApp {
   int init();
   void cleanup() const;
 
-  int exec(int argc, char** argv);
+  int exec();
   void quit();
 
  private:
   void cameraAdded(std::shared_ptr<Camera> cam);
   void cameraRemoved(std::shared_ptr<Camera> cam);
   void captureDone();
-  int run(int argc, char** argv);
+  int run();
 
   static std::string cameraName(const Camera* camera);
 
@@ -110,11 +110,11 @@ void CamApp::cleanup() const {
   cm_->stop();
 }
 
-int CamApp::exec(int argc, char** argv) {
+int CamApp::exec() {
   PRINT_UPTIME();
   int ret;
 
-  ret = run(argc, argv);
+  ret = run();
   cleanup();
 
   return ret;
@@ -124,40 +124,12 @@ void CamApp::quit() {
   loop_.exit();
 }
 
-int CamApp::run(int argc, char** argv) {
+int CamApp::run() {
   PRINT_UPTIME();
-  const struct option options[] = {{"list-cameras", no_argument, 0, 'c'},
-                                   {"help", no_argument, 0, 'h'},
-                                   {"uptime", optional_argument, 0, 'u'},
-                                   {NULL, 0, 0, '\0'}};
-  for (int opt;
-       (opt = getopt_long(argc, argv, "chu::s", options, NULL)) != -1;) {
-    switch (opt) {
-      case 'c':
-        print("Available cameras:\n");
-        for (size_t i = 0; i < cm_->cameras().size(); ++i) {
-          print("%zu: %s\n", i, cameraName(cm_->cameras()[i].get()).c_str());
-        }
-
-        break;
-      case 'u':
-        print_uptime = true;
-        break;
-      case 's':
-        to_syslog = true;
-        openlog("twincam", 0, LOG_LOCAL1);
-        break;
-      default:
-        print(
-            "Usage: twincam [OPTIONS]\n\n"
-            "Options:\n"
-            "  -c, --list-cameras  List cameras\n"
-            "  -h, --help          Print this help\n"
-            "  -u, --uptime        Trace the uptime (output "
-            "to file if specified, otherwise "
-            "stdout)\n"
-            "  -s, --syslog        Trace the uptime in syslog\n");
-        return 0;
+  if (print_available_cameras) {
+    print("Available cameras:\n");
+    for (size_t i = 0; i < cm_->cameras().size(); ++i) {
+      print("%zu: %s\n", i, cameraName(cm_->cameras()[i].get()).c_str());
     }
   }
 
@@ -234,14 +206,49 @@ void signalHandler([[maybe_unused]] int signal) {
   }
 }
 
+static int processArgs(int argc, char** argv) {
+  const struct option options[] = {{"list-cameras", no_argument, 0, 'c'},
+                                   {"help", no_argument, 0, 'h'},
+                                   {"uptime", optional_argument, 0, 'u'},
+                                   {NULL, 0, 0, '\0'}};
+  for (int opt;
+       (opt = getopt_long(argc, argv, "chu::s", options, NULL)) != -1;) {
+    switch (opt) {
+      case 'c':
+        print_available_cameras = true;
+        break;
+      case 'u':
+        print_uptime = true;
+        break;
+      case 's':
+        to_syslog = true;
+        openlog("twincam", 0, LOG_LOCAL1);
+        break;
+      default:
+        print(
+            "Usage: twincam [OPTIONS]\n\n"
+            "Options:\n"
+            "  -c, --list-cameras  List cameras\n"
+            "  -h, --help          Print this help\n"
+            "  -u, --uptime        Trace the uptime\n"
+            "  -s, --syslog        Also trace output in syslog\n");
+        return 1;
+    }
+  }
+
+  return 0;
+}
+
 bool print_uptime = false;
 bool to_syslog = false;
-std::string uptime_buf;
-size_t uptime_buf_size = 0;
-size_t uptime_buf_capacity = 0;
+bool print_available_cameras = false;
 int main(int argc, char** argv) {
   PRINT_UPTIME();  // Although this is never printed, it's important because it
                    // sets the initial timer
+  if (int ret = processArgs(argc, argv); ret) {
+    return 0;
+  }
+
   CamApp app;
   if (int ret = app.init(); ret)
     return ret == -EINTR ? 0 : EXIT_FAILURE;
@@ -250,7 +257,7 @@ int main(int argc, char** argv) {
   sa.sa_handler = &signalHandler;
   sigaction(SIGINT, &sa, nullptr);
 
-  if (app.exec(argc, argv))
+  if (app.exec())
     return EXIT_FAILURE;
 
   return 0;
