@@ -21,20 +21,22 @@
 #include "uptime.h"
 
 static void vprint(const char* const fmt, va_list args) {
-  if (to_syslog) {
+  if (opts.to_syslog) {
     va_list args2;
     va_copy(args2, args);
     vsyslog(LOG_INFO, fmt, args2);
+    va_end(args2);
   }
 
   vprintf(fmt, args);
 }
 
 static void veprint(const char* const fmt, va_list args) {
-  if (to_syslog) {
+  if (opts.to_syslog) {
     va_list args2;
     va_copy(args2, args);
     vsyslog(LOG_INFO, fmt, args2);
+    va_end(args2);
   }
 
   vfprintf(stderr, fmt, args);
@@ -126,7 +128,7 @@ void CamApp::quit() {
 
 int CamApp::run() {
   PRINT_UPTIME();
-  if (print_available_cameras) {
+  if (opts.print_available_cameras) {
     print("Available cameras:\n");
     for (size_t i = 0; i < cm_->cameras().size(); ++i) {
       print("%zu: %s\n", i, cameraName(cm_->cameras()[i].get()).c_str());
@@ -201,7 +203,7 @@ std::string CamApp::cameraName(const Camera* camera) {
 void signalHandler([[maybe_unused]] int signal) {
   print("Exiting\n");
   CamApp::instance()->quit();
-  if (to_syslog) {
+  if (opts.to_syslog) {
     closelog();
   }
 }
@@ -215,13 +217,13 @@ static int processArgs(int argc, char** argv) {
        (opt = getopt_long(argc, argv, "chu::s", options, NULL)) != -1;) {
     switch (opt) {
       case 'c':
-        print_available_cameras = true;
+        opts.print_available_cameras = true;
         break;
       case 'u':
-        print_uptime = true;
+        opts.print_uptime = true;
         break;
       case 's':
-        to_syslog = true;
+        opts.to_syslog = true;
         openlog("twincam", 0, LOG_LOCAL1);
         break;
       default:
@@ -239,9 +241,7 @@ static int processArgs(int argc, char** argv) {
   return 0;
 }
 
-bool print_uptime = false;
-bool to_syslog = false;
-bool print_available_cameras = false;
+options opts;
 int main(int argc, char** argv) {
   PRINT_UPTIME();  // Although this is never printed, it's important because it
                    // sets the initial timer

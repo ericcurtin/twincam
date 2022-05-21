@@ -7,12 +7,11 @@
 
 int uptime(float* up, float* elapsed);
 
-extern bool print_uptime;
 extern float init_time;
 
 #define PRINT_UPTIME()                                                      \
   do {                                                                      \
-    if (print_uptime) {                                                     \
+    if (opts.print_uptime) {                                                \
       float up;                                                             \
       float elapsed;                                                        \
       uptime(&up, &elapsed);                                                \
