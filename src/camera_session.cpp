@@ -249,21 +249,21 @@ void CameraSession::processRequest(Request* request) {
   }
 
   const float elapsed = uptim - init_time;
-  std::string frame_str =
-      string_printf("%.6f (%.2f), (%.2f fps)", uptim, elapsed, fps);
+  std::string frame_str;
+  STRING_PRINTF(frame_str, "%.6f (%.2f), (%.2f fps)", uptim, elapsed, fps);
   for (const std::pair<const libcamera::Stream* const, libcamera::FrameBuffer*>&
            buf : buffers) {
     const FrameMetadata& metadata = buf.second->metadata();
 
-    frame_str += string_printf(
-        " %s seq: %d bytesused: ", streamNames_[buf.first].c_str(),
-        metadata.sequence);
+    STRING_PRINTF(frame_str,
+                  " %s seq: %d bytesused: ", streamNames_[buf.first].c_str(),
+                  metadata.sequence);
 
     unsigned int nplane = 0;
     for (const FrameMetadata::Plane& plane : metadata.planes()) {
-      frame_str += string_printf("%d", plane.bytesused);
+      STRING_PRINTF(frame_str, "%d", plane.bytesused);
       if (++nplane < metadata.planes().size())
-        frame_str += string_printf("/");
+        STRING_PRINTF(frame_str, "/");
     }
 
 #if 0  // not priority right now, for MJPG mainly
@@ -282,7 +282,7 @@ void CameraSession::processRequest(Request* request) {
    * Notify the user that capture is complete if the limit has just been
    * reached.
    */
-  captureCount_++;
+  ++captureCount_;
 
   /*
    * If the frame sink holds on the request, we'll requeue it later in the
