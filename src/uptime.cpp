@@ -52,32 +52,3 @@ int uptime(float* up, float* elapsed) {
   return 0;
 }
 
-void write_uptime_to_file() {
-  int fd = open(uptime_filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 00666);
-  if (fd < 0) {
-    eprint(
-        "errno: %d, %d = open(%s, "
-        "O_WRONLY|O_CREAT|O_TRUNC)\n",
-        errno, fd, uptime_filename.c_str());
-  }
-
-  ssize_t ret = write(fd, uptime_buf.c_str(), uptime_buf.size());
-  if (ret < 0) {
-    eprint("errno: %d, %ld = write(%d, uptime_buf, %zu)\n", errno, ret, fd,
-           uptime_buf.size());
-  }
-
-  close(fd);
-}
-
-void uptime_output(const std::string& s) {
-  if (!uptime_filename.empty()) {
-    uptime_buf += s;
-  }
-
-  if (to_syslog) {
-    syslog(LOG_INFO, "%s", s.c_str());
-  }
-
-  print("%s\n", s.c_str());
-}

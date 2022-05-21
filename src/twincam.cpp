@@ -22,7 +22,9 @@
 
 static void vprint(const char* const fmt, va_list args) {
   if (to_syslog) {
-    vsyslog(LOG_INFO, fmt, args);
+    va_list args2;
+    va_copy(args2, args);
+    vsyslog(LOG_INFO, fmt, args2);
   }
 
   vprintf(fmt, args);
@@ -30,7 +32,9 @@ static void vprint(const char* const fmt, va_list args) {
 
 static void veprint(const char* const fmt, va_list args) {
   if (to_syslog) {
-    vsyslog(LOG_INFO, fmt, args);
+    va_list args2;
+    va_copy(args2, args);
+    vsyslog(LOG_INFO, fmt, args2);
   }
 
   vfprintf(stderr, fmt, args);
@@ -138,15 +142,8 @@ int CamApp::run(int argc, char** argv) {
         break;
       case 'u':
         print_uptime = true;
-        if (((optarg == NULL && optind < argc && argv[optind][0] != '-')
-                 ? (bool)(optarg = argv[optind++])
-                 : (optarg != NULL))) {
-          uptime_filename = optarg;
-        }
-
         break;
       case 's':
-        print_uptime = true;
         to_syslog = true;
         openlog("twincam", 0, LOG_LOCAL1);
         break;
@@ -232,10 +229,6 @@ std::string CamApp::cameraName(const Camera* camera) {
 void signalHandler([[maybe_unused]] int signal) {
   print("Exiting\n");
   CamApp::instance()->quit();
-  if (!uptime_filename.empty()) {
-    write_uptime_to_file();
-  }
-
   if (to_syslog) {
     closelog();
   }
@@ -243,7 +236,6 @@ void signalHandler([[maybe_unused]] int signal) {
 
 bool print_uptime = false;
 bool to_syslog = false;
-std::string uptime_filename;
 std::string uptime_buf;
 size_t uptime_buf_size = 0;
 size_t uptime_buf_capacity = 0;
