@@ -11,7 +11,16 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 tests() {
+  set +e
+
   twincam
+  ret=$?
+  if [ "$ret" -ne "0" ] && [ "$ret" -ne "1" ]; then
+    exit $ret
+  fi
+
+  set -e
+
   twincam -h
   twincam -c
   twincam -u
