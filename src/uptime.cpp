@@ -10,6 +10,12 @@
 #include "twincam.h"
 #include "uptime.h"
 
+struct c_str {
+  ~c_str() { free(buf); }
+
+  char* buf = 0;
+};
+
 float init_time = 0;
 int uptime(float* up, float* elapsed) {
   int fd;
@@ -31,11 +37,11 @@ int uptime(float* up, float* elapsed) {
 
   buf[n] = '\0';
 
-  char* savelocale = strdup(setlocale(LC_NUMERIC, NULL));
+  c_str savelocale;
+  savelocale.buf = strdup(setlocale(LC_NUMERIC, NULL));
   setlocale(LC_NUMERIC, "C");
   if (sscanf(buf, "%f", up) < 1) {
-    setlocale(LC_NUMERIC, savelocale);
-    free(savelocale);
+    setlocale(LC_NUMERIC, savelocale.buf);
     fputs("bad data in /proc/uptime\n", stderr);
     return 104;
   }
@@ -47,8 +53,7 @@ int uptime(float* up, float* elapsed) {
     *elapsed = 0;
   }
 
-  setlocale(LC_NUMERIC, savelocale);
-  free(savelocale);
+  setlocale(LC_NUMERIC, savelocale.buf);
   return 0;
 }
 
