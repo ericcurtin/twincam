@@ -255,15 +255,14 @@ void CameraSession::processRequest(Request* request) {
            buf : buffers) {
     const FrameMetadata& metadata = buf.second->metadata();
 
-    STRING_PRINTF(frame_str,
-                  " %s seq: %d bytesused: ", streamNames_[buf.first].c_str(),
-                  metadata.sequence);
+    frame_str += " " + streamNames_[buf.first] +
+                 " seq: " + std::to_string(metadata.sequence) + " bytesused: ";
 
     unsigned int nplane = 0;
     for (const FrameMetadata::Plane& plane : metadata.planes()) {
-      STRING_PRINTF(frame_str, "%d", plane.bytesused);
+      frame_str += std::to_string(plane.bytesused);
       if (++nplane < metadata.planes().size())
-        STRING_PRINTF(frame_str, "/");
+        frame_str += "/";
     }
 
 #if 0  // not priority right now, for MJPG mainly
