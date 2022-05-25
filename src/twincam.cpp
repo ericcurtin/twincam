@@ -58,6 +58,16 @@ void eprint(const char* const fmt, ...) {
   va_end(args);
 }
 
+void verbose_print(const char* const fmt, ...) {
+  if (opts.verbose) {
+    va_list args;
+
+    va_start(args, fmt);
+    vprint(fmt, args);
+    va_end(args);
+  }
+}
+
 using namespace libcamera;
 
 class CamApp {
@@ -133,6 +143,8 @@ int CamApp::run() {
     for (size_t i = 0; i < cm_->cameras().size(); ++i) {
       print("%zu: %s\n", i, cameraName(cm_->cameras()[i].get()).c_str());
     }
+
+    return 0;
   }
 
   if (cm_->cameras().empty()) {
@@ -209,14 +221,14 @@ void signalHandler([[maybe_unused]] int signal) {
 }
 
 static int processArgs(int argc, char** argv) {
-  const struct option options[] = {{"list-cameras", no_argument, 0, 'c'},
-                                   {"help", no_argument, 0, 'h'},
-                                   {"uptime", optional_argument, 0, 'u'},
-                                   {NULL, 0, 0, '\0'}};
+  const struct option options[] = {
+      {"help", no_argument, 0, 'h'},    {"list-cameras", no_argument, 0, 'l'},
+      {"syslog", no_argument, 0, 's'},  {"uptime", no_argument, 0, 'u'},
+      {"verbose", no_argument, 0, 'v'}, {NULL, 0, 0, '\0'}};
   for (int opt;
-       (opt = getopt_long(argc, argv, "chu::s", options, NULL)) != -1;) {
+       (opt = getopt_long(argc, argv, "hlusv", options, NULL)) != -1;) {
     switch (opt) {
-      case 'c':
+      case 'l':
         opts.print_available_cameras = true;
         break;
       case 'u':
@@ -224,16 +236,22 @@ static int processArgs(int argc, char** argv) {
         break;
       case 's':
         opts.to_syslog = true;
+        setenv("LIBCAMERA_LOG_FILE", "syslog", 1);
         openlog("twincam", 0, LOG_LOCAL1);
+        break;
+      case 'v':
+        opts.verbose = true;
+        setenv("LIBCAMERA_LOG_LEVELS", "DEBUG", 1);
         break;
       default:
         print(
             "Usage: twincam [OPTIONS]\n\n"
             "Options:\n"
-            "  -c, --list-cameras  List cameras\n"
             "  -h, --help          Print this help\n"
+            "  -l, --list-cameras  List cameras\n"
             "  -u, --uptime        Trace the uptime\n"
-            "  -s, --syslog        Also trace output in syslog\n");
+            "  -s, --syslog        Also trace output in syslog\n"
+            "  -v, --verbose       Enable verbose logging\n");
         return 1;
     }
   }

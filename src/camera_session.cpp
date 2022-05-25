@@ -184,9 +184,11 @@ int CameraSession::startCapture() {
         sink_->mapBuffer(buffer.get());
     }
 
+    verbose_print("Pushing request onto vector\n");
     requests_.push_back(std::move(request));
   }
 
+  verbose_print("Buffers mapped... Starting camera\n");
   ret = camera_->start();
   if (ret) {
     print("Failed to start capture\n");
@@ -195,6 +197,7 @@ int CameraSession::startCapture() {
     return ret;
   }
 
+  verbose_print("Capture started\n");
   for (const std::unique_ptr<Request>& request : requests_) {
     ret = queueRequest(request.get());
     if (ret < 0) {
