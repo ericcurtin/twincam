@@ -180,6 +180,29 @@ static void printExit([[maybe_unused]] int signal) {
   }
 }
 
+static void chrootThis([[maybe_unused]] int signal) {
+  VERBOSE_PRINT("Chrooting: %d\n", signal);
+  int ret = chdir("/sysroot");
+  if (ret) {
+    EPRINT("chdir /sysroot failed: %d\n", ret);
+    return;
+  }
+
+  ret = chroot(".");
+  if (ret) {
+    EPRINT("chroot failed: %d\n", ret);
+    return;
+  }
+
+  ret = chdir("/");
+  if (ret) {
+    EPRINT("chdir / failed: %d\n", ret);
+    return;
+  }
+
+  setlocale(LC_ALL, "");
+}
+
 static int processArgs(int argc, char** argv) {
   const struct option options[] = {
       {"help", no_argument, 0, 'h'},    {"list-cameras", no_argument, 0, 'l'},
@@ -227,6 +250,7 @@ int main(int argc, char** argv) {
   CamApp app;
   struct sigaction sa = {};
   struct sigaction sa_err = {};
+  struct sigaction sa_chroot = {};
   int ret = processArgs(argc, argv);
   if (ret) {
     ret = 0;
@@ -241,6 +265,7 @@ int main(int argc, char** argv) {
 
   sa.sa_handler = &signalHandler;
   sa_err.sa_handler = &printExit;
+  sa_chroot.sa_handler = &chrootThis;
   sigaction(SIGINT, &sa, nullptr);
   sigaction(SIGFPE, &sa_err, nullptr);
   sigaction(SIGILL, &sa_err, nullptr);
@@ -250,6 +275,7 @@ int main(int argc, char** argv) {
   sigaction(SIGIOT, &sa_err, nullptr);
   sigaction(SIGTRAP, &sa_err, nullptr);
   sigaction(SIGSYS, &sa_err, nullptr);
+  sigaction(SIGUSR1, &sa_chroot, nullptr);
 
   if (app.exec()) {
     ret = EXIT_FAILURE;
