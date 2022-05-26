@@ -20,54 +20,6 @@
 #include "twincam.h"
 #include "uptime.h"
 
-static void vprint(const char* const fmt, va_list args) {
-  if (opts.to_syslog) {
-    va_list args2;
-    va_copy(args2, args);
-    vsyslog(LOG_INFO, fmt, args2);
-    va_end(args2);
-  }
-
-  vprintf(fmt, args);
-}
-
-static void veprint(const char* const fmt, va_list args) {
-  if (opts.to_syslog) {
-    va_list args2;
-    va_copy(args2, args);
-    vsyslog(LOG_INFO, fmt, args2);
-    va_end(args2);
-  }
-
-  vfprintf(stderr, fmt, args);
-}
-
-void print(const char* const fmt, ...) {
-  va_list args;
-
-  va_start(args, fmt);
-  vprint(fmt, args);
-  va_end(args);
-}
-
-void eprint(const char* const fmt, ...) {
-  va_list args;
-
-  va_start(args, fmt);
-  veprint(fmt, args);
-  va_end(args);
-}
-
-void verbose_print(const char* const fmt, ...) {
-  if (opts.verbose) {
-    va_list args;
-
-    va_start(args, fmt);
-    vprint(fmt, args);
-    va_end(args);
-  }
-}
-
 using namespace libcamera;
 
 class CamApp {
@@ -111,7 +63,7 @@ int CamApp::init() {
   cm_ = std::make_unique<CameraManager>();
 
   if (int ret = cm_->start(); ret) {
-    print("Failed to start camera manager: %s\n", strerror(-ret));
+    PRINT("Failed to start camera manager: %s\n", strerror(-ret));
     return ret;
   }
 
@@ -139,29 +91,29 @@ void CamApp::quit() {
 int CamApp::run() {
   PRINT_UPTIME();
   if (opts.print_available_cameras) {
-    print("Available cameras:\n");
+    PRINT("Available cameras:\n");
     for (size_t i = 0; i < cm_->cameras().size(); ++i) {
-      print("%zu: %s\n", i, cameraName(cm_->cameras()[i].get()).c_str());
+      PRINT("%zu: %s\n", i, cameraName(cm_->cameras()[i].get()).c_str());
     }
 
     return 0;
   }
 
   if (cm_->cameras().empty()) {
-    print("No cameras available\n");
+    PRINT("No cameras available\n");
     return 0;
   }
 
   CameraSession session(cm_.get());
   int ret = session.init();
   if (ret) {
-    print("Failed to init camera session\n");
+    PRINT("Failed to init camera session\n");
     return ret;
   }
 
   ret = session.start();
   if (ret) {
-    print("Failed to start camera session\n");
+    PRINT("Failed to start camera session\n");
     return ret;
   }
 
@@ -213,7 +165,7 @@ std::string CamApp::cameraName(const Camera* camera) {
 }
 
 void signalHandler([[maybe_unused]] int signal) {
-  print("Exiting\n");
+  PRINT("Exiting\n");
   CamApp::instance()->quit();
   if (opts.to_syslog) {
     closelog();
@@ -244,7 +196,7 @@ static int processArgs(int argc, char** argv) {
         setenv("LIBCAMERA_LOG_LEVELS", "DEBUG", 1);
         break;
       default:
-        print(
+        PRINT(
             "Usage: twincam [OPTIONS]\n\n"
             "Options:\n"
             "  -h, --help          Print this help\n"
@@ -263,20 +215,30 @@ options opts;
 int main(int argc, char** argv) {
   PRINT_UPTIME();  // Although this is never printed, it's important because it
                    // sets the initial timer
-  if (int ret = processArgs(argc, argv); ret) {
-    return 0;
-  }
 
   CamApp app;
-  if (int ret = app.init(); ret)
-    return ret == -EINTR ? 0 : EXIT_FAILURE;
-
   struct sigaction sa = {};
+  int ret = processArgs(argc, argv);
+  if (ret) {
+    ret = 0;
+    goto end;
+  }
+
+  ret = app.init();
+  if (ret) {
+    ret = ret == -EINTR ? 0 : EXIT_FAILURE;
+    goto end;
+  }
+
   sa.sa_handler = &signalHandler;
   sigaction(SIGINT, &sa, nullptr);
 
-  if (app.exec())
-    return EXIT_FAILURE;
+  if (app.exec()) {
+    ret = EXIT_FAILURE;
+    goto end;
+  }
 
-  return 0;
+end:
+  VERBOSE_PRINT("Exit with status: %d", ret);
+  return ret;
 }

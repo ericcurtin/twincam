@@ -11,6 +11,3 @@ struct options {
 
 extern options opts;
 
-void print(const char* const fmt, ...);
-void eprint(const char* const fmt, ...);
-void verbose_print(const char* const fmt, ...);

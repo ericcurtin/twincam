@@ -37,9 +37,9 @@ KMSSink::KMSSink(const std::string& connectorName) {
 
   if (!connector_) {
     if (!connectorName.empty())
-      eprint("Connector %s not found\n", connectorName.c_str());
+      EPRINT("Connector %s not found\n", connectorName.c_str());
     else
-      eprint("No connected connector found\n");
+      EPRINT("No connected connector found\n");
     return;
   }
 
@@ -190,12 +190,12 @@ int KMSSink::selectPipeline(const libcamera::PixelFormat& format) {
 int KMSSink::configurePipeline(const libcamera::PixelFormat& format) {
   PRINT_UPTIME();
   if (int ret = selectPipeline(format)) {
-    eprint("Unable to find display pipeline for format %s\n",
+    EPRINT("Unable to find display pipeline for format %s\n",
            format.toString().c_str());
     return ret;
   }
 
-  print("Using KMS plane %u, CRTC %u, connector %s (%u)\n", plane_->id(),
+  PRINT("Using KMS plane %u, CRTC %u, connector %s (%u)\n", plane_->id(),
         crtc_->id(), connector_->name().c_str(), connector_->id());
 
   return 0;
@@ -212,7 +212,7 @@ int KMSSink::stop() {
   request.addProperty(plane_, "FB_ID", 0);
 
   if (int ret = request.commit(DRM::AtomicRequest::FlagAllowModeset); ret < 0) {
-    eprint("Failed to stop display pipeline: %s\n", strerror(-ret));
+    EPRINT("Failed to stop display pipeline: %s\n", strerror(-ret));
     return ret;
   }
 
@@ -264,9 +264,9 @@ bool KMSSink::processRequest(libcamera::Request* camRequest) {
 
   if (!queued_) {
     if (int ret = drmRequest->commit(flags); ret < 0) {
-      eprint("Failed to commit atomic request: %s\n", strerror(-ret));
+      EPRINT("Failed to commit atomic request: %s\n", strerror(-ret));
       if (-ret == EACCES) {
-        eprint(
+        EPRINT(
             "You need to run 'sudo fgconsole -n | xargs sudo chvt' to switch\n"
             "out of Desktop Environment if you still have Gnome, XFCE, etc. \n"
             "running\n");

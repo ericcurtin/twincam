@@ -3,7 +3,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "string_printf.h"
+#include "print.h"
 
 int uptime(float* up, float* elapsed);
 
@@ -15,7 +15,7 @@ extern float init_time;
       float up;                                                             \
       float elapsed;                                                        \
       uptime(&up, &elapsed);                                                \
-      print("%.6f (%.2f), %s at %s:%d\n", up, elapsed, __PRETTY_FUNCTION__, \
+      PRINT("%.6f (%.2f), %s at %s:%d\n", up, elapsed, __PRETTY_FUNCTION__, \
             __FILE__, __LINE__);                                            \
     }                                                                       \
   } while (0)

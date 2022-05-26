@@ -48,7 +48,7 @@ std::unique_ptr<Image> Image::fromFrameBuffer(const FrameBuffer* buffer,
     const size_t length = mappedBuffers[fd].dmabufLength;
 
     if (plane.offset > length || plane.offset + plane.length > length) {
-      eprint(
+      EPRINT(
           "plane is out of buffer: buffer length=%ld, plane offset=%d, plane "
           "length=%d\n",
           length, plane.offset, plane.length);
@@ -68,7 +68,7 @@ std::unique_ptr<Image> Image::fromFrameBuffer(const FrameBuffer* buffer,
           mmap(nullptr, info.mapLength, mmapFlags, MAP_SHARED, fd, 0);
       if (address == MAP_FAILED) {
         int error = -errno;
-        eprint("Failed to mmap plane: %s\n", strerror(-error));
+        EPRINT("Failed to mmap plane: %s\n", strerror(-error));
         return nullptr;
       }
 

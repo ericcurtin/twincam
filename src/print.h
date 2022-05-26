@@ -19,3 +19,32 @@
                                                                     \
     snprintf(&str[write_point], size + 1, __VA_ARGS__);             \
   } while (0)
+
+#define PRINT(...)                   \
+  do {                               \
+    if (opts.to_syslog) {            \
+      syslog(LOG_INFO, __VA_ARGS__); \
+    }                                \
+                                     \
+    printf(__VA_ARGS__);             \
+  } while (0)
+
+#define EPRINT(...)                  \
+  do {                               \
+    if (opts.to_syslog) {            \
+      syslog(LOG_INFO, __VA_ARGS__); \
+    }                                \
+                                     \
+    fprintf(stderr, __VA_ARGS__);    \
+  } while (0)
+
+#define VERBOSE_PRINT(...)             \
+  do {                                 \
+    if (opts.verbose) {                \
+      if (opts.to_syslog) {            \
+        syslog(LOG_INFO, __VA_ARGS__); \
+      }                                \
+                                       \
+      printf(__VA_ARGS__);             \
+    }                                  \
+  } while (0)
