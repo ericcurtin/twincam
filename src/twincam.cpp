@@ -165,7 +165,7 @@ std::string CamApp::cameraName(const Camera* camera) {
 }
 
 static void signalHandler([[maybe_unused]] int signal) {
-  PRINT("Exiting\n");
+  VERBOSE_PRINT("Exiting\n");
   CamApp::instance()->quit();
   if (opts.to_syslog) {
     closelog();
@@ -173,7 +173,7 @@ static void signalHandler([[maybe_unused]] int signal) {
 }
 
 static void printExit([[maybe_unused]] int signal) {
-  VERBOSE_PRINT("Exit with signal: %d", signal);
+  VERBOSE_PRINT("Exit with signal: %d\n", signal);
   CamApp::instance()->quit();
   if (opts.to_syslog) {
     closelog();
@@ -257,6 +257,6 @@ int main(int argc, char** argv) {
   }
 
 end:
-  VERBOSE_PRINT("Exit with status: %d", ret);
+  VERBOSE_PRINT("Exit with status: %d\n", ret);
   return ret;
 }
