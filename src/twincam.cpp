@@ -164,8 +164,16 @@ std::string CamApp::cameraName(const Camera* camera) {
   return name;
 }
 
-void signalHandler([[maybe_unused]] int signal) {
+static void signalHandler([[maybe_unused]] int signal) {
   PRINT("Exiting\n");
+  CamApp::instance()->quit();
+  if (opts.to_syslog) {
+    closelog();
+  }
+}
+
+static void printExit([[maybe_unused]] int signal) {
+  VERBOSE_PRINT("Exit with signal: %d", signal);
   CamApp::instance()->quit();
   if (opts.to_syslog) {
     closelog();
@@ -218,6 +226,7 @@ int main(int argc, char** argv) {
 
   CamApp app;
   struct sigaction sa = {};
+  struct sigaction sa_err = {};
   int ret = processArgs(argc, argv);
   if (ret) {
     ret = 0;
@@ -231,7 +240,16 @@ int main(int argc, char** argv) {
   }
 
   sa.sa_handler = &signalHandler;
+  sa_err.sa_handler = &printExit;
   sigaction(SIGINT, &sa, nullptr);
+  sigaction(SIGFPE, &sa_err, nullptr);
+  sigaction(SIGILL, &sa_err, nullptr);
+  sigaction(SIGSEGV, &sa_err, nullptr);
+  sigaction(SIGBUS, &sa_err, nullptr);
+  sigaction(SIGABRT, &sa_err, nullptr);
+  sigaction(SIGIOT, &sa_err, nullptr);
+  sigaction(SIGTRAP, &sa_err, nullptr);
+  sigaction(SIGSYS, &sa_err, nullptr);
 
   if (app.exec()) {
     ret = EXIT_FAILURE;
