@@ -17,6 +17,7 @@
 
 #include "camera_session.h"
 #include "event_loop.h"
+#include "file.h"
 #include "twincam.h"
 #include "uptime.h"
 
@@ -203,17 +204,42 @@ static void chrootThis([[maybe_unused]] int signal) {
   setlocale(LC_ALL, "");
 }
 
+static int twincam_atoi(const char* buf) {
+  return strtol(buf, NULL, 10);
+}
+
 static int processArgs(int argc, char** argv) {
-  const struct option options[] = {
-      {"help", no_argument, 0, 'h'},    {"list-cameras", no_argument, 0, 'l'},
-      {"syslog", no_argument, 0, 's'},  {"uptime", no_argument, 0, 'u'},
-      {"verbose", no_argument, 0, 'v'}, {NULL, 0, 0, '\0'}};
+  const struct option options[] = {{"daemon", no_argument, 0, 'd'},
+                                   {"help", no_argument, 0, 'h'},
+                                   {"list-cameras", no_argument, 0, 'l'},
+                                   {"new-root-dir", no_argument, 0, 'n'},
+                                   {"syslog", no_argument, 0, 's'},
+                                   {"uptime", no_argument, 0, 'u'},
+                                   {"verbose", no_argument, 0, 'v'},
+                                   {NULL, 0, 0, '\0'}};
   for (int opt;
-       (opt = getopt_long(argc, argv, "hlusv", options, NULL)) != -1;) {
+       (opt = getopt_long(argc, argv, "dhlnusv", options, NULL)) != -1;) {
+    int fd;
     switch (opt) {
+      case 'd':
+        fd = twincam_open_write("/var/run/twincam.pid");
+        if (fd < 0) {
+          break;
+        }
+
+        pid_write(fd);
+        twincam_close(fd);
+        break;
       case 'l':
         opts.print_available_cameras = true;
         break;
+      case 'n':
+        fd = twincam_open_read("/var/run/twincam.pid");
+        char buf[16];
+        pid_read(fd, buf);
+        kill(twincam_atoi(buf), SIGUSR1);
+
+        return 1;
       case 'u':
         opts.print_uptime = true;
         break;
@@ -230,11 +256,16 @@ static int processArgs(int argc, char** argv) {
         PRINT(
             "Usage: twincam [OPTIONS]\n\n"
             "Options:\n"
+            "  -d, --daemon        Daemon mode (write a pid file "
+            "/var/run/twincam.pid)\n"
             "  -h, --help          Print this help\n"
             "  -l, --list-cameras  List cameras\n"
+            "  -n, --new-root-dir  chroot to /sysroot (sends SIGUSR1 to "
+            "pidfile pid)\n"
             "  -u, --uptime        Trace the uptime\n"
             "  -s, --syslog        Also trace output in syslog\n"
             "  -v, --verbose       Enable verbose logging\n");
+
         return 1;
     }
   }

@@ -15,6 +15,7 @@ incdir = include_directories('/usr/include/libcamera')
 twincam_sources = files([
     'src/camera_session.cpp',
     'src/event_loop.cpp',
+    'src/file.cpp',
     'src/twincam.cpp',
     'src/drm.cpp',
     'src/kms_sink.cpp',
