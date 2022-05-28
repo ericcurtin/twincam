@@ -20,9 +20,11 @@
 
 using namespace libcamera;
 
-CameraSession::CameraSession(const CameraManager* const cm)
-    : camera_(cm->cameras()[opts.camera]) {
+CameraSession::CameraSession(const CameraManager* const cm) {
   PRINT_UPTIME();
+  if (opts.camera < cm->cameras().size()) {
+    camera_ = cm->cameras()[opts.camera];
+  }
 }
 
 CameraSession::~CameraSession() {
