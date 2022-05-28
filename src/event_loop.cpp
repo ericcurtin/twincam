@@ -6,8 +6,8 @@
  */
 
 #include "event_loop.h"
-#include "print.h"
 #include "twincam.h"
+#include "twncm_stdio.h"
 
 #include <assert.h>
 #include <event2/event.h>

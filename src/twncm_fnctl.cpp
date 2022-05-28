@@ -1,10 +1,10 @@
-#include "file.h"
+#include "twncm_fnctl.h"
 #include <fcntl.h>
 #include <unistd.h>
-#include "print.h"
 #include "twincam.h"
+#include "twncm_stdio.h"
 
-int twincam_open_write(const char* file) {
+int twncm_open_write(const char* file) {
   int fd_ = open(file, O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0666);
   if (fd_ < 0) {
     EPRINT("Failed to open file %s: %s\n", file, strerror(errno));
@@ -13,7 +13,7 @@ int twincam_open_write(const char* file) {
   return fd_;
 }
 
-int twincam_open_read(const char* file) {
+int twncm_open_read(const char* file) {
   int fd_ = open(file, O_RDONLY | O_CLOEXEC);
   if (fd_ < 0) {
     EPRINT("Failed to open file %s: %s\n", file, strerror(errno));
@@ -44,7 +44,7 @@ int pid_read(const int pidfile_fd, char* const buf) {
   return bytes_read;
 }
 
-int twincam_close(const int fd) {
+int twncm_close(const int fd) {
   int ret = close(fd);
   if (ret < 0) {
     EPRINT("Failed %d = close(%d): %s\n", ret, fd, strerror(errno));
@@ -53,7 +53,7 @@ int twincam_close(const int fd) {
   return ret;
 }
 
-int twincam_remove(const char* file) {
+int twncm_remove(const char* file) {
   int ret = unlink(file);
   if (ret < 0) {
     EPRINT("Failed %d = unlink(%s): %s\n", ret, file, strerror(errno));

@@ -3,7 +3,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "print.h"
+#include "twncm_stdio.h"
 
 int uptime(float* up, float* elapsed);
 

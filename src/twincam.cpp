@@ -17,8 +17,9 @@
 
 #include "camera_session.h"
 #include "event_loop.h"
-#include "file.h"
 #include "twincam.h"
+#include "twncm_fnctl.h"
+#include "twncm_stdlib.h"
 #include "uptime.h"
 
 using namespace libcamera;
@@ -204,12 +205,9 @@ static void chrootThis([[maybe_unused]] int signal) {
   setlocale(LC_ALL, "");
 }
 
-static int twincam_atoi(const char* buf) {
-  return strtol(buf, NULL, 10);
-}
-
 static int processArgs(int argc, char** argv) {
-  const struct option options[] = {{"daemon", no_argument, 0, 'd'},
+  const struct option options[] = {{"camera", required_argument, 0, 'c'},
+                                   {"daemon", no_argument, 0, 'd'},
                                    {"help", no_argument, 0, 'h'},
                                    {"list-cameras", no_argument, 0, 'l'},
                                    {"new-root-dir", no_argument, 0, 'n'},
@@ -218,26 +216,29 @@ static int processArgs(int argc, char** argv) {
                                    {"verbose", no_argument, 0, 'v'},
                                    {NULL, 0, 0, '\0'}};
   for (int opt;
-       (opt = getopt_long(argc, argv, "dhlnusv", options, NULL)) != -1;) {
+       (opt = getopt_long(argc, argv, "c:dhlnusv", options, NULL)) != -1;) {
     int fd;
     switch (opt) {
+      case 'c':
+        opts.camera = twncm_atoi(optarg);
+        break;
       case 'd':
-        fd = twincam_open_write("/var/run/twincam.pid");
+        fd = twncm_open_write("/var/run/twincam.pid");
         if (fd < 0) {
           break;
         }
 
         pid_write(fd);
-        twincam_close(fd);
+        twncm_close(fd);
         break;
       case 'l':
         opts.print_available_cameras = true;
         break;
       case 'n':
-        fd = twincam_open_read("/var/run/twincam.pid");
+        fd = twncm_open_read("/var/run/twincam.pid");
         char buf[16];
         pid_read(fd, buf);
-        kill(twincam_atoi(buf), SIGUSR1);
+        kill(twncm_atoi(buf), SIGUSR1);
 
         return 1;
       case 'u':
@@ -256,6 +257,7 @@ static int processArgs(int argc, char** argv) {
         PRINT(
             "Usage: twincam [OPTIONS]\n\n"
             "Options:\n"
+            "  -c, --camera        Camera to select\n"
             "  -d, --daemon        Daemon mode (write a pid file "
             "/var/run/twincam.pid)\n"
             "  -h, --help          Print this help\n"

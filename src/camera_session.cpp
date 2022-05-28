@@ -21,7 +21,7 @@
 using namespace libcamera;
 
 CameraSession::CameraSession(const CameraManager* const cm)
-    : camera_(cm->cameras()[0]) {
+    : camera_(cm->cameras()[opts.camera]) {
   PRINT_UPTIME();
 }
 

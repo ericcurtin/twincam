@@ -15,7 +15,7 @@
 #include <set>
 #include <string>
 #include <vector>
-#include "print.h"
+#include "twncm_stdio.h"
 
 #include <libcamera/base/signal.h>
 #include <libcamera/base/span.h>
