@@ -318,8 +318,8 @@ void CameraSession::processRequest(Request* request) {
    */
   ++captureCount_;
   if (opts.capture && captureCount_ >= opts.capture) {
-    exit(0);
     captureDone.emit();
+    exit(0);
     return;
   }
 

@@ -64,12 +64,13 @@ CamApp* CamApp::instance() {
 int CamApp::init() {
   cm_ = std::make_unique<CameraManager>();
 
-  if (int ret = cm_->start(); ret) {
+  int ret = 0;
+  for (int i = 0; (ret = cm_->start()) && i < 100; ++i) {
     PRINT("Failed to start camera manager: %s\n", strerror(-ret));
-    return ret;
+    usleep(10000);
   }
 
-  return 0;
+  return ret;
 }
 
 void CamApp::cleanup() const {
@@ -101,9 +102,9 @@ int CamApp::run() {
     return 0;
   }
 
-  if (cm_->cameras().empty()) {
+  for (int i = 0; cm_->cameras().empty() && i < 100; ++i) {
     PRINT("No cameras available\n");
-    return 0;
+    usleep(10000);
   }
 
   CameraSession session(cm_.get());
