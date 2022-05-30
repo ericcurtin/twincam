@@ -207,6 +207,7 @@ static void chrootThis([[maybe_unused]] int signal) {
 
 static int processArgs(int argc, char** argv) {
   const struct option options[] = {{"camera", required_argument, 0, 'c'},
+                                   {"capture", required_argument, 0, 'C'},
                                    {"daemon", no_argument, 0, 'd'},
                                    {"help", no_argument, 0, 'h'},
                                    {"list-cameras", no_argument, 0, 'l'},
@@ -218,11 +219,14 @@ static int processArgs(int argc, char** argv) {
                                    {"pixel-format", no_argument, 0, 'p'},
                                    {NULL, 0, 0, '\0'}};
   for (int opt;
-       (opt = getopt_long(argc, argv, "c:dhlnusvSp:", options, NULL)) != -1;) {
+       (opt = getopt_long(argc, argv, "c:C:dhlnusSp:v", options, NULL)) != -1;) {
     int fd;
     switch (opt) {
       case 'c':
         opts.camera = twncm_atoi(optarg);
+        break;
+      case 'C':
+        opts.capture = twncm_atoi(optarg);
         break;
       case 'd':
         fd = twncm_open_write("/var/run/twincam.pid");
@@ -266,6 +270,7 @@ static int processArgs(int argc, char** argv) {
             "Usage: twincam [OPTIONS]\n\n"
             "Options:\n"
             "  -c, --camera        Camera to select\n"
+            "  -C, --capture       Capture until <count> frames captured\n"
             "  -d, --daemon        Daemon mode (write a pid file "
             "/var/run/twincam.pid)\n"
             "  -h, --help          Print this help\n"

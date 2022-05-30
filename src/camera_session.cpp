@@ -237,6 +237,11 @@ int CameraSession::startCapture() {
 }
 
 int CameraSession::queueRequest(Request* request) {
+  if (opts.capture && queueCount_ >= opts.capture) {
+    exit(0);
+    return 0;
+  }
+
   ++queueCount_;
 
   return camera_->queueRequest(request);
@@ -255,6 +260,11 @@ void CameraSession::requestComplete(Request* request) {
 }
 
 void CameraSession::processRequest(Request* request) {
+  if (opts.capture && captureCount_ >= opts.capture) {
+    exit(0);
+    return;
+  }
+
   const Request::BufferMap& buffers = request->buffers();
 
   /*
@@ -307,6 +317,11 @@ void CameraSession::processRequest(Request* request) {
    * reached.
    */
   ++captureCount_;
+  if (opts.capture && captureCount_ >= opts.capture) {
+    exit(0);
+    captureDone.emit();
+    return;
+  }
 
   /*
    * If the frame sink holds on the request, we'll requeue it later in the

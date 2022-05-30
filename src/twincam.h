@@ -5,6 +5,7 @@
 
 struct options {
   unsigned long camera = 0;
+  unsigned long capture = 0;
   bool print_available_cameras = false;
   bool print_uptime = false;
   bool to_syslog = false;
