@@ -18,6 +18,9 @@ installkernel() {
 # called by dracut
 install() {
     inst /usr/bin/twincam
+    inst $systemdsystemunitdir/twincam.service \
+         $systemdsystemunitdir/sysinit.target.wants/twincam.service
+
     # install libs
     inst_libdir_file "libcamera*.so*"
     inst_libdir_file "libcamera/ipa_*.so*"
