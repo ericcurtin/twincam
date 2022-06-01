@@ -8,13 +8,26 @@ A lightweight camera application, designed to start quickly in a bare environmen
 
 # To build, install and run twincam
 
-On fedora (steps should be similar on other platforms):
+On Fedora (steps should be similar on other platforms):
 
 ```
 sudo dnf install -y git gcc g++ libevent libevent-devel openssl openssl-devel \
   gnutls gnutls-devel meson boost boost-devel python3-jinja2 python3-ply \
   python3-yaml libdrm libdrm-devel systemd-udev doxygen cmake graphviz \
   libatomic texlive-latex
+```
+
+On Clear Linux:
+
+```
+sudo swupd bundle-add vim git dev-utils devpkg-gnutls devpkg-boost \
+  devpkg-libevent devpkg-libdrm
+sudo pip install jinja2 ply pyyaml
+``
+
+On all platforms:
+
+```
 git clone https://git.libcamera.org/libcamera/libcamera.git
 cd libcamera
 meson build --prefix=/usr && ninja -v -C build && sudo ninja -v -C build install
