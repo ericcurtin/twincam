@@ -7,6 +7,7 @@
 
 #include "image.h"
 #include "twincam.h"
+#include "twncm_stdio.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -39,7 +40,7 @@ std::unique_ptr<Image> Image::fromFrameBuffer(const FrameBuffer* buffer,
   std::map<int, MappedBufferInfo> mappedBuffers;
 
   for (const FrameBuffer::Plane& plane : buffer->planes()) {
-    const int fd = plane.fd.fd();
+    const int fd = plane.fd.get();
     if (mappedBuffers.find(fd) == mappedBuffers.end()) {
       const size_t length = lseek(fd, 0, SEEK_END);
       mappedBuffers[fd] = MappedBufferInfo{nullptr, 0, length};
@@ -61,7 +62,7 @@ std::unique_ptr<Image> Image::fromFrameBuffer(const FrameBuffer* buffer,
   }
 
   for (const FrameBuffer::Plane& plane : buffer->planes()) {
-    const int fd = plane.fd.fd();
+    const int fd = plane.fd.get();
     auto& info = mappedBuffers[fd];
     if (!info.address) {
       void* address =

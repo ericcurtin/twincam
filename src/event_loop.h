@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <functional>
 #include <list>
 #include <memory>
@@ -33,7 +34,11 @@ class EventLoop {
 
   void callLater(const std::function<void()>& func);
 
-  void addEvent(int fd, EventType type, const std::function<void()>& handler);
+  void addFdEvent(int fd, EventType type, const std::function<void()>& handler);
+
+  using duration = std::chrono::steady_clock::duration;
+  void addTimerEvent(const std::chrono::microseconds period,
+                     const std::function<void()>& handler);
 
  private:
   struct Event {

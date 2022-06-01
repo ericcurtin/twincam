@@ -20,19 +20,18 @@
 #include <libcamera/pixel_format.h>
 
 #include "drm.h"
+#include "frame_sink.h"
 
-class KMSSink {
+class KMSSink : public FrameSink {
  public:
   KMSSink(const std::string& connectorName);
 
-  void mapBuffer(libcamera::FrameBuffer* buffer);
+  void mapBuffer(libcamera::FrameBuffer* buffer) override;
 
-  int configure(const libcamera::CameraConfiguration& config);
-  int stop();
+  int configure(const libcamera::CameraConfiguration& config) override;
+  int stop() override;
 
-  bool processRequest(libcamera::Request* request);
-
-  libcamera::Signal<libcamera::Request*> requestProcessed;
+  bool processRequest(libcamera::Request* request) override;
 
  private:
   class Request {
