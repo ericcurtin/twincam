@@ -23,7 +23,7 @@ On Clear Linux:
 sudo swupd bundle-add vim git dev-utils devpkg-gnutls devpkg-boost \
   devpkg-libevent devpkg-libdrm
 sudo pip install jinja2 ply pyyaml
-``
+```
 
 On all platforms:
 
