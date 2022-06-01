@@ -329,11 +329,16 @@ int Device::init() {
    * from drmOpen() is of no practical use as any modern system will
    * handle that through udev or an equivalent component.
    */
-  const char* name = "/dev/dri/card0";
-  fd_ = open(name, O_RDWR | O_CLOEXEC);
+  std::string name;
+  for (int i = 0; fd_ < 0 && i < 10; ++i) {
+    name = "/dev/dri/card" + std::to_string(i);
+    fd_ = open(name.c_str(), O_RDWR | O_CLOEXEC);
+  }
+
   if (fd_ < 0) {
     ret = -errno;
-    EPRINT("Failed to open DRM/KMS device %s: %s\n", name, strerror(-ret));
+    EPRINT("Failed to open DRM/KMS device %s: %s\n", name.c_str(),
+           strerror(-ret));
     return ret;
   }
 
