@@ -18,6 +18,10 @@
 #include "twincam.h"
 #include "uptime.h"
 
+#ifdef HAVE_SDL
+#include "sdl_sink.h"
+#endif
+
 using namespace libcamera;
 
 CameraSession::CameraSession(const CameraManager* const cm) {
@@ -51,7 +55,7 @@ int CameraSession::init() {
     return 0;
   }
 
-  config->at(0).pixelFormat = PixelFormat::fromString("YUYV");
+  config->at(0).pixelFormat = PixelFormat::fromString(opts.opt_pf);
 
   switch (config->validate()) {
     case CameraConfiguration::Valid:
@@ -94,7 +98,15 @@ int CameraSession::start() {
   }
 
   camera_->requestCompleted.connect(this, &CameraSession::requestComplete);
-  sink_ = std::make_unique<KMSSink>("");
+
+#ifdef HAVE_SDL
+  if (opts.opt_sdl) {
+    sink_ = std::make_unique<SDLSink>();
+  } else
+#endif
+  {
+    sink_ = std::make_unique<KMSSink>("");
+  }
 
   ret = sink_->configure(*config_);
   if (ret < 0) {
@@ -188,6 +200,14 @@ int CameraSession::startCapture() {
 
     VERBOSE_PRINT("Pushing request onto vector\n");
     requests_.push_back(std::move(request));
+  }
+
+  if (sink_) {
+    ret = sink_->start();
+    if (ret) {
+      PRINT("Failed to start frame sink");
+      return ret;
+    }
   }
 
   VERBOSE_PRINT("Buffers mapped... Starting camera\n");
