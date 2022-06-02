@@ -67,7 +67,7 @@ int CamApp::init() {
   int ret = 0;
   for (int i = 0; (ret = cm_->start()) && i < 100; ++i) {
     PRINT("Failed to start camera manager: %s\n", strerror(-ret));
-    usleep(20000);
+    usleep(40000);
   }
 
   return ret;
@@ -104,7 +104,7 @@ int CamApp::run() {
 
   for (int i = 0; cm_->cameras().empty() && i < 100; ++i) {
     PRINT("No cameras available\n");
-    usleep(20000);
+    usleep(40000);
   }
 
   CameraSession session(cm_.get());
