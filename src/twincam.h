@@ -8,6 +8,7 @@ struct options {
   bool print_uptime = false;
   bool to_syslog = false;
   bool verbose = false;
+  bool opt_sdl = false;
 };
 
 extern options opts;

@@ -214,9 +214,10 @@ static int processArgs(int argc, char** argv) {
                                    {"syslog", no_argument, 0, 's'},
                                    {"uptime", no_argument, 0, 'u'},
                                    {"verbose", no_argument, 0, 'v'},
+                                   {"OptSDL", no_argument, 0, 'z'},
                                    {NULL, 0, 0, '\0'}};
   for (int opt;
-       (opt = getopt_long(argc, argv, "c:dhlnusv", options, NULL)) != -1;) {
+       (opt = getopt_long(argc, argv, "c:dhlnusvz", options, NULL)) != -1;) {
     int fd;
     switch (opt) {
       case 'c':
@@ -244,10 +245,8 @@ static int processArgs(int argc, char** argv) {
       case 'u':
         opts.print_uptime = true;
         break;
-      case 's':
-        opts.to_syslog = true;
-        setenv("LIBCAMERA_LOG_FILE", "syslog", 1);
-        openlog("twincam", 0, LOG_LOCAL1);
+      case 'z':
+        opts.opt_sdl = true;
         break;
       case 'v':
         opts.verbose = true;
@@ -262,6 +261,7 @@ static int processArgs(int argc, char** argv) {
             "/var/run/twincam.pid)\n"
             "  -h, --help          Print this help\n"
             "  -l, --list-cameras  List cameras\n"
+            "  -z, --sdl          Display viewfinder through SDL\n"
             "  -n, --new-root-dir  chroot to /sysroot (sends SIGUSR1 to "
             "pidfile pid)\n"
             "  -u, --uptime        Trace the uptime\n"

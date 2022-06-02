@@ -18,6 +18,10 @@
 #include "twincam.h"
 #include "uptime.h"
 
+#ifdef HAVE_SDL
+#include "sdl_sink.h"
+#endif
+
 using namespace libcamera;
 
 CameraSession::CameraSession(const CameraManager* const cm) {
@@ -94,7 +98,12 @@ int CameraSession::start() {
   }
 
   camera_->requestCompleted.connect(this, &CameraSession::requestComplete);
-  sink_ = std::make_unique<KMSSink>("");
+
+	if (opts.opt_sdl)
+		sink_ = std::make_unique<SDLSink>();
+  else
+    sink_ = std::make_unique<KMSSink>("");
+
 
   ret = sink_->configure(*config_);
   if (ret < 0) {

@@ -9,6 +9,7 @@ project('twincam', 'c', 'cpp',
 libcamera = dependency('libcamera')
 libevent = dependency('libevent_pthreads')
 libdrm = dependency('libdrm')
+libsdl2 = dependency('SDL2', required : false)
 
 incdir = include_directories('/usr/include/libcamera')
 
@@ -22,11 +23,22 @@ twincam_sources = files([
     'src/uptime.cpp'
 ])
 
+if libsdl2.found()
+    cam_cpp_args = ['-DHAVE_SDL']
+    twincam_sources += files([
+        'src/sdl_sink.cpp',
+        'src/sdl_texture.cpp',
+        'src/sdl_texture_yuyv.cpp'
+    ])
+endif
+
+
 twincam  = executable('twincam', twincam_sources, include_directories : incdir,
                   dependencies : [
                       libcamera,
                       libdrm,
                       libevent,
+                      libsdl2,
                   ],
                   install : true)
 
