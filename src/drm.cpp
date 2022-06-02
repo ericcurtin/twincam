@@ -7,6 +7,7 @@
 
 #include "drm.h"
 
+#include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
@@ -320,7 +321,13 @@ Device::~Device() {
 }
 
 int Device::init() {
-  int ret;
+  constexpr size_t DIR_NAME_MAX = sizeof("/dev/dri/");
+  constexpr size_t PRE_NODE_NAME_MAX = sizeof("card");
+  constexpr size_t POST_NODE_NAME_MAX = sizeof("255");
+  constexpr size_t NODE_NAME_MAX =
+      DIR_NAME_MAX + PRE_NODE_NAME_MAX + POST_NODE_NAME_MAX - 2;
+  char name[NODE_NAME_MAX] = "/dev/dri/";
+  int ret = 0;
 
   /*
    * Open the first DRM/KMS device. The libdrm drmOpen*() functions
@@ -329,17 +336,31 @@ int Device::init() {
    * from drmOpen() is of no practical use as any modern system will
    * handle that through udev or an equivalent component.
    */
-  std::string name;
-  for (int i = 0; fd_ < 0 && i < 10; ++i) {
-    name = "/dev/dri/card" + std::to_string(i);
-    fd_ = open(name.c_str(), O_RDWR | O_CLOEXEC);
+  DIR* folder = opendir(name);
+  memcpy(name + DIR_NAME_MAX - 1, "card", PRE_NODE_NAME_MAX);
+  if (folder) {
+    for (struct dirent* res; (res = readdir(folder));) {
+      if (!strncmp(res->d_name, "card", 4)) {
+        memcpy(name + DIR_NAME_MAX + PRE_NODE_NAME_MAX - 2,
+               res->d_name + PRE_NODE_NAME_MAX - 1, POST_NODE_NAME_MAX);
+        fd_ = open(name, O_RDWR | O_CLOEXEC);
+        if (fd_ < 0) {
+          ret = -errno;
+          EPRINT("Failed to open DRM/KMS device %s: %s\n", name,
+                 strerror(-ret));
+          continue;
+        }
+
+        break;
+      }
+    }
+
+    closedir(folder);
   }
 
   if (fd_ < 0) {
-    ret = -errno;
-    EPRINT("Failed to open DRM/KMS device %s: %s\n", name.c_str(),
-           strerror(-ret));
-    return ret;
+    EPRINT("Unable to open any DRM/KMS device\n");
+    return ret ? ret : -ENOENT;
   }
 
   /*
