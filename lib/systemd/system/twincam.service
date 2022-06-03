@@ -1,16 +1,16 @@
 [Unit]
-Description=Show twincam
+Description=Show Twincam Boot Screen
 DefaultDependencies=no
-Wants=systemd-ask-password-plymouth.path systemd-vconsole-setup.service
+Wants=systemd-vconsole-setup.service
 After=systemd-vconsole-setup.service systemd-udev-trigger.service systemd-udevd.service
-Before=systemd-ask-password-plymouth.service
-ConditionKernelCommandLine=!plymouth.enable=0
+RequiresMountsFor=/sys/bus/media/devices /dev
+Before=sysinit.target
 ConditionVirtualization=!container
 IgnoreOnIsolate=true
 
 [Service]
-ExecStart=/usr/bin/twincam
-Type=simple
+ExecStart=/usr/bin/twincam -C100
+Type=forking
 RemainAfterExit=yes
 KillMode=mixed
 SendSIGKILL=no
