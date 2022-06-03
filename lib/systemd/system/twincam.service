@@ -1,15 +1,12 @@
 [Unit]
 Description=Show Twincam Boot Screen
 DefaultDependencies=no
-Wants=systemd-vconsole-setup.service
-After=systemd-vconsole-setup.service systemd-udev-trigger.service systemd-udevd.service
-RequiresMountsFor=/sys/bus/media/devices /dev
-Before=sysinit.target
+Before=-.slice
 ConditionVirtualization=!container
 IgnoreOnIsolate=true
 
 [Service]
-ExecStart=/usr/bin/twincam -C100
+ExecStart=/usr/bin/twincam -C100 -u -s -v
 Type=forking
 RemainAfterExit=yes
 KillMode=mixed
