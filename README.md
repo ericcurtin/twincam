@@ -25,6 +25,14 @@ sudo swupd bundle-add vim git dev-utils devpkg-gnutls devpkg-boost \
 sudo pip install jinja2 ply pyyaml
 ```
 
+On Alpine (enable community repo in /etc/apk/repositories):
+
+```
+sudo apk add git vim gcc meson g++ pkgconf gnutls-dev cmake boost-dev py-pip \
+  ccache libevent-dev libdrm-dev
+sudo pip install jinja2 ply pyyaml
+```
+
 On all platforms:
 
 ```
