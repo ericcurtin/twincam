@@ -40,7 +40,7 @@ sudo swupd bundle-add vim git dev-utils devpkg-gnutls devpkg-boost \
 On Ubuntu:
 
 ```
-apt install -y clang gnutls-dev libboost-dev meson cmake pkg-config \
+sudo apt install -y clang gnutls-dev libboost-dev meson cmake pkg-config \
   libevent-dev libdrm-dev gcc make autoconf automake cppcheck libsdl2-dev \
   meson vim libgtest-dev libyaml-dev curl zip valgrind libasan5 \
   libsdl2-image-dev python3-pip
