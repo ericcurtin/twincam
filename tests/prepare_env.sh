@@ -15,9 +15,7 @@ if command -v apt > /dev/null; then
   $prefix apt install -y gnutls-dev || true
   $prefix apt install -y libboost-dev || true
   $prefix apt install -y meson || true
-  $prefix apt install -y python3-jinja2 || true
-  $prefix apt install -y python3-ply || true
-  $prefix apt install -y python3-yaml || true
+  $prefix apt install -y python3-pip || true
   $prefix apt install -y cmake || true
   $prefix apt install -y pkg-config || true
   $prefix apt install -y libevent-dev || true
@@ -30,8 +28,6 @@ if command -v apt > /dev/null; then
   $prefix apt install -y libsdl2-dev || true
   $prefix apt install -y meson || true
   $prefix apt install -y vim || true
-  $prefix apt install -y python3-jinja2 || true
-  $prefix apt install -y python3-ply || true
   $prefix apt install -y libgtest-dev || true
   $prefix apt install -y libyaml-dev || true
   $prefix apt install -y curl || true
@@ -45,9 +41,10 @@ elif command -v dnf > /dev/null; then
   $prefix dnf install -y epel-release || true
   $prefix dnf install -y SDL2_image-devel || true
   $prefix dnf install -y git gcc g++ libevent libevent-devel openssl \
-    openssl-devel gnutls gnutls-devel meson boost boost-devel python3-jinja2 \
-    python3-ply python3-yaml libdrm libdrm-devel systemd-udev doxygen cmake \
-    graphviz libatomic texlive-latex cppcheck libyaml-devel clang zip valgrind \
-    libasan findutils
+    openssl-devel gnutls gnutls-devel meson boost boost-devel python3-pip \
+    libdrm libdrm-devel systemd-udev doxygen cmake graphviz libatomic \
+    texlive-latex cppcheck libyaml-devel clang zip valgrind libasan findutils
 fi
+
+$prefix pip install jinja2 ply pyyaml
 
