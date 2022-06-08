@@ -320,54 +320,57 @@ Device::~Device() {
     drmClose(fd_);
 }
 
-int Device::init() {
-  constexpr size_t DIR_NAME_MAX = sizeof("/dev/dri/");
-  constexpr size_t PRE_NODE_NAME_MAX = sizeof("card");
-  constexpr size_t POST_NODE_NAME_MAX = sizeof("255");
+static int openCard() {
+  constexpr size_t DIR_NAME_MAX = sizeof("/dev/dri/") - 1;
+  constexpr size_t PRE_NODE_NAME_MAX = sizeof("card") - 1;
+  constexpr size_t POST_NODE_NAME_MAX = sizeof("255") - 1;
   constexpr size_t NODE_NAME_MAX =
-      DIR_NAME_MAX + PRE_NODE_NAME_MAX + POST_NODE_NAME_MAX - 2;
-  char name[NODE_NAME_MAX] = "/dev/dri/";
-  int ret = 0;
+      DIR_NAME_MAX + PRE_NODE_NAME_MAX + POST_NODE_NAME_MAX;
+  char name[NODE_NAME_MAX + 1] = "/dev/dri/";
+  int fd = -1;
 
   /*
    * Open the first DRM/KMS device. The libdrm drmOpen*() functions
-   * require either a module name or a bus ID, which we don't have, so
-   * bypass them. The automatic module loading and device node creation
    * from drmOpen() is of no practical use as any modern system will
    * handle that through udev or an equivalent component.
    */
   DIR* folder = opendir(name);
-  memcpy(name + DIR_NAME_MAX - 1, "card", PRE_NODE_NAME_MAX);
-  if (folder) {
-    for (struct dirent* res; (res = readdir(folder));) {
-      if (!strncmp(res->d_name, "card", 4)) {
-        memcpy(name + DIR_NAME_MAX + PRE_NODE_NAME_MAX - 2,
-               res->d_name + PRE_NODE_NAME_MAX - 1, POST_NODE_NAME_MAX);
-        fd_ = open(name, O_RDWR | O_CLOEXEC);
-        if (fd_ < 0) {
-          ret = -errno;
-          EPRINT("Failed to open DRM/KMS device %s: %s\n", name,
-                 strerror(-ret));
-          continue;
-        }
-
-        break;
-      }
-    }
-
-    closedir(folder);
+  if (!folder) {
+    EPRINT("Failed to open %s directory: %s\n", name, strerror(errno));
+    return -1;
   }
 
+  memcpy(name + DIR_NAME_MAX, "card", PRE_NODE_NAME_MAX);
+  for (struct dirent* res; (res = readdir(folder));) {
+    if (!memcmp(res->d_name, "card", PRE_NODE_NAME_MAX)) {
+      memcpy(name + DIR_NAME_MAX + PRE_NODE_NAME_MAX,
+             res->d_name + PRE_NODE_NAME_MAX, POST_NODE_NAME_MAX + 1);
+      fd = open(name, O_RDWR | O_CLOEXEC);
+      if (fd >= 0) {
+        break;
+      }
+
+      EPRINT("Failed to open DRM/KMS device %s: %s\n", name, strerror(errno));
+    }
+  }
+
+  closedir(folder);
+
+  return fd;
+}
+
+int Device::init() {
+  int fd_ = openCard();
   if (fd_ < 0) {
-    EPRINT("Unable to open any DRM/KMS device\n");
-    return ret ? ret : -ENOENT;
+    EPRINT("Failed to open any DRM/KMS device\n");
+    return fd_;
   }
 
   /*
    * Enable the atomic APIs. This also automatically enables the
    * universal planes API.
    */
-  ret = drmSetClientCap(fd_, DRM_CLIENT_CAP_ATOMIC, 1);
+  int ret = drmSetClientCap(fd_, DRM_CLIENT_CAP_ATOMIC, 1);
   if (ret < 0) {
     ret = -errno;
     EPRINT("Failed to enable atomic capability: %s\n", strerror(-ret));
