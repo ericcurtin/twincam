@@ -360,7 +360,7 @@ static int openCard() {
 }
 
 int Device::init() {
-  int fd_ = openCard();
+  fd_ = openCard();
   if (fd_ < 0) {
     EPRINT("Failed to open any DRM/KMS device\n");
     return fd_;
