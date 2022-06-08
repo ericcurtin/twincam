@@ -281,12 +281,9 @@ class Device {
 
   libcamera::Signal<AtomicRequest*> requestComplete;
 
-  void setPossiblePlanesForEachCRTC(std::list<DRM::Crtc>& crtcs_,
-                                    const std::list<DRM::Plane>& planes_);
-  int performAllDelayedSetupOfModeObjects(
-      const std::map<unsigned int, DRM::Object*>& objects_);
+  void setPossiblePlanesForEachCRTC();
+  int performAllDelayedSetupOfModeObjects();
   void collectPropertyIDsAndCreatePropertyInstances(
-      const std::map<unsigned int, DRM::Object*>& objects_,
       std::set<unsigned int>& properties);
 
  private:

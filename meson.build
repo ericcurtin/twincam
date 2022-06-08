@@ -6,6 +6,19 @@ project('twincam', 'c', 'cpp',
         'cpp_std=c++17'
     ])
 
+add_project_arguments(
+  '-Wstrict-aliasing',
+  '-Wchar-subscripts',
+  '-Wformat-security',
+  '-Wmissing-declarations',
+  '-Wpointer-arith',
+  '-Wshadow',
+  '-Wsign-compare',
+  '-Wtype-limits',
+  '-Wunused-function',
+  language: 'cpp'
+)
+
 libcamera = dependency('libcamera')
 libevent = dependency('libevent_pthreads')
 libdrm = dependency('libdrm')
