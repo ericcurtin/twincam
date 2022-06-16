@@ -14,6 +14,7 @@
 #include "camera_session.h"
 #include "event_loop.h"
 
+#include "file_sink.h"
 #include "kms_sink.h"
 #include "twincam.h"
 #include "uptime.h"
@@ -55,7 +56,7 @@ int CameraSession::init() {
     return 0;
   }
 
-  config->at(0).pixelFormat = PixelFormat::fromString(opts.opt_pf);
+  config->at(0).pixelFormat = PixelFormat::fromString(opts.pf);
 
   switch (config->validate()) {
     case CameraConfiguration::Valid:
@@ -99,12 +100,15 @@ int CameraSession::start() {
 
   camera_->requestCompleted.connect(this, &CameraSession::requestComplete);
 
+  if (!opts.filename.empty()) {
+    sink_ = std::make_unique<FileSink>(streamNames_, opts.filename);
+  }
 #ifdef HAVE_SDL
-  if (opts.opt_sdl) {
+  else if (opts.sdl) {
     sink_ = std::make_unique<SDLSink>();
-  } else
+  }
 #endif
-  {
+  else {
     sink_ = std::make_unique<KMSSink>("");
   }
 

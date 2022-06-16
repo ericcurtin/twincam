@@ -208,6 +208,7 @@ static void chrootThis([[maybe_unused]] int signal) {
 static int processArgs(int argc, char** argv) {
   const struct option options[] = {{"camera", required_argument, 0, 'c'},
                                    {"daemon", no_argument, 0, 'd'},
+                                   {"filename", no_argument, 0, 'F'},
                                    {"help", no_argument, 0, 'h'},
                                    {"list-cameras", no_argument, 0, 'l'},
                                    {"new-root-dir", no_argument, 0, 'n'},
@@ -217,8 +218,8 @@ static int processArgs(int argc, char** argv) {
                                    {"sdl", no_argument, 0, 'S'},
                                    {"pixel-format", no_argument, 0, 'p'},
                                    {NULL, 0, 0, '\0'}};
-  for (int opt;
-       (opt = getopt_long(argc, argv, "c:dhlnusvSp:", options, NULL)) != -1;) {
+  for (int opt; (opt = getopt_long(argc, argv, "c:dF:hlnusvSp:", options,
+                                   NULL)) != -1;) {
     int fd;
     switch (opt) {
       case 'c':
@@ -232,6 +233,9 @@ static int processArgs(int argc, char** argv) {
 
         pid_write(fd);
         twncm_close(fd);
+        break;
+      case 'F':
+        opts.filename = optarg;
         break;
       case 'l':
         opts.print_available_cameras = true;
@@ -252,10 +256,10 @@ static int processArgs(int argc, char** argv) {
         openlog("twincam", 0, LOG_LOCAL1);
         break;
       case 'p':
-        opts.opt_pf = optarg;
+        opts.pf = optarg;
         break;
       case 'S':
-        opts.opt_sdl = true;
+        opts.sdl = true;
         break;
       case 'v':
         opts.verbose = true;

@@ -3,6 +3,8 @@
 #include <string.h>
 #include <string>
 
+#include "twincam.h"
+
 // function that will sprintf to a C++ string starting from std::string::size()
 // so if you want to completely overwrite a string or start at a specific point
 // use std::string::clear() or std::string::resize(). str is a std::string.

@@ -39,6 +39,7 @@ twincam_sources = files([
     'src/uptime.cpp',
     'src/frame_sink.cpp',
     'src/image.cpp',
+    'src/file_sink.cpp'
 ])
 
 if libsdl2.found()

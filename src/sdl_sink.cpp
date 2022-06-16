@@ -7,7 +7,6 @@
 #include <string.h>
 #include <unistd.h>
 #include <iomanip>
-#include <sstream>
 
 #include <libcamera/camera.h>
 #include <libcamera/formats.h>
