@@ -217,8 +217,9 @@ static int processArgs(int argc, char** argv) {
                                    {"verbose", no_argument, 0, 'v'},
                                    {"sdl", no_argument, 0, 'S'},
                                    {"pixel-format", no_argument, 0, 'p'},
+                                   {"capture-limit", required_argument, 0, 'C'},
                                    {NULL, 0, 0, '\0'}};
-  for (int opt; (opt = getopt_long(argc, argv, "c:dF:hlnusvSp:", options,
+  for (int opt; (opt = getopt_long(argc, argv, "c:dF:hlnusvSp:C:", options,
                                    NULL)) != -1;) {
     int fd;
     switch (opt) {
@@ -258,6 +259,9 @@ static int processArgs(int argc, char** argv) {
       case 'p':
         opts.pf = optarg;
         break;
+      case 'C':
+        opts.capture_limit = twncm_atoi(optarg);
+        break;
       case 'S':
         opts.sdl = true;
         break;
@@ -275,6 +279,7 @@ static int processArgs(int argc, char** argv) {
             "  -h, --help          Print this help\n"
             "  -l, --list-cameras  List cameras\n"
             "  -p, --pixel-format  Select pixel format\n"
+            "  -C, --capture-limit Set capture limit\n"
             "  -S, --sdl           Display viewfinder through SDL\n"
             "  -n, --new-root-dir  chroot to /sysroot (sends SIGUSR1 to "
             "pidfile pid)\n"
