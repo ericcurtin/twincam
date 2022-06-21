@@ -62,20 +62,20 @@ CamApp* CamApp::instance() {
   return CamApp::app_;
 }
 
-static bool dev_video_exists() {
-  const char name[] = "/dev/";
-  DIR* folder = opendir(name);
-  if (!folder) {
-    return false;
-  }
+static bool sysfs_exists() {
+  static const char* const sysfs_dirs[] = {
+      "/sys/subsystem/media/devices",
+      "/sys/bus/media/devices",
+      "/sys/class/media/devices",
+  };
 
-  for (struct dirent* res; (res = readdir(folder));) {
-    if (!memcmp(res->d_name, "video", 5)) {
+  for (const char* dirname : sysfs_dirs) {
+    DIR* dir = opendir(dirname);
+    if (dir) {
+      closedir(dir);
       return true;
     }
   }
-
-  closedir(folder);
 
   return false;
 }
@@ -87,7 +87,11 @@ int CamApp::init() {
   // plus it means the binary is fully loaded, the libraries are fully loaded
   // etc. Sleep for 0.01 seconds in between each try, upto 40 times, 4 second
   // timeout esentially. May be V4L2 specific.
-  for (int i = 0; !dev_video_exists() && i < 40; ++i) {
+  for (int i = 0; i < 40; ++i) {
+    if (sysfs_exists()) {
+      break;
+    }
+
     usleep(10000);
   }
 
