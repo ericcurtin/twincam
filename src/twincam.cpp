@@ -5,6 +5,7 @@
  * main.cpp - cam - The libcamera swiss army knife
  */
 
+#include <dirent.h>
 #include <getopt.h>
 #include <signal.h>
 #include <string.h>
@@ -61,8 +62,34 @@ CamApp* CamApp::instance() {
   return CamApp::app_;
 }
 
+static bool dev_video_exists() {
+  const char name[] = "/dev/";
+  DIR* folder = opendir(name);
+  if (!folder) {
+    return false;
+  }
+
+  for (struct dirent* res; (res = readdir(folder));) {
+    if (!memcmp(res->d_name, "video", 5)) {
+      return true;
+    }
+  }
+
+  closedir(folder);
+
+  return false;
+}
+
 int CamApp::init() {
   cm_ = std::make_unique<CameraManager>();
+
+  // A cheap udev, more portable this way, don't have to wait for udev
+  // plus it means the binary is fully loaded, the libraries are fully loaded
+  // etc. Sleep for 0.01 seconds in between each try, upto 40 times, 4 second
+  // timeout esentially. May be V4L2 specific.
+  for (int i = 0; !dev_video_exists() && i < 40; ++i) {
+    usleep(10000);
+  }
 
   if (int ret = cm_->start(); ret) {
     PRINT("Failed to start camera manager: %s\n", strerror(-ret));

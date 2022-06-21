@@ -49,16 +49,16 @@ int CameraSession::init() {
     return 0;
   }
 
-  std::unique_ptr<CameraConfiguration> config =
+  std::unique_ptr<CameraConfiguration> cfg =
       camera_->generateConfiguration({libcamera::Viewfinder});
-  if (!config || config->size() != 1) {
+  if (!cfg || cfg->size() != 1) {
     EPRINT("Failed to get default stream configuration\n");
     return 0;
   }
 
-  config->at(0).pixelFormat = PixelFormat::fromString(opts.pf);
+  cfg->at(0).pixelFormat = PixelFormat::fromString(opts.pf);
 
-  switch (config->validate()) {
+  switch (cfg->validate()) {
     case CameraConfiguration::Valid:
       break;
 
@@ -73,7 +73,7 @@ int CameraSession::init() {
       break;
   }
 
-  config_ = std::move(config);
+  config_ = std::move(cfg);
 
   return 0;
 }
