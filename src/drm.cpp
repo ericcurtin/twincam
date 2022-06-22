@@ -40,16 +40,16 @@ Object::Object(Device* dev, uint32_t id, Type type)
    * property and failures due to other conditions. Assume we use the API
    * correctly and consider the object has no property.
    */
-  drmModeObjectProperties* properties =
+  drmModeObjectProperties* prop =
       drmModeObjectGetProperties(dev->fd(), id, type);
-  if (!properties)
+  if (!prop)
     return;
 
-  properties_.reserve(properties->count_props);
-  for (uint32_t i = 0; i < properties->count_props; ++i)
-    properties_.emplace_back(properties->props[i], properties->prop_values[i]);
+  properties_.reserve(prop->count_props);
+  for (uint32_t i = 0; i < prop->count_props; ++i)
+    properties_.emplace_back(prop->props[i], prop->prop_values[i]);
 
-  drmModeFreeObjectProperties(properties);
+  drmModeFreeObjectProperties(prop);
 }
 
 Object::~Object() = default;

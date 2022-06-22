@@ -128,6 +128,10 @@ int KMSSink::configure(const libcamera::CameraConfiguration& config) {
   y_ = (mode_->vdisplay - size_.height) / 2;
   stride_ = cfg.stride;
 
+  PRINT("Using KMS plane %u, CRTC %u, connector %s (%u), mode %ux%u@%u\n",
+        plane_->id(), crtc_->id(), connector_->name().c_str(), connector_->id(),
+        mode_->hdisplay, mode_->vdisplay, mode_->vrefresh);
+
   return 0;
 }
 
@@ -194,9 +198,6 @@ int KMSSink::configurePipeline(const libcamera::PixelFormat& format) {
            format.toString().c_str());
     return ret;
   }
-
-  PRINT("Using KMS plane %u, CRTC %u, connector %s (%u)\n", plane_->id(),
-        crtc_->id(), connector_->name().c_str(), connector_->id());
 
   return 0;
 }

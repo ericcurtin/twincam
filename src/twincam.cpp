@@ -5,6 +5,7 @@
  * main.cpp - cam - The libcamera swiss army knife
  */
 
+#include <dirent.h>
 #include <getopt.h>
 #include <signal.h>
 #include <string.h>
@@ -61,10 +62,79 @@ CamApp* CamApp::instance() {
   return CamApp::app_;
 }
 
+static bool sysfs_exists() {
+  static const char* const sysfs_dirs[] = {
+      "/sys/subsystem/media/devices",
+      "/sys/bus/media/devices",
+      "/sys/class/media/devices",
+  };
+
+  for (const char* dirname : sysfs_dirs) {
+    DIR* dir = opendir(dirname);
+    if (dir) {
+      closedir(dir);
+      return true;
+    }
+  }
+
+  return false;
+}
+
+static bool dev_media_exists() {
+  const char name[] = "/dev/";
+  DIR* folder = opendir(name);
+  if (!folder) {
+    return false;
+  }
+
+  for (struct dirent* res; (res = readdir(folder));) {
+    if (!memcmp(res->d_name, "media", 5)) {
+      return true;
+    }
+  }
+
+  closedir(folder);
+
+  return false;
+}
+
 int CamApp::init() {
   cm_ = std::make_unique<CameraManager>();
 
-  if (int ret = cm_->start(); ret) {
+  // A cheap udev, more portable this way, don't have to wait for udev
+  // plus it means the binary is fully loaded, the libraries are fully loaded
+  // etc. Sleep for 0.01 seconds in between each try, upto 40 times, 4 second
+  // timeout esentially. May be V4L2 specific.
+  int ret = -1;
+  for (int i = 0; i < 400; ++i) {
+    if (sysfs_exists()) {
+      ret = 0;
+      break;
+    }
+
+    usleep(10000);
+  }
+
+  if (ret < 0) {
+    PRINT("Failed to find sysfs\n");
+  }
+
+  ret = -1;
+  for (int i = 0; i < 400; ++i) {
+    if (dev_media_exists()) {
+      ret = 0;
+      break;
+    }
+
+    usleep(10000);
+  }
+
+  if (ret < 0) {
+    PRINT("Failed to find a /dev/media* entry\n");
+  }
+
+  ret = cm_->start();
+  if (ret) {
     PRINT("Failed to start camera manager: %s\n", strerror(-ret));
     return ret;
   }

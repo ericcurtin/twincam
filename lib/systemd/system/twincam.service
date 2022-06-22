@@ -6,7 +6,7 @@ ConditionVirtualization=!container
 IgnoreOnIsolate=true
 
 [Service]
-ExecStart=/usr/bin/twincam -C100 -u -s -v
+ExecStart=/usr/bin/twincam -S -u -s -v
 Type=forking
 RemainAfterExit=yes
 KillMode=mixed
