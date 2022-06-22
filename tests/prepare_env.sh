@@ -43,7 +43,8 @@ elif command -v dnf > /dev/null; then
   $prefix dnf install -y git gcc g++ libevent libevent-devel openssl \
     openssl-devel gnutls gnutls-devel meson boost boost-devel python3-pip \
     libdrm libdrm-devel systemd-udev doxygen cmake graphviz libatomic \
-    texlive-latex cppcheck libyaml-devel clang zip valgrind libasan findutils
+    texlive-latex cppcheck libyaml-devel clang zip valgrind libasan findutils \
+    systemd-devel
 fi
 
 $prefix pip install jinja2 ply pyyaml

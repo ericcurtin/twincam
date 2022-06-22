@@ -29,7 +29,7 @@ sudo dnf install -y SDL2_image-devel
 sudo dnf install -y git gcc g++ libevent libevent-devel openssl openssl-devel \
   gnutls gnutls-devel meson boost boost-devel python3-pip libdrm libdrm-devel \
   systemd-udev doxygen cmake graphviz libatomic texlive-latex cppcheck \
-  libyaml-devel clang zip valgrind libasan findutils
+  libyaml-devel clang zip valgrind libasan findutils systemd-devel
 ```
 
 On Clear Linux:
