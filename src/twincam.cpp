@@ -80,7 +80,7 @@ static bool sysfs_exists() {
   return false;
 }
 
-static bool dev_video_exists() {
+static bool dev_media_exists() {
   const char name[] = "/dev/";
   DIR* folder = opendir(name);
   if (!folder) {
@@ -88,7 +88,7 @@ static bool dev_video_exists() {
   }
 
   for (struct dirent* res; (res = readdir(folder));) {
-    if (!memcmp(res->d_name, "video", 5)) {
+    if (!memcmp(res->d_name, "media", 5)) {
       return true;
     }
   }
@@ -106,13 +106,13 @@ int CamApp::init() {
   // etc. Sleep for 0.01 seconds in between each try, upto 40 times, 4 second
   // timeout esentially. May be V4L2 specific.
   int ret = -1;
-  for (int i = 0; i < 40; ++i) {
+  for (int i = 0; i < 400; ++i) {
     if (sysfs_exists()) {
       ret = 0;
       break;
     }
 
-    usleep(100000);
+    usleep(10000);
   }
 
   if (ret < 0) {
@@ -120,17 +120,17 @@ int CamApp::init() {
   }
 
   ret = -1;
-  for (int i = 0; i < 40; ++i) {
-    if (dev_video_exists()) {
+  for (int i = 0; i < 400; ++i) {
+    if (dev_media_exists()) {
       ret = 0;
       break;
     }
 
-    usleep(100000);
+    usleep(10000);
   }
 
   if (ret < 0) {
-    PRINT("Failed to find a /dev/video* entry\n");
+    PRINT("Failed to find a /dev/media* entry\n");
   }
 
   ret = cm_->start();
