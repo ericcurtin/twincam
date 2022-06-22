@@ -105,23 +105,36 @@ int CamApp::init() {
   // plus it means the binary is fully loaded, the libraries are fully loaded
   // etc. Sleep for 0.01 seconds in between each try, upto 40 times, 4 second
   // timeout esentially. May be V4L2 specific.
+  int ret = -1;
   for (int i = 0; i < 40; ++i) {
     if (sysfs_exists()) {
+      ret = 0;
       break;
     }
 
     usleep(10000);
   }
 
+  if (ret < 0) {
+    PRINT("Failed to find sysfs\n");
+  }
+
+  ret = -1;
   for (int i = 0; i < 40; ++i) {
     if (dev_video_exists()) {
+      ret = 0;
       break;
     }
 
     usleep(10000);
   }
 
-  if (int ret = cm_->start(); ret) {
+  if (ret < 0) {
+    PRINT("Failed to find a /dev/video* entry\n");
+  }
+
+  ret = cm_->start();
+  if (ret) {
     PRINT("Failed to start camera manager: %s\n", strerror(-ret));
     return ret;
   }
