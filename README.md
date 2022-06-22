@@ -4,7 +4,9 @@
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=ericcurtin_twincam&metric=bugs)](https://sonarcloud.io/summary/new_code?id=ericcurtin_twincam)
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=ericcurtin_twincam&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=ericcurtin_twincam)
 
-A lightweight camera application, designed to start quickly in a bare environment
+A lightweight camera application, designed to start quickly in a bare
+environment. It is named twincam as it is built with automotive in mind
+like a twin-cam engine, it is simply the name of the application.
 
 # To build, install and run twincam
 
