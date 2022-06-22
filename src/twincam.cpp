@@ -112,7 +112,7 @@ int CamApp::init() {
       break;
     }
 
-    usleep(10000);
+    usleep(100000);
   }
 
   if (ret < 0) {
@@ -126,7 +126,7 @@ int CamApp::init() {
       break;
     }
 
-    usleep(10000);
+    usleep(100000);
   }
 
   if (ret < 0) {
