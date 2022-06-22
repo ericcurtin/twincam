@@ -35,7 +35,7 @@ install() {
     inst_dir "/usr/share/glvnd/egl_vendor.d"
     inst_multiple "/usr/share/glvnd/egl_vendor.d/*.json"
 
-    inst_dir "/usr/share/plymouth/themes/external-command/"
-    inst_multiple "/usr/share/plymouth/themes/external-command/*.plymouth"
+#    inst_dir "/usr/share/plymouth/themes/external-command/"
+#    inst_multiple "/usr/share/plymouth/themes/external-command/*.plymouth"
 }
 
