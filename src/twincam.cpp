@@ -80,6 +80,24 @@ static bool sysfs_exists() {
   return false;
 }
 
+static bool dev_video_exists() {
+  const char name[] = "/dev/";
+  DIR* folder = opendir(name);
+  if (!folder) {
+    return false;
+  }
+
+  for (struct dirent* res; (res = readdir(folder));) {
+    if (!memcmp(res->d_name, "video", 5)) {
+      return true;
+    }
+  }
+
+  closedir(folder);
+
+  return false;
+}
+
 int CamApp::init() {
   cm_ = std::make_unique<CameraManager>();
 
@@ -89,6 +107,14 @@ int CamApp::init() {
   // timeout esentially. May be V4L2 specific.
   for (int i = 0; i < 40; ++i) {
     if (sysfs_exists()) {
+      break;
+    }
+
+    usleep(10000);
+  }
+
+  for (int i = 0; i < 40; ++i) {
+    if (dev_video_exists()) {
       break;
     }
 
