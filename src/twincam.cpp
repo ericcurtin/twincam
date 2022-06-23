@@ -194,6 +194,7 @@ done:
 int CamApp::init() {
   cm_ = std::make_unique<CameraManager>();
 
+  // V4L2 specific
   int ret = -1;
   for (int i = 0; i < 400; ++i) {
     if (sysfs_exists()) {
@@ -206,6 +207,7 @@ int CamApp::init() {
 
   if (ret < 0) {
     PRINT("Failed to find sysfs\n");
+    return ret;
   }
 
   ret = -1;
@@ -220,6 +222,7 @@ int CamApp::init() {
 
   if (ret < 0) {
     PRINT("Failed to find a /dev/media* entry\n");
+    return ret;
   }
 
 #ifdef HAVE_LIBUDEV
@@ -235,6 +238,7 @@ int CamApp::init() {
 
   if (ret < 0) {
     PRINT("Failed to find a udev entry\n");
+    return ret;
   }
 #endif
 
