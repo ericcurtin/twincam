@@ -241,6 +241,10 @@ int CameraSession::startCapture() {
 }
 
 int CameraSession::queueRequest(Request* request) {
+  if (opts.capture_limit && queueCount_ >= opts.capture_limit) {
+    exit(0);
+    return 0;
+  }
   ++queueCount_;
 
   return camera_->queueRequest(request);
@@ -259,6 +263,18 @@ void CameraSession::requestComplete(Request* request) {
 }
 
 void CameraSession::processRequest(Request* request) {
+  /*
+   * If we've reached the capture limit, we're done. This doesn't
+   * duplicate the check below that emits the captureDone signal, as this
+   * function will be called for each request still in flight after the
+   * capture limit is reached and we don't want to emit the signal every
+   * single time.
+   */
+  if (opts.capture_limit && captureCount_ >= opts.capture_limit) {
+    exit(0);
+    return;
+  }
+
   const Request::BufferMap& buffers = request->buffers();
 
   /*
@@ -310,6 +326,11 @@ void CameraSession::processRequest(Request* request) {
    * Notify the user that capture is complete if the limit has just been
    * reached.
    */
+  if (opts.capture_limit && captureCount_ >= opts.capture_limit) {
+    captureDone.emit();
+    exit(0);
+    return;
+  }
   ++captureCount_;
 
   /*
