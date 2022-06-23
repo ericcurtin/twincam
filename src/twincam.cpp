@@ -7,6 +7,9 @@
 
 #include <dirent.h>
 #include <getopt.h>
+#ifdef HAVE_LIBUDEV
+#include <libudev.h>
+#endif
 #include <signal.h>
 #include <string.h>
 #include <unistd.h>
@@ -80,7 +83,7 @@ static bool sysfs_exists() {
   return false;
 }
 
-static bool dev_media_exists() {
+static bool dev_video_exists() {
   const char name[] = "/dev/";
   DIR* folder = opendir(name);
   if (!folder) {
@@ -88,7 +91,8 @@ static bool dev_media_exists() {
   }
 
   for (struct dirent* res; (res = readdir(folder));) {
-    if (!memcmp(res->d_name, "media", 5)) {
+    if (!memcmp(res->d_name, "video", 5)) {
+      closedir(folder);
       return true;
     }
   }
@@ -98,13 +102,98 @@ static bool dev_media_exists() {
   return false;
 }
 
+#ifdef HAVE_LIBUDEV
+static int checkUdevDevice(struct udev_device* dev) {
+  const char* subsystem = udev_device_get_subsystem(dev);
+  VERBOSE_PRINT("subsystem: '%s'\n", subsystem);
+  if (!subsystem)
+    return -ENODEV;
+
+  if (!strcmp(subsystem, "video4linux")) {
+    return 0;
+  }
+
+  return -ENODEV;
+}
+
+static int wait_for_udev() {
+  struct udev* udev = udev_new();  // init
+  int ret = -1;
+  struct udev_enumerate* udev_enum = 0;
+  if (!udev) {
+    ret = -ENODEV;
+    goto done;
+  }
+
+  udev_enum = udev_enumerate_new(udev);  // enumerate
+  if (!udev_enum) {
+    ret = -ENOMEM;
+    goto done;
+  }
+
+  ret = udev_enumerate_add_match_subsystem(udev_enum, "video4linux");
+  if (ret < 0)
+    goto done;
+
+  ret = udev_enumerate_add_match_is_initialized(udev_enum);
+  if (ret < 0)
+    goto done;
+
+  struct udev_list_entry* ents;
+  ret = udev_enumerate_scan_devices(udev_enum);
+  if (ret < 0)
+    goto done;
+
+  ents = udev_enumerate_get_list_entry(udev_enum);
+  if (!ents) {
+    ret = -1;
+    goto done;
+  }
+
+  struct udev_list_entry* ent;
+  udev_list_entry_foreach(ent, ents) {
+    struct udev_device* dev;
+    const char* devnode;
+    const char* syspath = udev_list_entry_get_name(ent);
+
+    dev = udev_device_new_from_syspath(udev, syspath);
+    if (!dev) {
+      EPRINT("Failed to get device for '%s', skipping\n", syspath);
+      continue;
+    }
+
+    devnode = udev_device_get_devnode(dev);
+    if (!devnode) {
+      udev_device_unref(dev);
+      EPRINT("Failed to get device node for '%s', skipping\n", syspath);
+      continue;
+    }
+
+    if (checkUdevDevice(dev) < 0) {
+      EPRINT("Not a valid camera device for '%s', skipping\n", syspath);
+      continue;
+    } else {
+      ret = 0;
+    }
+
+    udev_device_unref(dev);
+    break;
+  }
+
+done:
+  if (udev_enum)
+    udev_enumerate_unref(udev_enum);
+
+  if (udev)
+    udev_unref(udev);
+
+  return ret;
+}
+#endif
+
 int CamApp::init() {
   cm_ = std::make_unique<CameraManager>();
 
-  // A cheap udev, more portable this way, don't have to wait for udev
-  // plus it means the binary is fully loaded, the libraries are fully loaded
-  // etc. Sleep for 0.01 seconds in between each try, upto 40 times, 4 second
-  // timeout esentially. May be V4L2 specific.
   int ret = -1;
   for (int i = 0; i < 400; ++i) {
     if (sysfs_exists()) {
@@ -121,7 +210,7 @@ int CamApp::init() {
 
   ret = -1;
   for (int i = 0; i < 400; ++i) {
-    if (dev_media_exists()) {
+    if (dev_video_exists()) {
       ret = 0;
       break;
     }
@@ -132,6 +221,22 @@ int CamApp::init() {
   if (ret < 0) {
     PRINT("Failed to find a /dev/media* entry\n");
   }
+
+#ifdef HAVE_LIBUDEV
+  ret = -1;
+  for (int i = 0; i < 400; ++i) {
+    if (wait_for_udev() >= 0) {
+      ret = 0;
+      break;
+    }
+
+    usleep(10000);
+  }
+
+  if (ret < 0) {
+    PRINT("Failed to find a udev entry\n");
+  }
+#endif
 
   ret = cm_->start();
   if (ret) {

@@ -24,6 +24,7 @@ libevent = dependency('libevent_pthreads')
 libdrm = dependency('libdrm')
 libsdl2 = dependency('SDL2', required : false)
 libsdl2_image = dependency('SDL2_image', required : false)
+libudev = dependency('libudev', required : false)
 
 incdir = include_directories('/usr/include/libcamera')
 
@@ -58,6 +59,9 @@ if libsdl2.found()
     endif
 endif
 
+if libudev.found()
+    cam_cpp_args += ['-DHAVE_LIBUDEV']
+endif
 
 twincam  = executable('twincam', twincam_sources, include_directories : incdir,
                       dependencies : [
@@ -66,6 +70,7 @@ twincam  = executable('twincam', twincam_sources, include_directories : incdir,
                           libevent,
                           libsdl2,
                           libsdl2_image,
+                          libudev,
                       ],
                       cpp_args : cam_cpp_args,
                       install : true)
