@@ -221,7 +221,7 @@ int CamApp::init() {
   }
 
   if (ret < 0) {
-    PRINT("Failed to find a /dev/media* entry\n");
+    PRINT("Failed to find a /dev/video* entry\n");
     return ret;
   }
 
