@@ -7,7 +7,7 @@ IgnoreOnIsolate=true
 
 [Service]
 ExecStart=/usr/bin/twincam -S -u -s -v
-Type=forking
+Type=simple
 RemainAfterExit=yes
 KillMode=mixed
 SendSIGKILL=no
