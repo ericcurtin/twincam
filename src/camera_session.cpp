@@ -235,8 +235,8 @@ int CameraSession::startCapture() {
     }
   }
 
-	if (opts.capture_limit)
-		printf("cam: %u: Capture %lu frames\n", cameraIndex_, opts.capture_limit);
+  if (opts.capture_limit)
+    printf("cam: %u: Capture %lu frames\n", cameraIndex_, opts.capture_limit);
   else
     PRINT("cam%u: Capture until user interrupts by SIGINT\n", cameraIndex_);
 
@@ -333,7 +333,6 @@ void CameraSession::processRequest(Request* request) {
     captureDone.emit();
     return;
   }
-
 
   /*
    * If the frame sink holds on the request, we'll requeue it later in the
