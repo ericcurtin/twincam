@@ -10,27 +10,22 @@ like a twin-cam engine, it is simply the name of the application.
 
 # To build, install and run twincam
 
-On Fedora (steps should be similar on other platforms):
-
-```
-sudo dnf install -y git gcc g++ libevent libevent-devel openssl openssl-devel \
-  gnutls gnutls-devel meson boost boost-devel python3-pip libdrm libdrm-devel \
-  systemd-udev doxygen cmake graphviz libatomic texlive-latex cppcheck \
-  libyaml-devel clang zip valgrind libasan findutils SDL2_image-devel \
-  systemd-devel
-```
-
 On CentOS Stream 9:
 
 ```
 sudo dnf install -y 'dnf-command(config-manager)'
 sudo dnf config-manager --set-enabled crb
 sudo dnf install -y epel-release
-sudo dnf install -y SDL2_image-devel
+```
+
+On Fedora and CentOS Stream 9 (steps should be similar on other platforms):
+
+```
 sudo dnf install -y git gcc g++ libevent libevent-devel openssl openssl-devel \
   gnutls gnutls-devel meson boost boost-devel python3-pip libdrm libdrm-devel \
   systemd-udev doxygen cmake graphviz libatomic texlive-latex cppcheck \
-  libyaml-devel clang zip valgrind libasan findutils systemd-devel
+  libyaml-devel clang zip valgrind libasan findutils SDL2_image-devel \
+  systemd-devel mesa-dri-drivers
 ```
 
 On Clear Linux:
