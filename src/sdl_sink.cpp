@@ -157,6 +157,9 @@ void SDLSink::processSDLEvents() {
       /* Click close icon then quit */
       EventLoop::instance()->exit(0);
     }
+    else if (opts.capture_limit_reached){
+      EventLoop::instance()->exit(0);
+    }
   }
 }
 

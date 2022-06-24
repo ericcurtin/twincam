@@ -235,14 +235,16 @@ int CameraSession::startCapture() {
     }
   }
 
-  PRINT("cam%u: Capture until user interrupts by SIGINT\n", cameraIndex_);
+	if (opts.capture_limit)
+		printf("cam: %u: Capture %lu frames\n", cameraIndex_, opts.capture_limit);
+  else
+    PRINT("cam%u: Capture until user interrupts by SIGINT\n", cameraIndex_);
 
   return 0;
 }
 
 int CameraSession::queueRequest(Request* request) {
   if (opts.capture_limit && queueCount_ >= opts.capture_limit) {
-    exit(0);
     return 0;
   }
   ++queueCount_;
@@ -271,7 +273,7 @@ void CameraSession::processRequest(Request* request) {
    * single time.
    */
   if (opts.capture_limit && captureCount_ >= opts.capture_limit) {
-    exit(0);
+    opts.capture_limit_reached = true;
     return;
   }
 
@@ -326,12 +328,12 @@ void CameraSession::processRequest(Request* request) {
    * Notify the user that capture is complete if the limit has just been
    * reached.
    */
+  ++captureCount_;
   if (opts.capture_limit && captureCount_ >= opts.capture_limit) {
     captureDone.emit();
-    exit(0);
     return;
   }
-  ++captureCount_;
+
 
   /*
    * If the frame sink holds on the request, we'll requeue it later in the
