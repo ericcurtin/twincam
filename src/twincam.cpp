@@ -116,76 +116,92 @@ static int checkUdevDevice(struct udev_device* dev) {
   return -ENODEV;
 }
 
+struct udev_enum {
+  struct udev_enumerate* ptr = 0;
+
+  ~udev_enum() {
+    if (ptr)
+      udev_enumerate_unref(ptr);
+  }
+};
+
+struct udev {
+  struct udev* ptr = 0;
+
+  ~udev() {
+    if (ptr)
+      udev_unref(ptr);
+  }
+};
+
+struct udev_device {
+  struct udev_device* ptr = 0;
+
+  ~udev_device() {
+    if (ptr)
+      udev_device_unref(ptr);
+  }
+};
+
 static int wait_for_udev() {
-  struct udev* udev = udev_new();  // init
   int ret = -1;
-  struct udev_enumerate* udev_enum = 0;
-  if (!udev) {
-    ret = -ENODEV;
-    goto done;
+  udev udev;
+  udev.ptr = udev_new();
+  if (!udev.ptr) {
+    return -ENODEV;
   }
 
-  udev_enum = udev_enumerate_new(udev);  // enumerate
-  if (!udev_enum) {
-    ret = -ENOMEM;
-    goto done;
+  udev_enum udev_enum;
+  udev_enum.ptr = udev_enumerate_new(udev.ptr);  // enumerate
+  if (!udev_enum.ptr) {
+    return -ENOMEM;
   }
 
-  ret = udev_enumerate_add_match_subsystem(udev_enum, "video4linux");
+  ret = udev_enumerate_add_match_subsystem(udev_enum.ptr, "video4linux");
   if (ret < 0)
-    goto done;
+    return ret;
 
-  ret = udev_enumerate_add_match_is_initialized(udev_enum);
+  ret = udev_enumerate_add_match_is_initialized(udev_enum.ptr);
   if (ret < 0)
-    goto done;
+    return ret;
 
   struct udev_list_entry* ents;
-  ret = udev_enumerate_scan_devices(udev_enum);
+  ret = udev_enumerate_scan_devices(udev_enum.ptr);
   if (ret < 0)
-    goto done;
+    return ret;
 
-  ents = udev_enumerate_get_list_entry(udev_enum);
+  ents = udev_enumerate_get_list_entry(udev_enum.ptr);
   if (!ents) {
-    ret = -1;
-    goto done;
+    return -1;
   }
 
   struct udev_list_entry* ent;
   udev_list_entry_foreach(ent, ents) {
-    struct udev_device* dev;
+    udev_device dev;
     const char* devnode;
     const char* syspath = udev_list_entry_get_name(ent);
 
-    dev = udev_device_new_from_syspath(udev, syspath);
-    if (!dev) {
+    dev.ptr = udev_device_new_from_syspath(udev.ptr, syspath);
+    if (!dev.ptr) {
       EPRINT("Failed to get device for '%s', skipping\n", syspath);
       continue;
     }
 
-    devnode = udev_device_get_devnode(dev);
+    devnode = udev_device_get_devnode(dev.ptr);
     if (!devnode) {
-      udev_device_unref(dev);
       EPRINT("Failed to get device node for '%s', skipping\n", syspath);
       continue;
     }
 
-    if (checkUdevDevice(dev) < 0) {
+    if (checkUdevDevice(dev.ptr) < 0) {
       EPRINT("Not a valid camera device for '%s', skipping\n", syspath);
       continue;
     } else {
       ret = 0;
     }
 
-    udev_device_unref(dev);
     break;
   }
-
-done:
-  if (udev_enum)
-    udev_enumerate_unref(udev_enum);
-
-  if (udev)
-    udev_unref(udev);
 
   return ret;
 }
