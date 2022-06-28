@@ -26,7 +26,7 @@
 using namespace libcamera;
 
 CameraSession::CameraSession(const CameraManager* const cm) {
-  PRINT_UPTIME();
+  PRINT_FUNC();
   if (opts.camera < cm->cameras().size()) {
     camera_ = cm->cameras()[opts.camera];
   }
@@ -38,7 +38,7 @@ CameraSession::~CameraSession() {
 }
 
 int CameraSession::init() {
-  PRINT_UPTIME();
+  PRINT_FUNC();
   if (!camera_) {
     EPRINT("Camera not found\n");
     return 1;
@@ -79,7 +79,7 @@ int CameraSession::init() {
 }
 
 int CameraSession::start() {
-  PRINT_UPTIME();
+  PRINT_FUNC();
   int ret;
 
   queueCount_ = 0;
@@ -144,7 +144,7 @@ void CameraSession::stop() {
 }
 
 int CameraSession::startCapture() {
-  PRINT_UPTIME();
+  PRINT_FUNC();
   int ret;
 
   /* Identify the stream with the least number of buffers. */
@@ -272,14 +272,8 @@ void CameraSession::processRequest(Request* request) {
 
   bool requeue = true;
 
-  const float uptim = ts / 1000000000.0;
-  if (!init_time) {
-    init_time = uptim;
-  }
-
-  const float elapsed = uptim - init_time;
   std::string frame_str;
-  STRING_PRINTF(frame_str, "%.6f (%.2f), (%.2f fps)", uptim, elapsed, fps);
+  STRING_PRINTF(frame_str, "(%.2f fps)", fps);
   for (const std::pair<const libcamera::Stream* const, libcamera::FrameBuffer*>&
            buf : buffers) {
     const FrameMetadata& metadata = buf.second->metadata();

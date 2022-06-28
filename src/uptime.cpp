@@ -15,3 +15,9 @@ int uptime(float* up, float* elapsed) {
   return 0;
 }
 
+void uptime_str(std::string& str) {
+  float up;
+  float elapsed;
+  uptime(&up, &elapsed);
+  STRING_PRINTF(str, "%.6f (%.2f)", up, elapsed);
+}

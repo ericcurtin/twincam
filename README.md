@@ -32,7 +32,7 @@ On Clear Linux:
 
 ```
 sudo swupd bundle-add vim git dev-utils devpkg-gnutls devpkg-boost \
-  devpkg-libevent devpkg-libdrm ccache
+  devpkg-libevent devpkg-libdrm ccache devpkg-SDL2 devpkg-SDL2_image
 ```
 
 On Ubuntu:

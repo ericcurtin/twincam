@@ -24,7 +24,7 @@
 #include "uptime.h"
 
 KMSSink::KMSSink(const std::string& connectorName) {
-  PRINT_UPTIME();
+  PRINT_FUNC();
   if (dev_.init() < 0)
     return;
 
@@ -72,7 +72,7 @@ void KMSSink::findRequestedConnector(const std::string& connectorName) {
 }
 
 void KMSSink::mapBuffer(libcamera::FrameBuffer* buffer) {
-  PRINT_UPTIME();
+  PRINT_FUNC();
   std::array<uint32_t, 4> strides = {};
 
   /* \todo Should libcamera report per-plane strides ? */
@@ -107,7 +107,7 @@ void KMSSink::mapBuffer(libcamera::FrameBuffer* buffer) {
 }
 
 int KMSSink::configure(const libcamera::CameraConfiguration& config) {
-  PRINT_UPTIME();
+  PRINT_FUNC();
   if (!connector_)
     return -EINVAL;
 
@@ -136,7 +136,7 @@ int KMSSink::configure(const libcamera::CameraConfiguration& config) {
 }
 
 int KMSSink::selectPipeline(const libcamera::PixelFormat& format) {
-  PRINT_UPTIME();
+  PRINT_FUNC();
   /*
    * If the requested format has an alpha channel, also consider the X
    * variant.
@@ -192,7 +192,7 @@ int KMSSink::selectPipeline(const libcamera::PixelFormat& format) {
 }
 
 int KMSSink::configurePipeline(const libcamera::PixelFormat& format) {
-  PRINT_UPTIME();
+  PRINT_FUNC();
   if (int ret = selectPipeline(format)) {
     EPRINT("Unable to find display pipeline for format %s\n",
            format.toString().c_str());

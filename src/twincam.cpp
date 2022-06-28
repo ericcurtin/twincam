@@ -226,6 +226,8 @@ int CamApp::init() {
     return ret;
   }
 
+  VERBOSE_PRINT("Found sysfs\n");
+
   ret = -1;
   for (int i = 0; i < 400; ++i) {
     if (dev_video_exists()) {
@@ -240,6 +242,8 @@ int CamApp::init() {
     PRINT("Failed to find a /dev/video* entry\n");
     return ret;
   }
+
+  VERBOSE_PRINT("Found /dev/video* entry\n");
 
 #ifdef HAVE_LIBUDEV
   ret = -1;
@@ -258,6 +262,8 @@ int CamApp::init() {
   }
 #endif
 
+  VERBOSE_PRINT("Found udev entry\n");
+
   ret = cm_->start();
   if (ret) {
     PRINT("Failed to start camera manager: %s\n", strerror(-ret));
@@ -272,7 +278,7 @@ void CamApp::cleanup() const {
 }
 
 int CamApp::exec() {
-  PRINT_UPTIME();
+  PRINT_FUNC();
   int ret;
 
   ret = run();
@@ -286,7 +292,7 @@ void CamApp::quit() {
 }
 
 int CamApp::run() {
-  PRINT_UPTIME();
+  PRINT_FUNC();
   if (opts.print_available_cameras) {
     PRINT("Available cameras:\n");
     for (size_t i = 0; i < cm_->cameras().size(); ++i) {
@@ -403,19 +409,21 @@ static void chrootThis([[maybe_unused]] int signal) {
 static int processArgs(int argc, char** argv) {
   const struct option options[] = {{"camera", required_argument, 0, 'c'},
                                    {"daemon", no_argument, 0, 'd'},
-                                   {"filename", no_argument, 0, 'F'},
+                                   {"filename", required_argument, 0, 'F'},
+                                   {"function", required_argument, 0, 'f'},
                                    {"help", no_argument, 0, 'h'},
+                                   {"kill", no_argument, 0, 'k'},
                                    {"list-cameras", no_argument, 0, 'l'},
                                    {"new-root-dir", no_argument, 0, 'n'},
                                    {"syslog", no_argument, 0, 's'},
-                                   {"uptime", no_argument, 0, 'u'},
                                    {"verbose", no_argument, 0, 'v'},
                                    {"sdl", no_argument, 0, 'S'},
-                                   {"pixel-format", no_argument, 0, 'p'},
+                                   {"pixel-format", required_argument, 0, 'p'},
                                    {NULL, 0, 0, '\0'}};
-  for (int opt; (opt = getopt_long(argc, argv, "c:dF:hlnusvSp:", options,
+  for (int opt; (opt = getopt_long(argc, argv, "c:dF:fhklnsvSp:", options,
                                    NULL)) != -1;) {
     int fd;
+    char buf[16];
     switch (opt) {
       case 'c':
         opts.camera = twncm_atoi(optarg);
@@ -432,19 +440,24 @@ static int processArgs(int argc, char** argv) {
       case 'F':
         opts.filename = optarg;
         break;
+      case 'f':
+        opts.print_func = true;
+        break;
+      case 'k':
+        fd = twncm_open_read("/var/run/twincam.pid");
+        pid_read(fd, buf);
+        kill(twncm_atoi(buf), SIGTERM);
+
+        return 1;
       case 'l':
         opts.print_available_cameras = true;
         break;
       case 'n':
         fd = twncm_open_read("/var/run/twincam.pid");
-        char buf[16];
         pid_read(fd, buf);
         kill(twncm_atoi(buf), SIGUSR1);
 
         return 1;
-      case 'u':
-        opts.print_uptime = true;
-        break;
       case 's':
         opts.to_syslog = true;
         setenv("LIBCAMERA_LOG_FILE", "syslog", 1);
@@ -467,13 +480,16 @@ static int processArgs(int argc, char** argv) {
             "  -c, --camera        Camera to select\n"
             "  -d, --daemon        Daemon mode (write a pid file "
             "/var/run/twincam.pid)\n"
+            "  -F, --filename      Write captured frames to disk\n"
+            "  -f, --function      function tracer\n"
+            "  -k, --kill          Kill twincam (sends SIGTERM to "
+            "pidfile pid)\n"
             "  -h, --help          Print this help\n"
             "  -l, --list-cameras  List cameras\n"
             "  -p, --pixel-format  Select pixel format\n"
             "  -S, --sdl           Display viewfinder through SDL\n"
             "  -n, --new-root-dir  chroot to /sysroot (sends SIGUSR1 to "
             "pidfile pid)\n"
-            "  -u, --uptime        Trace the uptime\n"
             "  -s, --syslog        Also trace output in syslog\n"
             "  -v, --verbose       Enable verbose logging\n");
 
@@ -486,9 +502,8 @@ static int processArgs(int argc, char** argv) {
 
 options opts;
 int main(int argc, char** argv) {
-  PRINT_UPTIME();  // Although this is never printed, it's important because it
-                   // sets the initial timer
-
+  PRINT_FUNC();  // Although this is never printed, it's important because it
+                 // sets the initial timer
   CamApp app;
   struct sigaction sa = {};
   struct sigaction sa_err = {};
@@ -498,6 +513,8 @@ int main(int argc, char** argv) {
     ret = 0;
     goto end;
   }
+
+  VERBOSE_PRINT("Successfully processed args\n");
 
   ret = app.init();
   if (ret) {
