@@ -28,43 +28,37 @@ void uptime_str(std::string& str);
     snprintf(&str[write_point], sizesn + 1, __VA_ARGS__);        \
   } while (0)
 
-#define PRINT(...)                         \
+#define HEAD(str, ...)                     \
   do {                                     \
-    std::string str;                       \
     uptime_str(str);                       \
-    str += ", ";                           \
     STRING_PRINTF(str, __VA_ARGS__);       \
     if (opts.to_syslog) {                  \
       syslog(LOG_INFO, "%s", str.c_str()); \
     }                                      \
-                                           \
-    printf("%s", str.c_str());             \
   } while (0)
 
-#define EPRINT(...)                        \
-  do {                                     \
-    std::string str;                       \
-    uptime_str(str);                       \
-    str += ", ";                           \
-    STRING_PRINTF(str, __VA_ARGS__);       \
-    if (opts.to_syslog) {                  \
-      syslog(LOG_INFO, "%s", str.c_str()); \
-    }                                      \
-                                           \
-    fprintf(stderr, "%s", str.c_str());    \
+#define PRINT(...)             \
+  do {                         \
+    std::string str;           \
+    HEAD(str, __VA_ARGS__);    \
+                               \
+    printf("%s", str.c_str()); \
   } while (0)
 
-#define VERBOSE_PRINT(...)                   \
-  do {                                       \
-    if (opts.verbose) {                      \
-      std::string str;                       \
-      uptime_str(str);                       \
-      str += ", ";                           \
-      STRING_PRINTF(str, __VA_ARGS__);       \
-      if (opts.to_syslog) {                  \
-        syslog(LOG_INFO, "%s", str.c_str()); \
-      }                                      \
-                                             \
-      printf("%s", str.c_str());             \
-    }                                        \
+#define EPRINT(...)                     \
+  do {                                  \
+    std::string str;                    \
+    HEAD(str, __VA_ARGS__);             \
+                                        \
+    fprintf(stderr, "%s", str.c_str()); \
+  } while (0)
+
+#define VERBOSE_PRINT(...)       \
+  do {                           \
+    if (opts.verbose) {          \
+      std::string str;           \
+      HEAD(str, __VA_ARGS__);    \
+                                 \
+      printf("%s", str.c_str()); \
+    }                            \
   } while (0)
