@@ -24,7 +24,7 @@ On Fedora and CentOS Stream 9 (steps should be similar on other platforms):
 sudo dnf install -y git gcc g++ libevent libevent-devel openssl openssl-devel \
   gnutls gnutls-devel meson boost boost-devel python3-pip libdrm libdrm-devel \
   systemd-udev doxygen cmake graphviz libatomic texlive-latex cppcheck \
-  libyaml-devel clang zip valgrind libasan findutils SDL2_image-devel \
+  libyaml-devel clang zip valgrind libasan findutils libjpeg-turbo-devel \
   systemd-devel mesa-dri-drivers
 ```
 
@@ -32,7 +32,7 @@ On Clear Linux:
 
 ```
 sudo swupd bundle-add vim git dev-utils devpkg-gnutls devpkg-boost \
-  devpkg-libevent devpkg-libdrm ccache devpkg-SDL2 devpkg-SDL2_image
+  devpkg-libevent devpkg-libdrm ccache devpkg-SDL2
 ```
 
 On Ubuntu:
@@ -41,7 +41,7 @@ On Ubuntu:
 sudo apt install -y clang gnutls-dev libboost-dev meson cmake pkg-config \
   libevent-dev libdrm-dev gcc make autoconf automake cppcheck libsdl2-dev \
   meson vim libgtest-dev libyaml-dev curl zip valgrind libasan5 \
-  libsdl2-image-dev python3-pip
+  libjpeg-dev python3-pip
 ```
 
 On Alpine (enable community repo in /etc/apk/repositories):

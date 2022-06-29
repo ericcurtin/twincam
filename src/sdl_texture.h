@@ -18,5 +18,5 @@ class SDLTexture {
   SDL_Texture* ptr_;
   const SDL_Rect rect_;
   const SDL_PixelFormatEnum pixelFormat_;
-  const int pitch_;
+  int pitch_;
 };

@@ -16,7 +16,7 @@ BuildRequires: pkgconfig(libevent_pthreads)
 BuildRequires: pkgconfig(libcamera)
 BuildRequires: pkgconfig(libdrm)
 BuildRequires: SDL2-devel
-BuildRequires: SDL2_image-devel
+BuildRequires: libjpeg-devel
 BuildRequires: systemd
 
 Conflicts: plymouth

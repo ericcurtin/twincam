@@ -23,7 +23,7 @@ libcamera = dependency('libcamera')
 libevent = dependency('libevent_pthreads')
 libdrm = dependency('libdrm')
 libsdl2 = dependency('SDL2', required : false)
-libsdl2_image = dependency('SDL2_image', required : false)
+libjpeg = dependency('libjpeg', required : false)
 libudev = dependency('libudev', required : false)
 
 incdir = include_directories('/usr/include/libcamera')
@@ -51,8 +51,8 @@ if libsdl2.found()
         'src/sdl_texture_yuyv.cpp',
     ])
 
-    if libsdl2_image.found()
-        cam_cpp_args += ['-DHAVE_SDL_IMAGE']
+    if libjpeg.found()
+        cam_cpp_args += ['-DHAVE_LIBJPEG']
         twincam_sources += files([
             'src/sdl_texture_mjpg.cpp'
         ])
@@ -69,7 +69,7 @@ twincam  = executable('twincam', twincam_sources, include_directories : incdir,
                           libdrm,
                           libevent,
                           libsdl2,
-                          libsdl2_image,
+                          libjpeg,
                           libudev,
                       ],
                       cpp_args : cam_cpp_args,
