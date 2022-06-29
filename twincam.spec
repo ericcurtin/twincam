@@ -1,6 +1,8 @@
+%global dracutdir %(pkg-config --variable=dracutdir dracut)
+
 Name:          twincam
 Version:       0.3
-Release:       1%{?dist}
+Release:       2%{?dist}
 Summary:       A lightweight camera application
 
 License:       GPLv2
@@ -34,13 +36,33 @@ Conflicts: plymouth
 %install
 %meson_install
 
+mkdir -p $RPM_BUILD_ROOT%{dracutdir}/modules.d/81twincam
+mkdir -p $RPM_BUILD_ROOT%{_unitdir}/sysinit.target.wants
+mkdir -p $RPM_BUILD_ROOT%{_unitdir}/multi-user.target.wants
+install -m644 lib/dracut/modules.d/81twincam/module-setup.sh $RPM_BUILD_ROOT%{dracutdir}/modules.d/81twincam/
+install -m644 lib/systemd/system/*.service $RPM_BUILD_ROOT%{_unitdir}/
+ln -fs ../twincam.service $RPM_BUILD_ROOT%{_unitdir}/sysinit.target.wants/
+ln -fs ../twincam-quit.service $RPM_BUILD_ROOT%{_unitdir}/multi-user.target.wants/
+
+%post
+dracut -f
+
 %files
 %license COPYING
 %doc README.md
 %{_bindir}/twincam
+%{dracutdir}/modules.d/81twincam/module-setup.sh
+%{_unitdir}/twincam.service
+%{_unitdir}/twincam-quit.service
+%{_unitdir}/multi-user.target.wants/twincam-quit.service
+%{_unitdir}/sysinit.target.wants/twincam.service
 
 %changelog
-* Thu Feb 10 2022 Eric Curtin <ecurtin@redhat.com> - 0.3-1
+* Thu Jun 29 2022 Eric Curtin <ecurtin@redhat.com> - 0.3-2
+- Add some more files
+- Run dracut after the files are in place
+
+* Thu Jun 28 2022 Eric Curtin <ecurtin@redhat.com> - 0.3-1
 - Add SDL dependancies to ensure we will work on wide variety of hardware
 - Add more systemd files to ensure we start and stop correctly on boot
 
