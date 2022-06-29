@@ -79,15 +79,19 @@ int CameraSession::init() {
 }
 
 int CameraSession::parse_args() {
+#ifdef HAVE_SDL
   if (opts.sdl) {
     sink_ = std::make_unique<SDLSink>();
     return 1;
   }
+#endif
 
+#ifdef HAVE_DRM
   if (opts.drm) {
     sink_ = std::make_unique<KMSSink>("");
     return 2;
   }
+#endif
 
   if (!opts.filename.empty()) {
     sink_ = std::make_unique<FileSink>(streamNames_, opts.filename);

@@ -446,7 +446,7 @@ static int processArgs(int argc, char** argv) {
         break;
 #ifdef HAVE_DRM
       case 'D':
-        opts.sdl = true;
+        opts.drm = true;
         break;
 #endif
       case 'F':
