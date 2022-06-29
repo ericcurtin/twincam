@@ -11,6 +11,7 @@ struct options {
   bool print_available_cameras = false;
   bool print_func = false;
   bool to_syslog = false;
+  bool uptime = false;
   bool verbose = false;
 #ifdef HAVE_SDL
   bool sdl = false;

@@ -30,7 +30,10 @@ void uptime_str(std::string& str);
 
 #define HEAD(str, ...)                     \
   do {                                     \
-    uptime_str(str);                       \
+    if (opts.uptime) {                     \
+      uptime_str(str);                     \
+    }                                      \
+                                           \
     STRING_PRINTF(str, __VA_ARGS__);       \
     if (opts.to_syslog) {                  \
       syslog(LOG_INFO, "%s", str.c_str()); \

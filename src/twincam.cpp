@@ -413,19 +413,21 @@ static int processArgs(int argc, char** argv) {
                                    {"drm", no_argument, 0, 'D'},
 #endif
                                    {"filename", required_argument, 0, 'F'},
-                                   {"function", required_argument, 0, 'f'},
+                                   {"function", no_argument, 0, 'f'},
                                    {"help", no_argument, 0, 'h'},
                                    {"kill", no_argument, 0, 'k'},
                                    {"list-cameras", no_argument, 0, 'l'},
                                    {"new-root-dir", no_argument, 0, 'n'},
-                                   {"syslog", no_argument, 0, 's'},
-                                   {"verbose", no_argument, 0, 'v'},
+                                   {"pixel-format", required_argument, 0, 'p'},
 #ifdef HAVE_SDL
                                    {"sdl", no_argument, 0, 'S'},
 #endif
-                                   {"pixel-format", required_argument, 0, 'p'},
+                                   {"syslog", no_argument, 0, 's'},
+                                   {"uptime", no_argument, 0, 'u'},
+                                   {"verbose", no_argument, 0, 'v'},
                                    {NULL, 0, 0, '\0'}};
-  for (int opt; (opt = getopt_long(argc, argv, "c:dDF:fhklnsvSp:", options,
+
+  for (int opt; (opt = getopt_long(argc, argv, "c:dDF:fhklnp:Ssuv", options,
                                    NULL)) != -1;) {
     int fd;
     char buf[16];
@@ -468,18 +470,21 @@ static int processArgs(int argc, char** argv) {
         kill(twncm_atoi(buf), SIGUSR1);
 
         return 1;
+      case 'p':
+        opts.pf = optarg;
+        break;
 #ifdef HAVE_SDL
+      case 'S':
+        opts.sdl = true;
+        break;
+#endif
       case 's':
         opts.to_syslog = true;
         setenv("LIBCAMERA_LOG_FILE", "syslog", 1);
         openlog("twincam", 0, LOG_LOCAL1);
         break;
-#endif
-      case 'p':
-        opts.pf = optarg;
-        break;
-      case 'S':
-        opts.sdl = true;
+      case 'u':
+        opts.uptime = true;
         break;
       case 'v':
         opts.verbose = true;
@@ -497,17 +502,18 @@ static int processArgs(int argc, char** argv) {
 #endif
             "  -F, --filename      Write captured frames to disk\n"
             "  -f, --function      function tracer\n"
+            "  -h, --help          Print this help\n"
             "  -k, --kill          Kill twincam (sends SIGTERM to "
             "pidfile pid)\n"
-            "  -h, --help          Print this help\n"
             "  -l, --list-cameras  List cameras\n"
+            "  -n, --new-root-dir  chroot to /sysroot (sends SIGUSR1 to "
+            "pidfile pid)\n"
             "  -p, --pixel-format  Select pixel format\n"
 #ifdef HAVE_SDL
             "  -S, --sdl           Display viewfinder through SDL\n"
 #endif
-            "  -n, --new-root-dir  chroot to /sysroot (sends SIGUSR1 to "
-            "pidfile pid)\n"
             "  -s, --syslog        Also trace output in syslog\n"
+            "  -u, --uptime        prepend prints with uptime\n"
             "  -v, --verbose       Enable verbose logging";
         PRINT("%s\n", help);
 
