@@ -2,7 +2,7 @@
 
 Name:          twincam
 Version:       0.3
-Release:       2%{?dist}
+Release:       3%{?dist}
 Summary:       A lightweight camera application
 
 License:       GPLv2
@@ -17,6 +17,7 @@ BuildRequires: pkgconfig(libcamera)
 BuildRequires: pkgconfig(libdrm)
 BuildRequires: SDL2-devel
 BuildRequires: SDL2_image-devel
+BuildRequires: systemd
 
 Conflicts: plymouth
 
@@ -54,15 +55,19 @@ dracut -f
 %{dracutdir}/modules.d/81twincam/module-setup.sh
 %{_unitdir}/twincam.service
 %{_unitdir}/twincam-quit.service
-%{_unitdir}/multi-user.target.wants/twincam-quit.service
 %{_unitdir}/sysinit.target.wants/twincam.service
+%{_unitdir}/multi-user.target.wants/twincam-quit.service
 
 %changelog
-* Thu Jun 29 2022 Eric Curtin <ecurtin@redhat.com> - 0.3-2
+* Wed Jun 29 2022 Eric Curtin <ecurtin@redhat.com> - 0.3-3
+- Fix days
+- Add systemd
+
+* Wed Jun 29 2022 Eric Curtin <ecurtin@redhat.com> - 0.3-2
 - Add some more files
 - Run dracut after the files are in place
 
-* Thu Jun 28 2022 Eric Curtin <ecurtin@redhat.com> - 0.3-1
+* Tue Jun 28 2022 Eric Curtin <ecurtin@redhat.com> - 0.3-1
 - Add SDL dependancies to ensure we will work on wide variety of hardware
 - Add more systemd files to ensure we start and stop correctly on boot
 
