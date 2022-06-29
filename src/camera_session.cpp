@@ -78,6 +78,25 @@ int CameraSession::init() {
   return 0;
 }
 
+int CameraSession::parse_args() {
+  if (opts.sdl) {
+    sink_ = std::make_unique<SDLSink>();
+    return 1;
+  }
+
+  if (opts.drm) {
+    sink_ = std::make_unique<KMSSink>("");
+    return 2;
+  }
+
+  if (!opts.filename.empty()) {
+    sink_ = std::make_unique<FileSink>(streamNames_, opts.filename);
+    return 3;
+  }
+
+  return 0;
+}
+
 int CameraSession::start() {
   PRINT_FUNC();
   int ret;
@@ -100,30 +119,17 @@ int CameraSession::start() {
 
   camera_->requestCompleted.connect(this, &CameraSession::requestComplete);
 
-  if (opts.sdl) {
-    sink_ = std::make_unique<SDLSink>();
-    goto no_default;
-  }
-
-  if (opts.drm) {
-    sink_ = std::make_unique<KMSSink>("");
-    goto no_default;
-  }
-
-  if (!opts.filename.empty()) {
-    sink_ = std::make_unique<FileSink>(streamNames_, opts.filename);
-    goto no_default;
-  }
-
+  // When the user executes 'twincam' we want the most aesthetically pleasing
+  // sink to be used, the advanced users can use command line parameters
+  if (!parse_args()) {
 #if HAVE_SDL
-  sink_ = std::make_unique<SDLSink>();
+    sink_ = std::make_unique<SDLSink>();
 #elif HAVE_DRM
-  sink_ = std::make_unique<KMSSink>("");
+    sink_ = std::make_unique<KMSSink>("");
 #else
-  sink_ = std::make_unique<FileSink>(streamNames_, opts.filename);
+    sink_ = std::make_unique<FileSink>(streamNames_, opts.filename);
 #endif
-
-no_default:
+  }
 
   ret = sink_->configure(*config_);
   if (ret < 0) {

@@ -48,6 +48,7 @@ class CameraSession {
   libcamera::Signal<> captureDone;
 
  private:
+  int parse_args();
   int startCapture();
 
   int queueRequest(libcamera::Request* request);
