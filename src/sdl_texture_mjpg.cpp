@@ -11,9 +11,7 @@ SDLTextureMJPG::SDLTextureMJPG(const SDL_Rect& rect)
 }
 
 SDLTextureMJPG::~SDLTextureMJPG() {
-  if (rgbdata_) {
-    free(rgbdata_);
-  }
+  free(rgbdata_);
 }
 
 void SDLTextureMJPG::read_JPEG_file(const unsigned char* jpegData,
