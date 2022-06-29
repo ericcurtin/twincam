@@ -409,6 +409,9 @@ static void chrootThis([[maybe_unused]] int signal) {
 static int processArgs(int argc, char** argv) {
   const struct option options[] = {{"camera", required_argument, 0, 'c'},
                                    {"daemon", no_argument, 0, 'd'},
+#ifdef HAVE_DRM
+                                   {"drm", no_argument, 0, 'D'},
+#endif
                                    {"filename", required_argument, 0, 'F'},
                                    {"function", required_argument, 0, 'f'},
                                    {"help", no_argument, 0, 'h'},
@@ -417,10 +420,12 @@ static int processArgs(int argc, char** argv) {
                                    {"new-root-dir", no_argument, 0, 'n'},
                                    {"syslog", no_argument, 0, 's'},
                                    {"verbose", no_argument, 0, 'v'},
+#ifdef HAVE_SDL
                                    {"sdl", no_argument, 0, 'S'},
+#endif
                                    {"pixel-format", required_argument, 0, 'p'},
                                    {NULL, 0, 0, '\0'}};
-  for (int opt; (opt = getopt_long(argc, argv, "c:dF:fhklnsvSp:", options,
+  for (int opt; (opt = getopt_long(argc, argv, "c:dDF:fhklnsvSp:", options,
                                    NULL)) != -1;) {
     int fd;
     char buf[16];
@@ -437,6 +442,11 @@ static int processArgs(int argc, char** argv) {
         pid_write(fd);
         twncm_close(fd);
         break;
+#ifdef HAVE_DRM
+      case 'D':
+        opts.sdl = true;
+        break;
+#endif
       case 'F':
         opts.filename = optarg;
         break;
@@ -458,11 +468,13 @@ static int processArgs(int argc, char** argv) {
         kill(twncm_atoi(buf), SIGUSR1);
 
         return 1;
+#ifdef HAVE_SDL
       case 's':
         opts.to_syslog = true;
         setenv("LIBCAMERA_LOG_FILE", "syslog", 1);
         openlog("twincam", 0, LOG_LOCAL1);
         break;
+#endif
       case 'p':
         opts.pf = optarg;
         break;
@@ -474,12 +486,15 @@ static int processArgs(int argc, char** argv) {
         setenv("LIBCAMERA_LOG_LEVELS", "DEBUG", 1);
         break;
       default:
-        PRINT(
+        static const char* help =
             "Usage: twincam [OPTIONS]\n\n"
             "Options:\n"
             "  -c, --camera        Camera to select\n"
             "  -d, --daemon        Daemon mode (write a pid file "
             "/var/run/twincam.pid)\n"
+#ifdef HAVE_DRM
+            "  -D, --drm           Display viewfinder through drm\n"
+#endif
             "  -F, --filename      Write captured frames to disk\n"
             "  -f, --function      function tracer\n"
             "  -k, --kill          Kill twincam (sends SIGTERM to "
@@ -487,11 +502,14 @@ static int processArgs(int argc, char** argv) {
             "  -h, --help          Print this help\n"
             "  -l, --list-cameras  List cameras\n"
             "  -p, --pixel-format  Select pixel format\n"
+#ifdef HAVE_SDL
             "  -S, --sdl           Display viewfinder through SDL\n"
+#endif
             "  -n, --new-root-dir  chroot to /sysroot (sends SIGUSR1 to "
             "pidfile pid)\n"
             "  -s, --syslog        Also trace output in syslog\n"
-            "  -v, --verbose       Enable verbose logging\n");
+            "  -v, --verbose       Enable verbose logging";
+        PRINT("%s\n", help);
 
         return 1;
     }

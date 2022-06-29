@@ -100,17 +100,30 @@ int CameraSession::start() {
 
   camera_->requestCompleted.connect(this, &CameraSession::requestComplete);
 
+  if (opts.sdl) {
+    sink_ = std::make_unique<SDLSink>();
+    goto no_default;
+  }
+
+  if (opts.drm) {
+    sink_ = std::make_unique<KMSSink>("");
+    goto no_default;
+  }
+
   if (!opts.filename.empty()) {
     sink_ = std::make_unique<FileSink>(streamNames_, opts.filename);
+    goto no_default;
   }
-#ifdef HAVE_SDL
-  else if (opts.sdl) {
-    sink_ = std::make_unique<SDLSink>();
-  }
+
+#if HAVE_SDL
+  sink_ = std::make_unique<SDLSink>();
+#elif HAVE_DRM
+  sink_ = std::make_unique<KMSSink>("");
+#else
+  sink_ = std::make_unique<FileSink>(streamNames_, opts.filename);
 #endif
-  else {
-    sink_ = std::make_unique<KMSSink>("");
-  }
+
+no_default:
 
   ret = sink_->configure(*config_);
   if (ret < 0) {
