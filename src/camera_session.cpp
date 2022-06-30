@@ -5,6 +5,7 @@
  * camera_session.cpp - Camera capture session
  */
 
+#include <dirent.h>
 #include <limits.h>
 #include <iomanip>
 
@@ -78,18 +79,53 @@ int CameraSession::init() {
   return 0;
 }
 
+static bool proc_fb_exists() {
+  const char* name = "/proc/";
+  DIR* folder = opendir(name);
+  if (!folder) {
+    return false;
+  }
+
+  for (struct dirent* res; (res = readdir(folder));) {
+    if (!memcmp(res->d_name, "fb", 2)) {
+      closedir(folder);
+      return true;
+    }
+  }
+
+  closedir(folder);
+
+  return false;
+}
+
 int CameraSession::parse_args() {
 #ifdef HAVE_SDL
   if (opts.sdl) {
-    sink_ = std::make_unique<SDLSink>();
-    return 1;
+    for (int i = 0; i < 400; ++i) {
+      if (proc_fb_exists()) {
+        sink_ = std::make_unique<SDLSink>();
+        return 1;
+      }
+
+      usleep(10000);
+    }
+
+    return 0;
   }
 #endif
 
 #ifdef HAVE_DRM
   if (opts.drm) {
-    sink_ = std::make_unique<KMSSink>("");
-    return 2;
+    for (int i = 0; i < 400; ++i) {
+      if (proc_fb_exists()) {
+        sink_ = std::make_unique<KMSSink>("");
+        return 2;
+      }
+
+      usleep(10000);
+    }
+
+    return 0;
   }
 #endif
 
@@ -127,9 +163,23 @@ int CameraSession::start() {
   // sink to be used, the advanced users can use command line parameters
   if (!parse_args()) {
 #if HAVE_SDL
-    sink_ = std::make_unique<SDLSink>();
+    for (int i = 0; i < 400; ++i) {
+      if (proc_fb_exists()) {
+        sink_ = std::make_unique<SDLSink>();
+        break;
+      }
+
+      usleep(10000);
+    }
 #elif HAVE_DRM
-    sink_ = std::make_unique<KMSSink>("");
+    for (int i = 0; i < 400; ++i) {
+      if (proc_fb_exists()) {
+        sink_ = std::make_unique<KMSSink>("");
+        break;
+      }
+
+      usleep(10000);
+    }
 #else
     sink_ = std::make_unique<FileSink>(streamNames_, opts.filename);
 #endif
