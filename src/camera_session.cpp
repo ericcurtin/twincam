@@ -282,7 +282,7 @@ int CameraSession::startCapture() {
   if (sink_) {
     ret = sink_->start();
     if (ret) {
-      PRINT("Failed to start frame sink");
+      PRINT("Failed to start frame sink\n");
       return ret;
     }
   }

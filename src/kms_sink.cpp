@@ -268,9 +268,9 @@ bool KMSSink::processRequest(libcamera::Request* camRequest) {
       EPRINT("Failed to commit atomic request: %s\n", strerror(-ret));
       if (-ret == EACCES) {
         EPRINT(
-            "You need to run 'sudo fgconsole -n | xargs sudo chvt' to switch\n"
-            "out of Desktop Environment if you still have Gnome, XFCE, etc. \n"
-            "running\n");
+            "You cannot use kms/drm sink while Desktop Environment is "
+            "running,\n"
+            "if you still have Gnome, XFCE, etc. running, you need to quit\n");
       }
     }
 
