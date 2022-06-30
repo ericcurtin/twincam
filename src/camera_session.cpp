@@ -15,7 +15,9 @@
 #include "event_loop.h"
 
 #include "file_sink.h"
+#ifdef HAVE_DRM
 #include "kms_sink.h"
+#endif
 #include "twincam.h"
 #include "uptime.h"
 
