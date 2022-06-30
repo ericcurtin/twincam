@@ -25,7 +25,7 @@ sudo dnf install -y git gcc g++ libevent libevent-devel openssl openssl-devel \
   gnutls gnutls-devel meson boost boost-devel python3-pip libdrm libdrm-devel \
   systemd-udev doxygen cmake graphviz libatomic texlive-latex cppcheck \
   libyaml-devel clang zip valgrind libasan findutils libjpeg-turbo-devel \
-  systemd-devel mesa-dri-drivers
+  systemd-devel mesa-dri-drivers SDL2-devel
 ```
 
 On Clear Linux:
