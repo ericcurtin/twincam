@@ -2,6 +2,11 @@
 
 set -e
 
+if command -v rpm > /dev/null && rpm -qa | grep -q plymouth; then
+  echo "Please uninstall plymouth"
+  exit 0
+fi
+
 for i in $(find lib -type f | xargs dirname); do
   mkdir -p /usr/$i
 done
