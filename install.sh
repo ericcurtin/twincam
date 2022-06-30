@@ -4,6 +4,10 @@ set -e
 
 if command -v rpm > /dev/null && rpm -qa | grep -q plymouth; then
   echo "Please uninstall plymouth"
+    if command -v dnf > /dev/null; then
+      echo "Please run 'dnf remove plymouth'"
+    fi
+
   exit 0
 fi
 
