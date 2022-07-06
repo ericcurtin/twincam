@@ -43,7 +43,8 @@ elif command -v dnf > /dev/null; then
     openssl-devel gnutls gnutls-devel meson boost boost-devel python3-pip \
     libdrm libdrm-devel systemd-udev doxygen cmake graphviz libatomic \
     texlive-latex cppcheck libyaml-devel clang zip valgrind libasan findutils \
-    systemd-devel libjpeg-turbo-devel SDL2-devel
+    systemd-devel libjpeg-turbo-devel SDL2-devel libglvnd-devel \
+    mesa-libgbm-devel
 fi
 
 $prefix pip install jinja2 ply pyyaml
