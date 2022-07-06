@@ -10,5 +10,5 @@ class SDLTextureMJPG : public SDLTexture {
 
  private:
   unsigned char* rgbdata_ = 0;
-  void read_JPEG_file(const unsigned char* jpegData, unsigned long jpegsize);
+  void decompress(const unsigned char* jpeg, unsigned long jpeg_size);
 };
