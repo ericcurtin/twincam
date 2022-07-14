@@ -27,11 +27,8 @@
 
 using namespace libcamera;
 
-CameraSession::CameraSession(const CameraManager* const cm) {
+CameraSession::CameraSession(const CameraManager* const cm) : cm_(cm) {
   PRINT_FUNC();
-  if (opts.camera < cm->cameras().size()) {
-    camera_ = cm->cameras()[opts.camera];
-  }
 }
 
 CameraSession::~CameraSession() {
@@ -41,6 +38,24 @@ CameraSession::~CameraSession() {
 
 int CameraSession::init() {
   PRINT_FUNC();
+  if (opts.camera < 0) {
+    for (size_t i = 0; i < cm_->cameras().size(); ++i) {
+      camera_ = cm_->cameras()[i];
+      if (!validateConfig())
+        return 0;
+    }
+  } else if (opts.camera < static_cast<int>(cm_->cameras().size())) {
+    camera_ = cm_->cameras()[opts.camera];
+    if (!validateConfig()) {
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+int CameraSession::validateConfig() {
+  PRINT_FUNC();
   if (!camera_) {
     EPRINT("Camera not found\n");
     return 1;
@@ -48,14 +63,16 @@ int CameraSession::init() {
 
   if (camera_->acquire()) {
     EPRINT("Failed to acquire camera\n");
-    return 0;
+    return 2;
   }
 
   std::unique_ptr<CameraConfiguration> cfg =
       camera_->generateConfiguration({libcamera::Viewfinder});
   if (!cfg || cfg->size() != 1) {
     EPRINT("Failed to get default stream configuration\n");
-    return 0;
+    camera_->release();
+    camera_ = nullptr;
+    return 3;
   }
 
   cfg->at(0).pixelFormat = PixelFormat::fromString(opts.pf);
@@ -69,7 +86,9 @@ int CameraSession::init() {
 
     case CameraConfiguration::Invalid:
       EPRINT("Camera configuration invalid\n");
-      return 2;
+      camera_->release();
+      camera_ = nullptr;
+      return 4;
 
     default:
       break;

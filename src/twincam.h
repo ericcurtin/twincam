@@ -4,7 +4,7 @@
 #include <string>
 
 struct options {
-  unsigned long camera = 0;
+  long camera = -1;
 #ifdef HAVE_DRM
   bool drm = false;
 #endif

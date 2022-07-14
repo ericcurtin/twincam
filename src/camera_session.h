@@ -50,7 +50,7 @@ class CameraSession {
  private:
   int parse_args();
   int startCapture();
-
+  int validateConfig();
   int queueRequest(libcamera::Request* request);
   void requestComplete(libcamera::Request* request);
   void processRequest(libcamera::Request* request);
@@ -67,6 +67,7 @@ class CameraSession {
 
   unsigned int queueCount_ = 0;
   unsigned int captureCount_ = 0;
+  const libcamera::CameraManager* const cm_ = nullptr;
 
 #if 0  // not priority right now, for MJPG mainly
   FormatConverter converter_;
