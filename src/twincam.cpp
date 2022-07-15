@@ -417,6 +417,7 @@ static int processArgs(int argc, char** argv) {
                                    {"help", no_argument, 0, 'h'},
                                    {"kill", no_argument, 0, 'k'},
                                    {"list-cameras", no_argument, 0, 'l'},
+                                   {"capture-limit", required_argument, 0, 'C'},
                                    {"new-root-dir", no_argument, 0, 'n'},
                                    {"pixel-format", required_argument, 0, 'p'},
 #ifdef HAVE_SDL
@@ -427,7 +428,7 @@ static int processArgs(int argc, char** argv) {
                                    {"verbose", no_argument, 0, 'v'},
                                    {NULL, 0, 0, '\0'}};
 
-  for (int opt; (opt = getopt_long(argc, argv, "c:dDF:fhklnp:Ssuv", options,
+  for (int opt; (opt = getopt_long(argc, argv, "c:dDF:fhklnp:SsuvC:", options,
                                    NULL)) != -1;) {
     int fd;
     char buf[16];
@@ -463,6 +464,9 @@ static int processArgs(int argc, char** argv) {
         return 1;
       case 'l':
         opts.print_available_cameras = true;
+        break;
+      case 'C':
+        opts.capture_limit = twncm_atoi(optarg);
         break;
       case 'n':
         fd = twncm_open_read("/var/run/twincam.pid");
@@ -509,6 +513,7 @@ static int processArgs(int argc, char** argv) {
             "  -n, --new-root-dir  chroot to /sysroot (sends SIGUSR1 to "
             "pidfile pid)\n"
             "  -p, --pixel-format  Select pixel format\n"
+            "  -C, --capture-limit Set capture limit\n"
 #ifdef HAVE_SDL
             "  -S, --sdl           Display viewfinder through SDL\n"
 #endif
