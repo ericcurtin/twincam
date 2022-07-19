@@ -1,4 +1,6 @@
 #include "sdl_texture_mjpg.h"
+#include "twncm_stdio.h"
+#include "jpeg_error_manager.h"
 
 #include <jpeglib.h>
 
@@ -14,15 +16,23 @@ SDLTextureMJPG::~SDLTextureMJPG() {
   free(rgbdata_);
 }
 
-void SDLTextureMJPG::decompress(const unsigned char* jpeg,
-                                unsigned long jpeg_size) {
+int SDLTextureMJPG::decompress(const Span<uint8_t>& data) {
   struct jpeg_error_mgr jerr;
   struct jpeg_decompress_struct cinfo;
   cinfo.err = jpeg_std_error(&jerr);
 
+  JpegErrorManager jpegErrorManager(cinfo);
+  if (setjmp(jpegErrorManager.escape_)) {
+    /* libjpeg found an error */
+    jpeg_destroy_decompress(&cinfo);
+
+    EPRINT("JPEG decompression error");
+    return -EINVAL;
+  }
+
   jpeg_create_decompress(&cinfo);
 
-  jpeg_mem_src(&cinfo, jpeg, jpeg_size);
+  jpeg_mem_src(&cinfo, data.data(), data.size());
 
   jpeg_read_header(&cinfo, TRUE);
 
@@ -39,9 +49,11 @@ void SDLTextureMJPG::decompress(const unsigned char* jpeg,
   jpeg_finish_decompress(&cinfo);
 
   jpeg_destroy_decompress(&cinfo);
+
+  return 0;
 }
 
 void SDLTextureMJPG::update(const Span<uint8_t>& data) {
-  decompress(data.data(), data.size());
+  decompress(data);
   SDL_UpdateTexture(ptr_, nullptr, rgbdata_, pitch_);
 }
