@@ -1,5 +1,7 @@
 #include "uptime.h"
 
+#include <time.h>
+
 float init_time = 0;
 int uptime(float* up, float* elapsed) {
   struct timespec timespec = {0, 0};
