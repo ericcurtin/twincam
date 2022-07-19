@@ -7,6 +7,10 @@ if command -v cppcheck > /dev/null; then
   supp="--suppress=missingInclude --suppress=unusedFunction"
   supp="$supp --suppress=noExplicitConstructor --suppress=uninitMemberVar"
   supp="$supp --suppress=unknownMacro --suppress=unusedStructMember"
+  if cppcheck --errorlist | grep -q id=\"constParameter\"; then
+    supp="$supp --suppress=constParameter"
+  fi
+
   arg="-q --force $u --enable=all $inc $supp --error-exitcode=1"
   cppcheck="xargs cppcheck $arg"
   find . -name  "*.h" -o -name "*.cpp" | $cppcheck --language=c++ 2>&1
