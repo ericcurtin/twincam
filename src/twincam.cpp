@@ -336,8 +336,8 @@ std::string CamApp::cameraName(const Camera* camera) {
    * Construct the name from the camera location, model and ID. The model
    * is only used if the location isn't present or is set to External.
    */
-  if (*props.contains(properties::Location)) {
-    switch (props.get(properties::Location)) {
+  if (props.contains(properties::Location)) {
+    switch (*props.get(properties::Location)) {
       case properties::CameraLocationFront:
         addModel = false;
         name = "Internal front camera ";
