@@ -1,7 +1,6 @@
 [Unit]
 Description=Show Twincam Boot Screen
 DefaultDependencies=no
-Before=-.slice
 ConditionVirtualization=!container
 IgnoreOnIsolate=true
 
