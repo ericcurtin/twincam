@@ -10,5 +10,5 @@ class SDLTextureMJPG : public SDLTexture {
 
  private:
   unsigned char* rgbdata_ = 0;
-  void decompress(const unsigned char* jpeg, unsigned long jpeg_size);
+  int decompress(const libcamera::Span<uint8_t>& data);
 };

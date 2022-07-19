@@ -60,6 +60,7 @@ if libsdl2.found()
     if libjpeg.found()
         twincam_cpp_args += ['-DHAVE_LIBJPEG']
         twincam_sources += files([
+            'src/jpeg_error_manager.cpp',
             'src/sdl_texture_mjpg.cpp'
         ])
     endif
