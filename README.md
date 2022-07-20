@@ -35,12 +35,12 @@ sudo swupd bundle-add vim git dev-utils devpkg-gnutls devpkg-boost \
   devpkg-libevent devpkg-libdrm ccache devpkg-SDL2
 ```
 
-On Ubuntu:
+On Debian/Ubuntu:
 
 ```
 sudo apt install -y clang gnutls-dev libboost-dev meson cmake pkg-config \
   libevent-dev libdrm-dev gcc make autoconf automake cppcheck libsdl2-dev \
-  meson vim libgtest-dev libyaml-dev curl zip valgrind libasan5 \
+  meson vim libgtest-dev libyaml-dev curl zip valgrind libasan5 git \
   libjpeg-dev python3-pip
 ```
 
