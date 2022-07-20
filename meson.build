@@ -16,6 +16,7 @@ add_project_arguments(
   '-Wsign-compare',
   '-Wtype-limits',
   '-Wunused-function',
+  '-Wold-style-cast',
   language: 'cpp'
 )
 

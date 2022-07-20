@@ -77,7 +77,7 @@ void FileSink::writeBuffer(FrameBuffer* buffer) {
       ret = -errno;
       EPRINT("write error: %s\n", strerror(-ret));
       break;
-    } else if (ret != (int)length) {
+    } else if (ret != static_cast<int>(length)) {
       EPRINT("write error: only %d bytes written instead of %d\n", ret, length);
       break;
     }
