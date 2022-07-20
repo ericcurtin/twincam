@@ -77,4 +77,4 @@ To install as a quick booting camera application, you can install via:
 sudo ./install.sh
 ```
 
-and reboot to test.
+and reboot to test. There will be an rpm soon.
