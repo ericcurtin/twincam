@@ -71,3 +71,10 @@ Ctrl+Alt+F? (whichever tty does not have DE running F1, F2, F3, etc.) and run:
 twincam
 ```
 
+To install as a quick booting camera application, you can install via:
+
+```
+sudo ./install.sh
+```
+
+and reboot to test.
