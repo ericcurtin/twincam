@@ -83,7 +83,7 @@ static bool sysfs_exists() {
   return false;
 }
 
-static bool dev_video_exists() {
+static bool dev_exists(const char* fn) {
   const char name[] = "/dev/";
   DIR* folder = opendir(name);
   if (!folder) {
@@ -91,7 +91,7 @@ static bool dev_video_exists() {
   }
 
   for (struct dirent* res; (res = readdir(folder));) {
-    if (!memcmp(res->d_name, "video", 5)) {
+    if (!memcmp(res->d_name, fn, 5)) {
       closedir(folder);
       return true;
     }
@@ -103,13 +103,13 @@ static bool dev_video_exists() {
 }
 
 #ifdef HAVE_LIBUDEV
-static int checkUdevDevice(struct udev_device* dev) {
+static int checkUdevDevice(struct udev_device* dev, const char* subsys) {
   const char* subsystem = udev_device_get_subsystem(dev);
   VERBOSE_PRINT("subsystem: '%s'\n", subsystem);
   if (!subsystem)
     return -ENODEV;
 
-  if (!strcmp(subsystem, "video4linux")) {
+  if (!strcmp(subsystem, subsys)) {
     return 0;
   }
 
@@ -143,7 +143,7 @@ struct udev_device {
   }
 };
 
-static int wait_for_udev() {
+static int wait_for_udev(const char* subsys) {
   int ret = -1;
   udev udev;
   udev.ptr = udev_new();
@@ -157,7 +157,7 @@ static int wait_for_udev() {
     return -ENOMEM;
   }
 
-  ret = udev_enumerate_add_match_subsystem(udev_enum.ptr, "video4linux");
+  ret = udev_enumerate_add_match_subsystem(udev_enum.ptr, subsys);
   if (ret < 0)
     return ret;
 
@@ -193,7 +193,7 @@ static int wait_for_udev() {
       continue;
     }
 
-    if (checkUdevDevice(dev.ptr) < 0) {
+    if (checkUdevDevice(dev.ptr, subsys) < 0) {
       EPRINT("Not a valid camera device for '%s', skipping\n", syspath);
       continue;
     } else {
@@ -212,7 +212,8 @@ int CamApp::init() {
 
   // V4L2 specific
   int ret = -1;
-  for (int i = 0; i < 400; ++i) {
+  const int end = 400;
+  for (int i = 0; i < end; ++i) {
     if (sysfs_exists()) {
       ret = 0;
       break;
@@ -229,8 +230,8 @@ int CamApp::init() {
   VERBOSE_PRINT("Found sysfs\n");
 
   ret = -1;
-  for (int i = 0; i < 400; ++i) {
-    if (dev_video_exists()) {
+  for (int i = 0; i < end; ++i) {
+    if (dev_exists("video")) {
       ret = 0;
       break;
     }
@@ -245,10 +246,27 @@ int CamApp::init() {
 
   VERBOSE_PRINT("Found /dev/video* entry\n");
 
+  ret = -1;
+  for (int i = 0; i < end; ++i) {
+    if (dev_exists("media")) {
+      ret = 0;
+      break;
+    }
+
+    usleep(10000);
+  }
+
+  if (ret < 0) {
+    PRINT("Failed to find a /dev/media* entry\n");
+    return ret;
+  }
+
+  VERBOSE_PRINT("Found /dev/media* entry\n");
+
 #ifdef HAVE_LIBUDEV
   ret = -1;
-  for (int i = 0; i < 400; ++i) {
-    if (wait_for_udev() >= 0) {
+  for (int i = 0; i < end; ++i) {
+    if (!wait_for_udev("media")) {
       ret = 0;
       break;
     }
@@ -260,9 +278,26 @@ int CamApp::init() {
     PRINT("Failed to find a udev entry\n");
     return ret;
   }
-#endif
 
-  VERBOSE_PRINT("Found udev entry\n");
+  VERBOSE_PRINT("Found media udev entry\n");
+
+  ret = -1;
+  for (int i = 0; i < end; ++i) {
+    if (!wait_for_udev("video4linux")) {
+      ret = 0;
+      break;
+    }
+
+    usleep(10000);
+  }
+
+  if (ret < 0) {
+    PRINT("Failed to find a video4linux udev entry\n");
+    return ret;
+  }
+
+  VERBOSE_PRINT("Found video4linux udev entry\n");
+#endif
 
   ret = cm_->start();
   if (ret) {
