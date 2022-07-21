@@ -19,5 +19,9 @@ cp lib/dracut/modules.d/81twincam/module-setup.sh /usr/lib/dracut/modules.d/81tw
 cp lib/systemd/system/*.service /usr/lib/systemd/system/
 ln -fs ../twincam.service /usr/lib/systemd/system/sysinit.target.wants/
 ln -fs ../twincam-quit.service /usr/lib/systemd/system/multi-user.target.wants/
-dracut -f
+
+# Some distros don't have initrds
+if command -v dracut > /dev/null; then
+  dracut -f
+fi
 
