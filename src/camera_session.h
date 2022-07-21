@@ -50,7 +50,7 @@ class CameraSession {
  private:
   int parse_args();
   int startCapture();
-
+  int validateConfig();
   int queueRequest(libcamera::Request* request);
   void requestComplete(libcamera::Request* request);
   void processRequest(libcamera::Request* request);

@@ -29,8 +29,19 @@ using namespace libcamera;
 
 CameraSession::CameraSession(const CameraManager* const cm) {
   PRINT_FUNC();
-  if (opts.camera < cm->cameras().size()) {
+  if (opts.camera < 0) {
+    for (size_t i = 0; i < cm->cameras().size(); ++i) {
+      camera_ = cm->cameras()[i];
+      if (!CameraSession::validateConfig())
+        return;
+    }
+  } else if (opts.camera < static_cast<int>(cm->cameras().size())) {
     camera_ = cm->cameras()[opts.camera];
+    if (CameraSession::validateConfig()) {
+      EPRINT("Camera configuration invalid\n");
+      camera_ = nullptr;
+      return;
+    }
   }
 }
 
@@ -51,6 +62,11 @@ int CameraSession::init() {
     return 0;
   }
 
+  return 0;
+}
+
+int CameraSession::validateConfig() {
+  PRINT_FUNC();
   std::unique_ptr<CameraConfiguration> cfg =
       camera_->generateConfiguration({libcamera::Viewfinder});
   if (!cfg || cfg->size() != 1) {
@@ -65,7 +81,7 @@ int CameraSession::init() {
       break;
 
     case CameraConfiguration::Adjusted:
-      break;
+      return 1;
 
     case CameraConfiguration::Invalid:
       EPRINT("Camera configuration invalid\n");
