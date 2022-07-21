@@ -260,12 +260,18 @@ int CameraSession::startCapture() {
     }
   }
 
-  PRINT("cam%u: Capture until user interrupts by SIGINT\n", cameraIndex_);
+  if (opts.capture_limit)
+    printf("cam: %u: Capture %lu frames\n", cameraIndex_, opts.capture_limit);
+  else
+    PRINT("cam%u: Capture until user interrupts by SIGINT\n", cameraIndex_);
 
   return 0;
 }
 
 int CameraSession::queueRequest(Request* request) {
+  if (opts.capture_limit && queueCount_ >= opts.capture_limit) {
+    return 0;
+  }
   ++queueCount_;
 
   return camera_->queueRequest(request);
@@ -284,6 +290,17 @@ void CameraSession::requestComplete(Request* request) {
 }
 
 void CameraSession::processRequest(Request* request) {
+  /*
+   * If we've reached the capture limit, we're done. This doesn't
+   * duplicate the check below that emits the captureDone signal, as this
+   * function will be called for each request still in flight after the
+   * capture limit is reached and we don't want to emit the signal every
+   * single time.
+   */
+  if (opts.capture_limit && captureCount_ >= opts.capture_limit) {
+    return;
+  }
+
   const Request::BufferMap& buffers = request->buffers();
 
   /*
@@ -330,6 +347,12 @@ void CameraSession::processRequest(Request* request) {
    * reached.
    */
   ++captureCount_;
+
+  if (opts.capture_limit && captureCount_ >= opts.capture_limit) {
+    captureDone.emit();
+    sink_->stop();
+    return;
+  }
 
   /*
    * If the frame sink holds on the request, we'll requeue it later in the

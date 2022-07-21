@@ -5,6 +5,7 @@
 
 struct options {
   unsigned long camera = 0;
+  unsigned long capture_limit = 0;
 #ifdef HAVE_DRM
   bool drm = false;
 #endif
