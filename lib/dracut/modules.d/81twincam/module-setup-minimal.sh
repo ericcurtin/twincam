@@ -5,11 +5,6 @@ check() {
     require_binaries twincam
 }
 
-# called by dracut
-depends() {
-    echo drm
-}
-
 # Install kernel module(s).
 installkernel() {
     instmods '=drivers/media'
