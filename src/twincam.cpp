@@ -305,6 +305,23 @@ int CamApp::init() {
     return ret;
   }
 
+  ret = -1;
+  for (int i = 0; i < end; ++i) {
+    if (!cm_->cameras().empty()) {
+      ret = 0;
+      break;
+    }
+
+    usleep(10000);
+  }
+
+  if (ret < 0) {
+    PRINT("Failed to find a camera\n");
+    return ret;
+  }
+
+  VERBOSE_PRINT("Found camera\n");
+
   return 0;
 }
 
