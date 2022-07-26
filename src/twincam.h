@@ -16,7 +16,11 @@ struct options {
 #ifdef HAVE_SDL
   bool sdl = false;
 #endif
+#ifdef HAVE_LIBJPEG
+  std::string pf = "MJPEG";
+#else
   std::string pf = "YUYV";
+#endif
   std::string filename;
 };
 
