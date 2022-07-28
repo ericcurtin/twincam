@@ -48,6 +48,9 @@ build() {
   $prefix ninja -v -C build install
 }
 
+clang --version
+gcc --version
+
 mkdir ../libcamera
 git clone https://git.libcamera.org/libcamera/libcamera.git ../libcamera
 cd ../libcamera
