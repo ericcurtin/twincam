@@ -21,7 +21,7 @@ install() {
     # install libs
     inst_libdir_file "libcamera*.so*"
     inst_libdir_file "libcamera/ipa_*.so*"
-    inst_libdir_file "libevent*.so*"
+    inst_libdir_file "libevent-*.so*"
     inst_libdir_file "libstdc++.so*"
 
     # Required if using Fedora SDL2
@@ -30,6 +30,9 @@ install() {
     inst_libdir_file "dri/*.so*"
     inst_libdir_file "libOpenGL*.so*"
     inst_libdir_file "libEGL*.so*"
+
+    # Required for MJPEG
+    inst_libdir_file "libjpeg.so*"
 #    inst_libdir_file "egl_vendor.d/*.json"
 
 #    inst_dir "/usr/share/glvnd/egl_vendor.d"

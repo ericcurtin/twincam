@@ -5,7 +5,7 @@ ConditionVirtualization=!container
 IgnoreOnIsolate=true
 
 [Service]
-ExecStart=/usr/bin/twincam -pMJPEG -d -s -u
+ExecStart=/usr/bin/twincam -d -s -u
 Type=simple
 RemainAfterExit=yes
 KillMode=mixed
