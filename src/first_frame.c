@@ -5,6 +5,7 @@
 
 #include <getopt.h> /* getopt_long() */
 
+#include <dirent.h>
 #include <errno.h>
 #include <fcntl.h> /* low-level i/o */
 #include <stdbool.h>
@@ -64,6 +65,14 @@ static float get_monotonic() {
   return ((timespec.tv_sec * 1000000000) + timespec.tv_nsec) / 1000000000.0;
 }
 
+#define PRINT(...)                   \
+  do {                               \
+    printf(__VA_ARGS__);             \
+    if (to_syslog) {                 \
+      syslog(LOG_INFO, __VA_ARGS__); \
+    }                                \
+  } while (0)
+
 static void process_image(const void* p, int size) {
   if (out_buf)
     fwrite(p, size, 1, stdout);
@@ -73,12 +82,7 @@ static void process_image(const void* p, int size) {
   char str[256];
   sprintf(str, "%f (%.2f), (0.00 fps) cam0-stream0 seq: 0 bytesused: 4147200",
           now, now - init_time);
-  printf("%s", str);
-  if (to_syslog) {
-    openlog("twincam", 0, LOG_LOCAL1);
-    syslog(LOG_INFO, "%s", str);
-    closelog();
-  }
+  PRINT(str);
 
   fflush(stdout);
 }
@@ -577,8 +581,103 @@ static const struct option long_options[] = {
     {"count", required_argument, NULL, 'c'},
     {0, 0, 0, 0}};
 
+static bool sysfs_exists() {
+  static const char* const sysfs_dirs[] = {
+      "/sys/subsystem/media/devices",
+      "/sys/bus/media/devices",
+      "/sys/class/media/devices",
+  };
+
+  for (int i = 0; i < 3; ++i) {
+    DIR* dir = opendir(sysfs_dirs[i]);
+    if (dir) {
+      closedir(dir);
+      return true;
+    }
+  }
+
+  return false;
+}
+
+static bool dev_exists(const char* fn) {
+  const char name[] = "/dev/";
+  DIR* folder = opendir(name);
+  if (!folder) {
+    return false;
+  }
+
+  for (struct dirent* res; (res = readdir(folder));) {
+    if (!memcmp(res->d_name, fn, 5)) {
+      closedir(folder);
+      return true;
+    }
+  }
+
+  closedir(folder);
+
+  return false;
+}
+
 int main(int argc, char** argv) {
   init_time = get_monotonic();
+
+  if (to_syslog) {
+    openlog("twincam", 0, LOG_LOCAL1);
+  }
+
+  // V4L2 specific
+  int ret = -1;
+  const int end = 400;
+  for (int i = 0; i < end; ++i) {
+    if (sysfs_exists()) {
+      ret = 0;
+      break;
+    }
+
+    usleep(10000);
+  }
+
+  if (ret < 0) {
+    PRINT("Failed to find sysfs\n");
+    return ret;
+  }
+
+  PRINT("Found sysfs\n");
+
+  ret = -1;
+  for (int i = 0; i < end; ++i) {
+    if (dev_exists("video")) {
+      ret = 0;
+      break;
+    }
+
+    usleep(10000);
+  }
+
+  if (ret < 0) {
+    PRINT("Failed to find a /dev/video* entry\n");
+    return ret;
+  }
+
+  PRINT("Found /dev/video* entry\n");
+
+  ret = -1;
+  for (int i = 0; i < end; ++i) {
+    if (dev_exists("media")) {
+      ret = 0;
+      break;
+    }
+
+    usleep(10000);
+  }
+
+  if (ret < 0) {
+    PRINT("Failed to find a /dev/media* entry\n");
+    return ret;
+  }
+
+  PRINT("Found /dev/media* entry\n");
+
   strcpy(dev_name, "/dev/video0");
 
   for (;;) {
@@ -647,5 +746,10 @@ int main(int argc, char** argv) {
   uninit_device();
   close_device();
   fprintf(stderr, "\n");
+
+  if (to_syslog) {
+    closelog();
+  }
+
   return 0;
 }
