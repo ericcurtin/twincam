@@ -223,11 +223,10 @@ int CamApp::init() {
   }
 
   if (ret < 0) {
-    PRINT("Failed to find sysfs\n");
-    return ret;
+    PRINT("Failed to find sysfs, is there a camera attached?\n");
+  } else {
+    VERBOSE_PRINT("Found sysfs\n");
   }
-
-  VERBOSE_PRINT("Found sysfs\n");
 
   ret = -1;
   for (int i = 0; i < end; ++i) {
@@ -241,10 +240,9 @@ int CamApp::init() {
 
   if (ret < 0) {
     PRINT("Failed to find a /dev/video* entry\n");
-    return ret;
+  } else {
+    VERBOSE_PRINT("Found /dev/video* entry\n");
   }
-
-  VERBOSE_PRINT("Found /dev/video* entry\n");
 
   ret = -1;
   for (int i = 0; i < end; ++i) {
@@ -258,10 +256,9 @@ int CamApp::init() {
 
   if (ret < 0) {
     PRINT("Failed to find a /dev/media* entry\n");
-    return ret;
+  } else {
+    VERBOSE_PRINT("Found /dev/media* entry\n");
   }
-
-  VERBOSE_PRINT("Found /dev/media* entry\n");
 
 #ifdef HAVE_LIBUDEV
   ret = -1;
@@ -276,10 +273,9 @@ int CamApp::init() {
 
   if (ret < 0) {
     PRINT("Failed to find a udev entry\n");
-    return ret;
+  } else {
+    VERBOSE_PRINT("Found media udev entry\n");
   }
-
-  VERBOSE_PRINT("Found media udev entry\n");
 
   ret = -1;
   for (int i = 0; i < end; ++i) {
@@ -293,10 +289,9 @@ int CamApp::init() {
 
   if (ret < 0) {
     PRINT("Failed to find a video4linux udev entry\n");
-    return ret;
+  } else {
+    VERBOSE_PRINT("Found video4linux udev entry\n");
   }
-
-  VERBOSE_PRINT("Found video4linux udev entry\n");
 #endif
 
   ret = cm_->start();
@@ -317,10 +312,9 @@ int CamApp::init() {
 
   if (ret < 0) {
     PRINT("Failed to find a camera\n");
-    return ret;
+  } else {
+    VERBOSE_PRINT("Found camera\n");
   }
-
-  VERBOSE_PRINT("Found camera\n");
 
   return 0;
 }
