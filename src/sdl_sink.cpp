@@ -103,6 +103,8 @@ int SDLSink::start() {
     return ret;
   }
 
+  SDL_ShowCursor(SDL_DISABLE);
+
   /* \todo Make the event cancellable to support stop/start cycles. */
   EventLoop::instance()->addTimerEvent(
       10ms, std::bind(&SDLSink::processSDLEvents, this));
