@@ -25,3 +25,5 @@ if command -v dracut > /dev/null; then
   dracut -f
 fi
 
+# Make sure the SELinux file type is correct for the twincam executable.
+restorecon -v /usr/bin/twincam
