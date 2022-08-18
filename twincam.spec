@@ -2,7 +2,7 @@
 
 Name:          twincam
 Version:       0.5
-Release:       1%{?dist}
+Release:       2%{?dist}
 Summary:       A lightweight camera application
 
 License:       GPLv2
@@ -41,7 +41,8 @@ mkdir -p $RPM_BUILD_ROOT%{dracutdir}/modules.d/81twincam
 mkdir -p $RPM_BUILD_ROOT%{_unitdir}/sysinit.target.wants
 mkdir -p $RPM_BUILD_ROOT%{_unitdir}/multi-user.target.wants
 install -m644 lib/dracut/modules.d/81twincam/module-setup.sh $RPM_BUILD_ROOT%{dracutdir}/modules.d/81twincam/
-install -m644 lib/systemd/system/*.service $RPM_BUILD_ROOT%{_unitdir}/
+install -m644 lib/systemd/system/twincam-quit.service $RPM_BUILD_ROOT%{_unitdir}/
+install -m644 lib/systemd/system/twincam.service $RPM_BUILD_ROOT%{_unitdir}/
 ln -fs ../twincam.service $RPM_BUILD_ROOT%{_unitdir}/sysinit.target.wants/
 ln -fs ../twincam-quit.service $RPM_BUILD_ROOT%{_unitdir}/multi-user.target.wants/
 
@@ -59,6 +60,9 @@ dracut -f
 %{_unitdir}/multi-user.target.wants/twincam-quit.service
 
 %changelog
+* Thu Aug 18 2022 Eric Curtin <ecurtin@redhat.com> - 0.5-2
+- Remove wildcard from spec file
+
 * Thu Aug 18 2022 Eric Curtin <ecurtin@redhat.com> - 0.5-1
 - Don't show cursor
 
