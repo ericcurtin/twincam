@@ -1,7 +1,7 @@
 %global dracutdir %(pkg-config --variable=dracutdir dracut)
 
 Name:          twincam
-Version:       0.4
+Version:       0.5
 Release:       1%{?dist}
 Summary:       A lightweight camera application
 
@@ -59,6 +59,9 @@ dracut -f
 %{_unitdir}/multi-user.target.wants/twincam-quit.service
 
 %changelog
+* Thu Aug 18 2022 Eric Curtin <ecurtin@redhat.com> - 0.5-1
+- Don't show cursor
+
 * Fri Jul 29 2022 Ian Mullins <imullins@redhat.com> - 0.4-1
 - Use libjpeg over SDL2_image 
 - Use MJPEG by default if compiled with libjpeg
