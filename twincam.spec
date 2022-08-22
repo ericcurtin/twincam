@@ -2,7 +2,7 @@
 
 Name:          twincam
 Version:       0.5
-Release:       2%{?dist}
+Release:       3%{?dist}
 Summary:       A lightweight camera application
 
 License:       GPLv2
@@ -20,6 +20,8 @@ BuildRequires: libjpeg-devel
 BuildRequires: systemd
 
 Conflicts: plymouth
+
+ExcludeArch: %ix86
 
 %description
 %{summary}.
@@ -60,6 +62,9 @@ dracut -f
 %{_unitdir}/multi-user.target.wants/twincam-quit.service
 
 %changelog
+* Mon Aug 22 2022 Eric Curtin <ecurtin@redhat.com> - 0.5-3
+- Exclude architecture ix86
+
 * Thu Aug 18 2022 Eric Curtin <ecurtin@redhat.com> - 0.5-2
 - Remove wildcard from spec file
 
