@@ -27,7 +27,7 @@ install() {
     # Required if using Fedora SDL2
     inst_libdir_file "libSDL2*.so*"
     inst_libdir_file "libgbm*.so*"
-    inst_libdir_file "dri/*.so*"
+    # inst_libdir_file "dri/*.so*" pulls in massive libLLVM which we don't need
     inst_libdir_file "libOpenGL*.so*"
     inst_libdir_file "libEGL*.so*"
 

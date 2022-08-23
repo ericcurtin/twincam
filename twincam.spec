@@ -2,7 +2,7 @@
 
 Name:          twincam
 Version:       0.5
-Release:       3%{?dist}
+Release:       4%{?dist}
 Summary:       A lightweight camera application
 
 License:       GPLv2
@@ -62,6 +62,9 @@ dracut -f
 %{_unitdir}/multi-user.target.wants/twincam-quit.service
 
 %changelog
+* Tue Aug 23 2022 Eric Curtin <ecurtin@redhat.com> - 0.5-4
+- Remove dri dependancies
+
 * Mon Aug 22 2022 Eric Curtin <ecurtin@redhat.com> - 0.5-3
 - Exclude architecture ix86
 
