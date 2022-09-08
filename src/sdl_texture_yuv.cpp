@@ -1,4 +1,4 @@
-#include "sdl_texture_yuyv.h"
+#include "sdl_texture_yuv.h"
 
 using namespace libcamera;
 
