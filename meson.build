@@ -55,7 +55,7 @@ if libsdl2.found()
     twincam_sources += files([
         'src/sdl_sink.cpp',
         'src/sdl_texture.cpp',
-        'src/sdl_texture_yuyv.cpp',
+        'src/sdl_texture_yuv.cpp',
     ])
 
     if libjpeg.found()
