@@ -174,19 +174,20 @@ void SDLSink::renderBuffer(FrameBuffer* buffer) {
 
   planes.reserve(buffer->metadata().planes().size());
 
-    for (const FrameMetadata::Plane &meta : buffer->metadata().planes()) {
-        Span<uint8_t> data = image->data(i);
-        if (meta.bytesused > data.size())
-          EPRINT("payload size %d larger than plane size %zu\n", meta.bytesused,
-            data.size());
-
-        planes.push_back(data);
-        i++;
+  for (const FrameMetadata::Plane &meta : buffer->metadata().planes()) {
+    Span<uint8_t> data = image->data(i);
+    if (meta.bytesused > data.size()) {
+      EPRINT("payload size %d larger than plane size %zu\n", meta.bytesused,
+        data.size());
     }
 
-    texture_->update(planes);
+    planes.push_back(data);
+    i++;
+  }
 
-    SDL_RenderClear(renderer_);
-    SDL_RenderCopy(renderer_, texture_->get(), nullptr, nullptr);
-    SDL_RenderPresent(renderer_);
+  texture_->update(planes);
+
+  SDL_RenderClear(renderer_);
+  SDL_RenderCopy(renderer_, texture_->get(), nullptr, nullptr);
+  SDL_RenderPresent(renderer_);
 }
