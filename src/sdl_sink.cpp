@@ -19,6 +19,7 @@
 #ifdef HAVE_LIBJPEG
 #include "sdl_texture_mjpg.h"
 #endif
+#include "sdl_texture_nv12.h"
 #include "sdl_texture_yuyv.h"
 
 using namespace libcamera;
@@ -56,6 +57,9 @@ int SDLSink::configure(const libcamera::CameraConfiguration& config) {
       texture_ = std::make_unique<SDLTextureMJPG>(rect_);
       break;
 #endif
+    case libcamera::formats::NV12:
+      texture_ = std::make_unique<SDLTextureNV12>(rect_, cfg.stride);
+      break;
     case libcamera::formats::YUYV:
       texture_ = std::make_unique<SDLTextureYUYV>(rect_, cfg.stride);
       break;
@@ -165,15 +169,23 @@ void SDLSink::processSDLEvents() {
 void SDLSink::renderBuffer(FrameBuffer* buffer) {
   Image* image = mappedBuffers_[buffer].get();
 
-  /* \todo Implement support for multi-planar formats. */
-  const FrameMetadata::Plane& meta = buffer->metadata().planes()[0];
+  std::vector<Span<const uint8_t>> planes;
+  unsigned int i = 0;
 
-  Span<uint8_t> data = image->data(0);
-  if (meta.bytesused > data.size())
-    EPRINT("payload size %d larger than plane size %zu\n", meta.bytesused,
-           data.size());
+  planes.reserve(buffer->metadata().planes().size());
 
-  texture_->update(data);
+  for (const FrameMetadata::Plane& meta : buffer->metadata().planes()) {
+    Span<uint8_t> data = image->data(i);
+    if (meta.bytesused > data.size()) {
+      EPRINT("payload size %d larger than plane size %zu\n", meta.bytesused,
+             data.size());
+    }
+
+    planes.push_back(data);
+    i++;
+  }
+
+  texture_->update(planes);
 
   SDL_RenderClear(renderer_);
   SDL_RenderCopy(renderer_, texture_->get(), nullptr, nullptr);
