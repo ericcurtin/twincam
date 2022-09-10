@@ -58,8 +58,8 @@ int SDLSink::configure(const libcamera::CameraConfiguration& config) {
       break;
 #endif
     case libcamera::formats::NV12:
-		texture_ = std::make_unique<SDLTextureNV12>(rect_, cfg.stride);
-		break;
+      texture_ = std::make_unique<SDLTextureNV12>(rect_, cfg.stride);
+      break;
     case libcamera::formats::YUYV:
       texture_ = std::make_unique<SDLTextureYUYV>(rect_, cfg.stride);
       break;
