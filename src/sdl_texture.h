@@ -10,7 +10,7 @@ class SDLTexture {
  public:
   SDLTexture(const SDL_Rect& rect,
              SDL_PixelFormatEnum pixelFormat,
-             const int pitch);
+             const int stride);
   virtual ~SDLTexture();
   int create(SDL_Renderer* renderer);
   virtual void update(
@@ -21,5 +21,5 @@ class SDLTexture {
   SDL_Texture* ptr_;
   const SDL_Rect rect_;
   const SDL_PixelFormatEnum pixelFormat_;
-  int pitch_;
+  const int stride_;
 };
