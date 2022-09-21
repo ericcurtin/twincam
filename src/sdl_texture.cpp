@@ -4,8 +4,8 @@
 
 SDLTexture::SDLTexture(const SDL_Rect& rect,
                        SDL_PixelFormatEnum pixelFormat,
-                       const int pitch)
-    : ptr_(nullptr), rect_(rect), pixelFormat_(pixelFormat), pitch_(pitch) {}
+                       const int stride)
+    : ptr_(nullptr), rect_(rect), pixelFormat_(pixelFormat), stride_(stride) {}
 
 SDLTexture::~SDLTexture() {
   if (ptr_)
