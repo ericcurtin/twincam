@@ -36,8 +36,9 @@ class KMSSink : public FrameSink {
  private:
   class Request {
    public:
-    Request(DRM::AtomicRequest* drmRequest, libcamera::Request* camRequest)
-        : drmRequest_(drmRequest), camRequest_(camRequest) {}
+    Request(std::unique_ptr<DRM::AtomicRequest> drmRequest,
+            libcamera::Request* camRequest)
+        : drmRequest_(std::move(drmRequest)), camRequest_(camRequest) {}
 
     std::unique_ptr<DRM::AtomicRequest> drmRequest_;
     libcamera::Request* camRequest_;
