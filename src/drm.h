@@ -230,6 +230,7 @@ class AtomicRequest {
   enum Flags {
     FlagAllowModeset = (1 << 0),
     FlagAsync = (1 << 1),
+    FlagTestOnly = (1 << 2),
   };
 
   AtomicRequest(Device* dev);
