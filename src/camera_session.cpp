@@ -67,7 +67,7 @@ int CameraSession::validateConfig() {
   }
 
   std::unique_ptr<CameraConfiguration> cfg =
-      camera_->generateConfiguration({libcamera::Viewfinder});
+      camera_->generateConfiguration({libcamera::StreamRole::Viewfinder});
   if (!cfg || cfg->size() != 1) {
     EPRINT("Failed to get default stream configuration\n");
     camera_->release();
