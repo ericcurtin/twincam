@@ -67,6 +67,7 @@ class CameraSession {
 
   unsigned int queueCount_ = 0;
   unsigned int captureCount_ = 0;
+  unsigned int captureLimit_ = 0;
   const libcamera::CameraManager* const cm_ = nullptr;
 
 #if 0  // not priority right now, for MJPG mainly
