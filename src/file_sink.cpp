@@ -63,13 +63,13 @@ void FileSink::writeBuffer(FrameBuffer* buffer) {
   Image* image = mappedBuffers_[buffer].get();
 
   for (unsigned int i = 0; i < buffer->planes().size(); ++i) {
-    const FrameMetadata::Plane& meta = buffer->metadata().planes()[i];
+    const unsigned int bytesused = buffer->metadata().planes()[i].bytesused;
 
     Span<uint8_t> data = image->data(i);
-    unsigned int length = std::min<unsigned int>(meta.bytesused, data.size());
+    const unsigned int length = std::min<unsigned int>(bytesused, data.size());
 
-    if (meta.bytesused > data.size())
-      EPRINT("payload size %d larger than plane size %lu\n", meta.bytesused,
+    if (bytesused > data.size())
+      EPRINT("payload size %d larger than plane size %lu\n", bytesused,
              data.size());
 
     ret = ::write(fd, data.data(), length);
