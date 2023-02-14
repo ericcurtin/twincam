@@ -2,7 +2,7 @@
 
 Name:          twincam
 Version:       0.6
-Release:       1%{?dist}
+Release:       3%{?dist}
 Summary:       A lightweight camera application
 
 License:       GPLv2
@@ -21,13 +21,14 @@ BuildRequires: systemd
 
 Conflicts: plymouth
 
-ExcludeArch: %ix86
+# twincam is not expected to be used in these architectures
+ExcludeArch: s390x ppc64le %ix86
 
 %description
 %{summary}.
 
 %prep
-%autosetup
+%autosetup -p1
 
 %build
 %meson
@@ -62,8 +63,24 @@ dracut -f
 %{_unitdir}/multi-user.target.wants/twincam-quit.service
 
 %changelog
+* Tue Feb 14 2023 Eric Curtin <ecurtin@redhat.com> - 0.6-3
+- Exclude more CPU architectures
+
+* Tue Feb 14 2023 Eric Curtin <ecurtin@redhat.com> - 0.6-2
+- .spec file changes
+
 * Tue Feb 14 2023 Eric Curtin <ecurtin@redhat.com> - 0.6-1
 - Some libcamera and gcc compatibility fixes
+
+* Sat Jan 21 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.5.4-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Sun Jan 01 2023 Mamoru TASAKA <mtasaka@fedoraproject.org> - 0.5.4-6
+- Rebuild for new libcamera again
+- Patch for libcamera 0.0.3 API change
+
+* Wed Dec 07 2022 Mamoru TASAKA <mtasaka@fedoraproject.org> - 0.5.4-5
+- Rebuild for new libcamera
 
 * Tue Aug 23 2022 Eric Curtin <ecurtin@redhat.com> - 0.5-4
 - Remove dri dependancies
