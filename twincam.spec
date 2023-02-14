@@ -1,8 +1,8 @@
 %global dracutdir %(pkg-config --variable=dracutdir dracut)
 
 Name:          twincam
-Version:       0.5
-Release:       4%{?dist}
+Version:       0.6
+Release:       1%{?dist}
 Summary:       A lightweight camera application
 
 License:       GPLv2
@@ -62,6 +62,9 @@ dracut -f
 %{_unitdir}/multi-user.target.wants/twincam-quit.service
 
 %changelog
+* Tue Feb 14 2023 Eric Curtin <ecurtin@redhat.com> - 0.6-1
+- Some libcamera and gcc compatibility fixes
+
 * Tue Aug 23 2022 Eric Curtin <ecurtin@redhat.com> - 0.5-4
 - Remove dri dependancies
 
