@@ -13,6 +13,7 @@ struct options {
   bool to_syslog = false;
   bool uptime = false;
   bool verbose = false;
+  long cl = -1;
 #ifdef HAVE_SDL
   bool sdl = false;
 #endif

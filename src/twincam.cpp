@@ -467,6 +467,7 @@ static int processArgs(int argc, char** argv) {
                                    {"kill", no_argument, 0, 'k'},
                                    {"list-cameras", no_argument, 0, 'l'},
                                    {"new-root-dir", no_argument, 0, 'n'},
+                                   {"capture-limit", required_argument, 0, 'C'},
                                    {"pixel-format", required_argument, 0, 'p'},
 #ifdef HAVE_SDL
                                    {"sdl", no_argument, 0, 'S'},
@@ -476,7 +477,7 @@ static int processArgs(int argc, char** argv) {
                                    {"verbose", no_argument, 0, 'v'},
                                    {NULL, 0, 0, '\0'}};
 
-  for (int opt; (opt = getopt_long(argc, argv, "c:dDF:fhklnp:Ssuv", options,
+  for (int opt; (opt = getopt_long(argc, argv, "c:dDF:fhklnC:p:Ssuv", options,
                                    NULL)) != -1;) {
     int fd;
     char buf[16];
@@ -519,6 +520,9 @@ static int processArgs(int argc, char** argv) {
         kill(twncm_atoi(buf), SIGUSR1);
 
         return 1;
+      case 'C':
+        opts.cl = twncm_atoi(optarg);
+        break;
       case 'p':
         opts.pf = optarg;
         break;
@@ -557,6 +561,7 @@ static int processArgs(int argc, char** argv) {
             "  -l, --list-cameras  List cameras\n"
             "  -n, --new-root-dir  chroot to /sysroot (sends SIGUSR1 to "
             "pidfile pid)\n"
+            "  -C, --capture-limit Define a limited number of frames captured\n"
             "  -p, --pixel-format  Select pixel format\n"
 #ifdef HAVE_SDL
             "  -S, --sdl           Display viewfinder through SDL\n"

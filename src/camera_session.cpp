@@ -128,6 +128,7 @@ int CameraSession::start() {
 
   queueCount_ = 0;
   captureCount_ = 0;
+  captureLimit_ = opts.cl;
 
   ret = camera_->configure(config_.get());
   if (ret < 0) {
@@ -291,6 +292,12 @@ int CameraSession::queueRequest(Request* request) {
 }
 
 void CameraSession::requestComplete(Request* request) {
+  if (opts.cl > 0) {
+    if (captureCount_ >= captureLimit_) {
+      EventLoop::instance()->exit(0);
+      return;
+    }
+  }
   if (request->status() == Request::RequestCancelled)
     return;
 
