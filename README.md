@@ -1,7 +1,5 @@
 # twincam
 
-[![GitHub Build Status](https://github.com/inotify-tools/inotify-tools/workflows/build/badge.svg)](https://github.com/ericcurtin/twincam/actions)
-
 A lightweight camera application, designed to start quickly in a bare
 environment. It is named twincam as it is built with automotive in mind
 like a twin-cam engine, it is simply the name of the application.
